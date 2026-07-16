@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
-import '../data/dummy_inbox_repository.dart';
+import '../data/sqflite_inbox_repository.dart';
 import '../domain/sms_message.dart';
+import '../../../core/services/sms_background_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // InboxFilter enum
@@ -33,7 +34,7 @@ extension InboxFilterX on InboxFilter {
 ///
 /// Responsibilities
 /// ─────────────────
-/// * Loads messages from [DummyInboxRepository] (later: SqfliteInboxRepository).
+/// * Loads messages from [SqfliteInboxRepository].
 /// * Holds the active [InboxFilter] and exposes [filteredMessages].
 /// * Tracks [isLoading] and [errorMessage] for UI error/loading states.
 /// * Exposes [markAsRead] to update the read flag on a message.
@@ -45,11 +46,18 @@ extension InboxFilterX on InboxFilter {
 class InboxProvider extends ChangeNotifier {
   InboxProvider() {
     loadMessages();
+    SmsBackgroundService.instance.addListener(loadMessages);
+  }
+
+  @override
+  void dispose() {
+    SmsBackgroundService.instance.removeListener(loadMessages);
+    super.dispose();
   }
 
   // ── Dependencies ──────────────────────────────────────────────────────────
 
-  final _repo = DummyInboxRepository.instance;
+  final _repo = SqfliteInboxRepository.instance;
 
   // ── Internal state ────────────────────────────────────────────────────────
 

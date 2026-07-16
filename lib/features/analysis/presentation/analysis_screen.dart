@@ -763,6 +763,14 @@ class _StatusConfig {
 
   factory _StatusConfig.of(AiStatus status) {
     switch (status) {
+      case AiStatus.pending:
+        return const _StatusConfig(
+          heroBackground: Color(0xFF1565C0),
+          heroForeground: Colors.white,
+          icon: Icons.sync,
+          verdictLabel: 'Analyzing...',
+          verdictSubtitle: 'Threat analysis in progress',
+        );
       case AiStatus.safe:
         return const _StatusConfig(
           heroBackground: Color(0xFF2E7D32),

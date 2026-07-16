@@ -159,6 +159,8 @@ class HistoryCard extends StatelessWidget {
 
   Color _getStatusColor(AiStatus status) {
     switch (status) {
+      case AiStatus.pending:
+        return const Color(0xFF1565C0);
       case AiStatus.safe:
         return const Color(0xFF2E7D32);
       case AiStatus.suspicious:
@@ -170,6 +172,8 @@ class HistoryCard extends StatelessWidget {
 
   IconData _getStatusIcon(AiStatus status) {
     switch (status) {
+      case AiStatus.pending:
+        return Icons.sync;
       case AiStatus.safe:
         return Icons.verified_rounded;
       case AiStatus.suspicious:

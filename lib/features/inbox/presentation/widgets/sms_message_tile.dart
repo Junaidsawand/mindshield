@@ -207,6 +207,8 @@ class _SenderAvatar extends StatelessWidget {
 
   Color _ringColor(AiStatus status) {
     switch (status) {
+      case AiStatus.pending:
+        return const Color(0xFF42A5F5);
       case AiStatus.safe:
         return const Color(0xFF66BB6A);
       case AiStatus.suspicious:

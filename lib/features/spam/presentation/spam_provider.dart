@@ -1,8 +1,9 @@
 // lib/features/spam/presentation/spam_provider.dart
 
 import 'package:flutter/foundation.dart';
-import '../data/dummy_spam_repository.dart';
+import '../data/sqflite_spam_repository.dart';
 import '../domain/spam_message.dart';
+import '../../../core/services/sms_background_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SpamFilter enum
@@ -76,11 +77,18 @@ extension SpamSortOrderX on SpamSortOrder {
 class SpamProvider extends ChangeNotifier {
   SpamProvider() {
     loadMessages();
+    SmsBackgroundService.instance.addListener(loadMessages);
+  }
+
+  @override
+  void dispose() {
+    SmsBackgroundService.instance.removeListener(loadMessages);
+    super.dispose();
   }
 
   // ── Dependencies ──────────────────────────────────────────────────────────
 
-  final _repo = DummySpamRepository.instance;
+  final _repo = SqfliteSpamRepository.instance;
 
   // ── Internal state ────────────────────────────────────────────────────────
 

@@ -5,10 +5,15 @@ import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'features/permissions/presentation/permissions_provider.dart';
 import 'features/settings/presentation/settings_provider.dart';
+import 'core/services/sms_background_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
+  
+  // Start analysis sync for any pending SMS messages in background
+  SmsBackgroundService.instance.syncPendingMessages();
+  
   runApp(MindShieldApp(prefs: prefs));
 }
 

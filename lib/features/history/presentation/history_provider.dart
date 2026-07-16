@@ -1,15 +1,23 @@
 import 'package:flutter/foundation.dart';
-import '../data/dummy_history_repository.dart';
+import '../data/sqflite_history_repository.dart';
 import '../../inbox/domain/sms_message.dart';
+import '../../../core/services/sms_background_service.dart';
 
 /// Manages state for the History screen, including loading, filtering,
 /// searching, and sorting of previously analyzed SMS messages.
 class HistoryProvider extends ChangeNotifier {
   HistoryProvider() {
     loadHistory();
+    SmsBackgroundService.instance.addListener(loadHistory);
   }
 
-  final _repo = DummyHistoryRepository.instance;
+  @override
+  void dispose() {
+    SmsBackgroundService.instance.removeListener(loadHistory);
+    super.dispose();
+  }
+
+  final _repo = SqfliteHistoryRepository.instance;
 
   // ── Internal state ────────────────────────────────────────────────────────
 

@@ -56,6 +56,13 @@ class AiStatusBadge extends StatelessWidget {
 
   static _BadgeConfig _config(BuildContext context, AiStatus status) {
     switch (status) {
+      case AiStatus.pending:
+        return _BadgeConfig(
+          background: const Color(0xFFE3F2FD),
+          border: const Color(0xFF90CAF9),
+          foreground: const Color(0xFF1565C0),
+          icon: Icons.sync,
+        );
       case AiStatus.safe:
         return _BadgeConfig(
           background: const Color(0xFFE8F5E9),

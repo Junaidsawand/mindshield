@@ -1,5 +1,8 @@
 /// Represents the AI-assigned risk level for an SMS message.
 enum AiStatus {
+  /// Message is recently received and awaiting analysis.
+  pending,
+
   /// No threat detected.
   safe,
 
@@ -15,6 +18,8 @@ extension AiStatusX on AiStatus {
   /// Short label shown in the badge chip.
   String get label {
     switch (this) {
+      case AiStatus.pending:
+        return 'Analyzing...';
       case AiStatus.safe:
         return 'Safe';
       case AiStatus.suspicious:
