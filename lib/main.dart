@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'features/permissions/presentation/permissions_provider.dart';
-// InboxProvider is scoped to InboxScreen and created locally there.
+import 'features/settings/presentation/settings_provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MindShieldApp());
+  final prefs = await SharedPreferences.getInstance();
+  runApp(MindShieldApp(prefs: prefs));
 }
 
 /// Root widget of the MindShield application.
@@ -16,7 +18,9 @@ void main() {
 /// feature-specific providers can be registered in one place as modules are
 /// built out.  GoRouter is wired up via [MaterialApp.router].
 class MindShieldApp extends StatelessWidget {
-  const MindShieldApp({super.key});
+  final SharedPreferences prefs;
+
+  const MindShieldApp({super.key, required this.prefs});
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +29,10 @@ class MindShieldApp extends StatelessWidget {
         // ── Permissions module ─────────────────────────────────────────────
         ChangeNotifierProvider<PermissionsProvider>(
           create: (_) => PermissionsProvider(),
+        ),
+        // ── Settings module ─────────────────────────────────────────────
+        ChangeNotifierProvider<SettingsProvider>(
+          create: (_) => SettingsProvider(prefs),
         ),
         // Future feature providers will be registered here.
         // Example:
@@ -40,12 +48,14 @@ class _AppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = context.watch<SettingsProvider>();
+    
     return MaterialApp.router(
       title: 'MindShield',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: settingsProvider.themeMode,
       routerConfig: appRouter,
     );
   }
