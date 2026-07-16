@@ -49,12 +49,76 @@ class SqfliteSpamRepository {
     }
   }
 
+  /// Moves a message to the spam folder by marking it as spam/quarantined.
+  Future<void> moveToSpam(String id) async {
+    try {
+      await DatabaseHelper.instance.updateMessage(id, {
+        'is_spam': 1,
+        'spam_status': 'quarantined',
+        'quarantined_at': DateTime.now().millisecondsSinceEpoch,
+        'spam_risk_level': 'high',
+        'spam_attack_type': 'socialEngineering',
+      });
+      debugPrint('SqfliteSpamRepository: Moved message $id to spam.');
+    } catch (e) {
+      debugPrint('SqfliteSpamRepository: Error moving message to spam: $e');
+      rethrow;
+    }
+  }
+
+  /// Moves an entire conversation thread (matching normalized sender) to spam.
+  Future<void> moveConversationToSpam(String sender) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await DatabaseHelper.instance.moveConversationToSpam(sender, now);
+      debugPrint('SqfliteSpamRepository: Moved conversation for $sender to spam.');
+    } catch (e) {
+      debugPrint('SqfliteSpamRepository: Error moving conversation to spam: $e');
+      rethrow;
+    }
+  }
+
+  /// Restores an entire conversation thread (matching normalized sender) to the inbox.
+  Future<void> restoreConversation(String sender) async {
+    try {
+      await DatabaseHelper.instance.restoreConversationToInbox(sender);
+      debugPrint('SqfliteSpamRepository: Restored conversation for $sender to inbox.');
+    } catch (e) {
+      debugPrint('SqfliteSpamRepository: Error restoring conversation to inbox: $e');
+      rethrow;
+    }
+  }
+
+  /// Blocks the sender for an entire conversation thread.
+  Future<void> blockConversation(String sender) async {
+    try {
+      await DatabaseHelper.instance.blockConversation(sender);
+      debugPrint('SqfliteSpamRepository: Blocked conversation for $sender.');
+    } catch (e) {
+      debugPrint('SqfliteSpamRepository: Error blocking conversation: $e');
+      rethrow;
+    }
+  }
+
+  /// Permanently deletes an entire conversation thread.
+  Future<void> deleteConversation(String sender) async {
+    try {
+      await DatabaseHelper.instance.deleteConversation(sender);
+      debugPrint('SqfliteSpamRepository: Deleted conversation for $sender.');
+    } catch (e) {
+      debugPrint('SqfliteSpamRepository: Error deleting conversation: $e');
+      rethrow;
+    }
+  }
+
   /// Blocks the sender of the message and updates its status.
   Future<SpamMessage> blockSender(String id) async {
     try {
       await DatabaseHelper.instance.updateMessage(id, {'spam_status': 'blocked'});
-      final rows = await DatabaseHelper.instance.querySpamMessages();
-      final updatedRow = rows.firstWhere((r) => r['id'] == id);
+      final updatedRow = await DatabaseHelper.instance.queryMessageById(id);
+      if (updatedRow == null) {
+        throw Exception('Message with id $id not found');
+      }
       return _mapToSpamMessage(updatedRow);
     } catch (e) {
       debugPrint('SqfliteSpamRepository: Error blocking sender for $id: $e');
@@ -66,8 +130,10 @@ class SqfliteSpamRepository {
   Future<SpamMessage> markReviewed(String id) async {
     try {
       await DatabaseHelper.instance.updateMessage(id, {'spam_status': 'reviewed'});
-      final rows = await DatabaseHelper.instance.querySpamMessages();
-      final updatedRow = rows.firstWhere((r) => r['id'] == id);
+      final updatedRow = await DatabaseHelper.instance.queryMessageById(id);
+      if (updatedRow == null) {
+        throw Exception('Message with id $id not found');
+      }
       return _mapToSpamMessage(updatedRow);
     } catch (e) {
       debugPrint('SqfliteSpamRepository: Error marking reviewed for $id: $e');

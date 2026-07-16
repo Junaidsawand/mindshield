@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import '../data/dummy_analysis_repository.dart';
 import '../domain/analysis_result.dart';
 import '../../inbox/domain/sms_message.dart';
+import '../../spam/data/sqflite_spam_repository.dart';
+import '../../../core/services/sms_background_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AnalysisActionState
@@ -21,20 +23,6 @@ enum AnalysisActionState {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Manages all state for the AI Threat Analysis screen.
-///
-/// Responsibilities
-/// ─────────────────
-/// * Calls [DummyAnalysisRepository] (later: ApiAnalysisRepository) to load
-///   the full [AnalysisResult] for a given [SmsMessage].
-/// * Exposes [analysisResult], [isLoading], [errorMessage].
-/// * Handles action button states via [AnalysisActionState].
-/// * Provides convenience methods for each action: [moveToSpam], [markSafe],
-///   [blockSender], [report].
-///
-/// Register in [AnalysisScreen] via:
-/// ```dart
-/// ChangeNotifierProvider<AnalysisProvider>(create: (_) => AnalysisProvider()),
-/// ```
 class AnalysisProvider extends ChangeNotifier {
   AnalysisProvider();
 
@@ -83,28 +71,28 @@ class AnalysisProvider extends ChangeNotifier {
 
   /// Marks the current message as spam and notifies listeners.
   Future<void> moveToSpam() async {
+    if (_currentMessage == null) return;
     await _performAction(AnalysisActionState.movingToSpam, () async {
-      // Future: call SpamRepository.addToSpam(_currentMessage!.id)
-      await Future.delayed(const Duration(milliseconds: 600));
-      debugPrint('[AnalysisProvider] moveToSpam: ${_currentMessage?.id}');
+      await SqfliteSpamRepository.instance.moveToSpam(_currentMessage!.id);
+      SmsBackgroundService.instance.notifyListeners();
     });
   }
 
   /// Marks the current message as safe and notifies listeners.
   Future<void> markSafe() async {
+    if (_currentMessage == null) return;
     await _performAction(AnalysisActionState.markingSafe, () async {
-      // Future: call InboxRepository.markSafe(_currentMessage!.id)
-      await Future.delayed(const Duration(milliseconds: 600));
-      debugPrint('[AnalysisProvider] markSafe: ${_currentMessage?.id}');
+      await SqfliteSpamRepository.instance.restoreToInbox(_currentMessage!.id);
+      SmsBackgroundService.instance.notifyListeners();
     });
   }
 
   /// Blocks the sender of the current message.
   Future<void> blockSender() async {
+    if (_currentMessage == null) return;
     await _performAction(AnalysisActionState.blockingSender, () async {
-      // Future: call SystemContactsRepository.blockNumber(sender)
-      await Future.delayed(const Duration(milliseconds: 800));
-      debugPrint('[AnalysisProvider] blockSender: ${_currentMessage?.sender}');
+      await SqfliteSpamRepository.instance.blockSender(_currentMessage!.id);
+      SmsBackgroundService.instance.notifyListeners();
     });
   }
 

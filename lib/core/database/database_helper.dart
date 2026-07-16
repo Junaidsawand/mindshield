@@ -237,6 +237,25 @@ class DatabaseHelper {
     return await db.query('sms_messages', orderBy: 'timestamp DESC');
   }
 
+  Future<List<Map<String, dynamic>>> queryInboxMessages() async {
+    final db = await database;
+    return await db.query(
+      'sms_messages',
+      where: 'is_spam = 0',
+      orderBy: 'timestamp DESC',
+    );
+  }
+
+  Future<Map<String, dynamic>?> queryMessageById(String id) async {
+    final db = await database;
+    final results = await db.query(
+      'sms_messages',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return results.isNotEmpty ? results.first : null;
+  }
+
   Future<List<Map<String, dynamic>>> querySpamMessages() async {
     final db = await database;
     return await db.query(
@@ -253,6 +272,57 @@ class DatabaseHelper {
       where: 'ai_status = ?',
       whereArgs: ['pending'],
     );
+  }
+
+  // ── Conversation-level SQL operations ────────────────────────────────────
+
+  String _normalizeSender(String sender) {
+    return sender.replaceAll(RegExp(r'[\s\-()]+'), '').toLowerCase();
+  }
+
+  Future<int> moveConversationToSpam(String sender, int quarantinedAt) async {
+    final db = await database;
+    return await db.rawUpdate('''
+      UPDATE sms_messages
+      SET is_spam = 1,
+          spam_status = 'quarantined',
+          quarantined_at = ?,
+          ai_status = 'scam',
+          spam_risk_level = 'high',
+          spam_attack_type = 'socialEngineering'
+      WHERE LOWER(REPLACE(REPLACE(REPLACE(REPLACE(sender, ' ', ''), '-', ''), '(', ''), ')', '')) = ?
+    ''', [quarantinedAt, _normalizeSender(sender)]);
+  }
+
+  Future<int> restoreConversationToInbox(String sender) async {
+    final db = await database;
+    return await db.rawUpdate('''
+      UPDATE sms_messages
+      SET is_spam = 0,
+          ai_status = 'safe',
+          spam_status = NULL,
+          quarantined_at = NULL,
+          spam_risk_level = NULL,
+          spam_attack_type = NULL
+      WHERE LOWER(REPLACE(REPLACE(REPLACE(REPLACE(sender, ' ', ''), '-', ''), '(', ''), ')', '')) = ?
+    ''', [_normalizeSender(sender)]);
+  }
+
+  Future<int> blockConversation(String sender) async {
+    final db = await database;
+    return await db.rawUpdate('''
+      UPDATE sms_messages
+      SET spam_status = 'blocked'
+      WHERE LOWER(REPLACE(REPLACE(REPLACE(REPLACE(sender, ' ', ''), '-', ''), '(', ''), ')', '')) = ?
+    ''', [_normalizeSender(sender)]);
+  }
+
+  Future<int> deleteConversation(String sender) async {
+    final db = await database;
+    return await db.rawDelete('''
+      DELETE FROM sms_messages
+      WHERE LOWER(REPLACE(REPLACE(REPLACE(REPLACE(sender, ' ', ''), '-', ''), '(', ''), ')', '')) = ?
+    ''', [_normalizeSender(sender)]);
   }
 
   Future<int> insertMessage(Map<String, dynamic> row) async {

@@ -5,12 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/router/app_router.dart';
+import '../../inbox/domain/conversation.dart';
 import '../../inbox/domain/sms_message.dart';
 import '../domain/spam_message.dart';
 import 'spam_provider.dart';
 import 'widgets/spam_filter_bar.dart';
+import 'widgets/spam_conversation_tile.dart';
 import 'widgets/spam_section_header.dart';
-import 'widgets/spam_message_tile.dart';
 import 'widgets/spam_action_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -119,13 +120,13 @@ class _SpamView extends StatelessWidget {
                   onRetry: provider.loadMessages,
                 ),
               )
-            else if (provider.filteredMessages.isEmpty)
+            else if (provider.filteredConversations.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: _EmptyState(filter: provider.activeFilter),
               )
             else
-              _GroupedMessageList(grouped: provider.groupedMessages),
+              _GroupedMessageList(grouped: provider.groupedConversations),
           ],
         ),
       ),
@@ -313,16 +314,13 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
 // _GroupedMessageList
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Renders messages grouped by [SpamRiskLevel] with a [SpamSectionHeader]
-/// above each group, separated by thin dividers.
 class _GroupedMessageList extends StatelessWidget {
   const _GroupedMessageList({required this.grouped});
 
-  final Map<SpamRiskLevel, List<SpamMessage>> grouped;
+  final Map<SpamRiskLevel, List<Conversation<SpamMessage>>> grouped;
 
   @override
   Widget build(BuildContext context) {
-    // Build a flat list of section-header + tile items.
     final items = <_ListItem>[];
     for (final entry in grouped.entries) {
       items.add(_ListItem.header(entry.key, entry.value.length));
@@ -343,9 +341,10 @@ class _GroupedMessageList extends StatelessWidget {
               count: item.headerCount ?? 0,
             );
           }
+          final conv = item.conversation!;
           return _buildTile(
             context,
-            item.message ?? SpamMessage(id: '', sender: '', body: '', timestamp: DateTime.now(), riskLevel: SpamRiskLevel.medium, attackType: AttackType.phishing, aiConfidence: 0.0, status: SpamStatus.quarantined, detectedThreats: []),
+            conv,
             item.tileIndex ?? 0,
           );
         },
@@ -353,20 +352,20 @@ class _GroupedMessageList extends StatelessWidget {
     );
   }
 
-  Widget _buildTile(BuildContext context, SpamMessage message, int index) {
+  Widget _buildTile(BuildContext context, Conversation<SpamMessage> conversation, int index) {
     return _AnimatedTile(
-      key: ValueKey(message.id),
+      key: ValueKey(conversation.sender),
       index: index,
       child: Column(
         children: [
           GestureDetector(
-            onLongPress: () => _longPress(context, message),
-            child: SpamMessageTile(
-              message: message,
-              onViewAnalysis: () => _navigateToAnalysis(context, message),
-              onRestore: () => _restore(context, message.id),
-              onDelete: () => _confirmAndDelete(context, message),
-              onBlock: () => _block(context, message.id),
+            onLongPress: () => _longPress(context, conversation),
+            child: SpamConversationTile(
+              conversation: conversation,
+              onTap: () => _onTap(context, conversation),
+              onRestore: () => _restore(context, conversation),
+              onDelete: () => _confirmAndDelete(context, conversation),
+              onBlock: () => _block(context, conversation.latestMessage.id),
             ),
           ),
           Divider(
@@ -384,8 +383,17 @@ class _GroupedMessageList extends StatelessWidget {
     );
   }
 
+  void _onTap(BuildContext context, Conversation<SpamMessage> conversation) {
+    context.push(
+      AppRoutes.conversation,
+      extra: {
+        'sender': conversation.sender,
+        'isSpam': true,
+      },
+    );
+  }
+
   void _navigateToAnalysis(BuildContext context, SpamMessage spam) {
-    // Bridge SpamMessage → SmsMessage so we can reuse AnalysisScreen.
     final sms = SmsMessage(
       id: spam.id,
       sender: spam.sender,
@@ -409,21 +417,21 @@ class _GroupedMessageList extends StatelessWidget {
     }
   }
 
-  void _longPress(BuildContext context, SpamMessage message) {
+  void _longPress(BuildContext context, Conversation<SpamMessage> conversation) {
     SpamActionSheet.show(
       context: context,
-      message: message,
-      onRestore: () => _restore(context, message.id),
-      onBlock: () => _block(context, message.id),
-      onViewAnalysis: () => _navigateToAnalysis(context, message),
-      onDelete: () => _delete(context, message.id),
+      message: conversation.latestMessage,
+      onRestore: () => _restore(context, conversation),
+      onBlock: () => _block(context, conversation.latestMessage.id),
+      onViewAnalysis: () => _navigateToAnalysis(context, conversation.latestMessage),
+      onDelete: () => _confirmConversationDelete(context, conversation),
     );
   }
 
-  void _restore(BuildContext context, String id) {
-    context.read<SpamProvider>().restoreToInbox(id);
-    _showSnackBar(context, 'Message restored to Inbox', Icons.restore_rounded,
-        const Color(0xFF1565C0));
+  void _restore(BuildContext context, Conversation<SpamMessage> conversation) {
+    context.read<SpamProvider>().restoreConversationToInbox(conversation.sender);
+    _showSnackBar(context, 'Conversation restored to Inbox', Icons.restore_rounded,
+        const Color(0xFF2E7D32));
   }
 
   void _block(BuildContext context, String id) {
@@ -432,13 +440,13 @@ class _GroupedMessageList extends StatelessWidget {
         const Color(0xFFE65100));
   }
 
-  void _delete(BuildContext context, String id) {
-    context.read<SpamProvider>().deleteMessage(id);
-    _showSnackBar(context, 'Message deleted permanently',
+  void _delete(BuildContext context, Conversation<SpamMessage> conversation) {
+    context.read<SpamProvider>().deleteConversation(conversation.sender);
+    _showSnackBar(context, 'Conversation deleted permanently',
         Icons.delete_forever_rounded, Theme.of(context).colorScheme.error);
   }
 
-  void _confirmAndDelete(BuildContext context, SpamMessage message) {
+  void _confirmConversationDelete(BuildContext context, Conversation<SpamMessage> conversation) {
     showDialog<void>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
@@ -446,8 +454,8 @@ class _GroupedMessageList extends StatelessWidget {
         iconColor: Theme.of(dialogCtx).colorScheme.error,
         title: const Text('Delete permanently?'),
         content: Text(
-          'This message from "${message.sender}" will be removed from your '
-          'spam folder forever.',
+          'All messages in the conversation from "${conversation.sender}" '
+          'will be removed permanently.',
         ),
         actions: [
           TextButton(
@@ -460,13 +468,17 @@ class _GroupedMessageList extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.pop(dialogCtx);
-              _delete(context, message.id);
+              _delete(context, conversation);
             },
             child: const Text('Delete'),
           ),
         ],
       ),
     );
+  }
+
+  void _confirmAndDelete(BuildContext context, Conversation<SpamMessage> conversation) {
+    _confirmConversationDelete(context, conversation);
   }
 
   void _showSnackBar(
@@ -497,20 +509,20 @@ class _ListItem {
       : isHeader = true,
         riskLevel = level,
         headerCount = count,
-        message = null,
+        conversation = null,
         tileIndex = null;
 
-  _ListItem.tile(SpamMessage msg, int index)
+  _ListItem.tile(Conversation<SpamMessage> conv, int index)
       : isHeader = false,
         riskLevel = null,
         headerCount = null,
-        message = msg,
+        conversation = conv,
         tileIndex = index;
 
   final bool isHeader;
   final SpamRiskLevel? riskLevel;
   final int? headerCount;
-  final SpamMessage? message;
+  final Conversation<SpamMessage>? conversation;
   final int? tileIndex;
 }
 

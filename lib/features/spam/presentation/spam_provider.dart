@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart';
 import '../data/sqflite_spam_repository.dart';
 import '../domain/spam_message.dart';
+import '../../inbox/domain/conversation.dart';
 import '../../../core/services/sms_background_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -63,17 +64,6 @@ extension SpamSortOrderX on SpamSortOrder {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Manages state for the Spam Folder feature.
-///
-/// Responsibilities
-/// ─────────────────
-/// * Loads quarantined messages from [DummySpamRepository].
-/// * Holds the active [SpamFilter] and [SpamSortOrder].
-/// * Exposes [filteredMessages] and grouped views for the UI.
-/// * Provides action methods: [restoreToInbox], [deleteMessage],
-///   [blockSender], [markReviewed].
-/// * Tracks [isLoading] and [errorMessage] for UI state feedback.
-///
-/// Scoped to [SpamScreen] via a local [ChangeNotifierProvider].
 class SpamProvider extends ChangeNotifier {
   SpamProvider() {
     loadMessages();
@@ -92,7 +82,7 @@ class SpamProvider extends ChangeNotifier {
 
   // ── Internal state ────────────────────────────────────────────────────────
 
-  List<SpamMessage> _messages = [];
+  List<Conversation<SpamMessage>> _conversations = [];
   SpamFilter _activeFilter = SpamFilter.all;
   SpamSortOrder _sortOrder = SpamSortOrder.newestFirst;
   bool _isLoading = false;
@@ -105,44 +95,45 @@ class SpamProvider extends ChangeNotifier {
   SpamFilter get activeFilter => _activeFilter;
   SpamSortOrder get sortOrder => _sortOrder;
 
-  /// All messages currently in memory (unfiltered).
-  List<SpamMessage> get allMessages => _messages;
+  /// All conversations.
+  List<Conversation<SpamMessage>> get allConversations => _conversations;
+
+  /// All latest messages currently in memory (unfiltered).
+  List<SpamMessage> get allMessages => _conversations.map((c) => c.latestMessage).toList();
 
   /// Total count of quarantined messages across all risk levels.
-  int get totalCount => _messages.length;
+  int get totalCount => _conversations.fold(0, (sum, c) => sum + c.messages.length);
 
-  /// Count of messages per [SpamFilter] tab.
+  /// Count of conversation threads per [SpamFilter] tab.
   int countFor(SpamFilter filter) {
-    if (filter == SpamFilter.all) return _messages.length;
+    if (filter == SpamFilter.all) return _conversations.length;
     final level = _filterToLevel(filter);
-    return _messages.where((m) => m.riskLevel == level).length;
+    return _conversations.where((c) => c.riskLevel == level).length;
   }
 
-  /// Count of critical-risk messages – used by the app bar badge.
+  /// Count of critical-risk messages across all conversations.
   int get criticalCount =>
-      _messages.where((m) => m.riskLevel == SpamRiskLevel.critical).length;
+      _conversations.fold(0, (sum, c) => sum + c.messages.where((m) => m.riskLevel == SpamRiskLevel.critical).length);
 
-  /// Messages matching the active filter and sort order.
-  List<SpamMessage> get filteredMessages {
-    List<SpamMessage> result;
+  /// Conversations matching the active filter and sort order.
+  List<Conversation<SpamMessage>> get filteredConversations {
+    List<Conversation<SpamMessage>> result;
     if (_activeFilter == SpamFilter.all) {
-      result = List.of(_messages);
+      result = List.from(_conversations);
     } else {
       final level = _filterToLevel(_activeFilter);
-      result = _messages.where((m) => m.riskLevel == level).toList();
+      result = _conversations.where((c) => c.riskLevel == level).toList();
     }
-    _applySort(result);
+    _applySortConversations(result);
     return result;
   }
 
-  /// Messages grouped by [SpamRiskLevel] in severity order:
-  /// Critical → High → Medium.
-  /// Only includes groups that contain at least one message.
-  Map<SpamRiskLevel, List<SpamMessage>> get groupedMessages {
-    final filtered = filteredMessages;
-    final map = <SpamRiskLevel, List<SpamMessage>>{};
+  /// Conversations grouped by [SpamRiskLevel] in severity order.
+  Map<SpamRiskLevel, List<Conversation<SpamMessage>>> get groupedConversations {
+    final filtered = filteredConversations;
+    final map = <SpamRiskLevel, List<Conversation<SpamMessage>>>{};
     for (final level in SpamRiskLevel.values) {
-      final group = filtered.where((m) => m.riskLevel == level).toList();
+      final group = filtered.where((c) => c.riskLevel == level).toList();
       if (group.isNotEmpty) map[level] = group;
     }
     return map;
@@ -150,13 +141,17 @@ class SpamProvider extends ChangeNotifier {
 
   // ── Public API ────────────────────────────────────────────────────────────
 
-  /// Fetches messages from the repository and notifies listeners.
+  /// Fetches messages from the repository, groups them, and notifies listeners.
   Future<void> loadMessages() async {
     _setLoading(true);
     _errorMessage = null;
     try {
       final fetched = await _repo.fetchSpamMessages();
-      _messages = fetched.toList();
+      _conversations = groupIntoConversations<SpamMessage>(
+        messages: fetched,
+        getSender: (m) => m.sender,
+        getTimestamp: (m) => m.timestamp,
+      );
     } catch (e, st) {
       _errorMessage = 'Failed to load spam folder: $e';
       debugPrintStack(stackTrace: st);
@@ -183,10 +178,35 @@ class SpamProvider extends ChangeNotifier {
   Future<void> restoreToInbox(String id) async {
     try {
       await _repo.restoreToInbox(id);
-      _messages.removeWhere((m) => m.id == id);
+      _removeMessageFromThreads(id);
       notifyListeners();
+      SmsBackgroundService.instance.notifyListeners();
     } catch (e) {
       debugPrint('SpamProvider.restoreToInbox error: $e');
+    }
+  }
+
+  /// Restores all messages in a conversation thread to the inbox.
+  Future<void> restoreConversationToInbox(String senderName) async {
+    try {
+      await _repo.restoreConversation(senderName);
+      _conversations.removeWhere((c) => normalizeSender(c.sender) == normalizeSender(senderName));
+      notifyListeners();
+      SmsBackgroundService.instance.notifyListeners();
+    } catch (e) {
+      debugPrint('SpamProvider.restoreConversationToInbox error: $e');
+    }
+  }
+
+  /// Permanently deletes all messages in a conversation thread.
+  Future<void> deleteConversation(String senderName) async {
+    try {
+      await _repo.deleteConversation(senderName);
+      _conversations.removeWhere((c) => normalizeSender(c.sender) == normalizeSender(senderName));
+      notifyListeners();
+      SmsBackgroundService.instance.notifyListeners();
+    } catch (e) {
+      debugPrint('SpamProvider.deleteConversation error: $e');
     }
   }
 
@@ -194,8 +214,9 @@ class SpamProvider extends ChangeNotifier {
   Future<void> deleteMessage(String id) async {
     try {
       await _repo.deleteMessage(id);
-      _messages.removeWhere((m) => m.id == id);
+      _removeMessageFromThreads(id);
       notifyListeners();
+      SmsBackgroundService.instance.notifyListeners();
     } catch (e) {
       debugPrint('SpamProvider.deleteMessage error: $e');
     }
@@ -205,11 +226,9 @@ class SpamProvider extends ChangeNotifier {
   Future<void> blockSender(String id) async {
     try {
       final updated = await _repo.blockSender(id);
-      final idx = _messages.indexWhere((m) => m.id == id);
-      if (idx != -1) {
-        _messages[idx] = updated;
-        notifyListeners();
-      }
+      _updateMessageInThreads(id, updated);
+      notifyListeners();
+      SmsBackgroundService.instance.notifyListeners();
     } catch (e) {
       debugPrint('SpamProvider.blockSender error: $e');
     }
@@ -219,17 +238,40 @@ class SpamProvider extends ChangeNotifier {
   Future<void> markReviewed(String id) async {
     try {
       final updated = await _repo.markReviewed(id);
-      final idx = _messages.indexWhere((m) => m.id == id);
-      if (idx != -1) {
-        _messages[idx] = updated;
-        notifyListeners();
-      }
+      _updateMessageInThreads(id, updated);
+      notifyListeners();
+      SmsBackgroundService.instance.notifyListeners();
     } catch (e) {
       debugPrint('SpamProvider.markReviewed error: $e');
     }
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
+
+  void _removeMessageFromThreads(String id) {
+    for (var i = 0; i < _conversations.length; i++) {
+      final thread = _conversations[i].messages;
+      final idx = thread.indexWhere((m) => m.id == id);
+      if (idx != -1) {
+        thread.removeAt(idx);
+        if (thread.isEmpty) {
+          _conversations.removeAt(i);
+        }
+        break;
+      }
+    }
+  }
+
+  void _updateMessageInThreads(String id, SpamMessage updated) {
+    for (var i = 0; i < _conversations.length; i++) {
+      final thread = _conversations[i].messages;
+      final idx = thread.indexWhere((m) => m.id == id);
+      if (idx != -1) {
+        thread[idx] = updated;
+        break;
+      }
+    }
+  }
 
   void _setLoading(bool value) {
     _isLoading = value;
@@ -249,10 +291,10 @@ class SpamProvider extends ChangeNotifier {
     }
   }
 
-  void _applySort(List<SpamMessage> list) {
+  void _applySortConversations(List<Conversation<SpamMessage>> list) {
     switch (_sortOrder) {
       case SpamSortOrder.newestFirst:
-        list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        list.sort((a, b) => b.latestTimestamp.compareTo(a.latestTimestamp));
       case SpamSortOrder.highestConfidence:
         list.sort((a, b) => b.aiConfidence.compareTo(a.aiConfidence));
       case SpamSortOrder.senderAZ:

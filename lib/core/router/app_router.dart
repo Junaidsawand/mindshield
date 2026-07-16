@@ -6,6 +6,7 @@ import '../../features/permissions/presentation/permissions_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/inbox/presentation/inbox_screen.dart';
 import '../../features/inbox/domain/sms_message.dart';
+import '../../features/inbox/presentation/conversation_detail_screen.dart';
 import '../../features/spam/presentation/spam_screen.dart';
 import '../../features/analysis/presentation/analysis_screen.dart';
 import '../../features/history/presentation/history_screen.dart';
@@ -19,6 +20,7 @@ abstract class AppRoutes {
   static const String inbox = '/inbox';
   static const String spam = '/spam';
   static const String analysis = '/analysis';
+  static const String conversation = '/conversation';
   static const String history = '/history';
   static const String settings = '/settings';
 }
@@ -49,6 +51,18 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final message = state.extra as SmsMessage?;
         return AnalysisScreen(message: message);
+      },
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: AppRoutes.conversation,
+      name: 'conversation',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return ConversationDetailScreen(
+          sender: extra['sender'] as String,
+          isSpam: extra['isSpam'] as bool,
+        );
       },
     ),
     // Bottom Navigation with StatefulShellRoute

@@ -3,10 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/router/app_router.dart';
 import '../domain/sms_message.dart';
+import '../domain/conversation.dart';
 import 'inbox_provider.dart';
 
 import 'widgets/inbox_filter_bar.dart';
-import 'widgets/sms_message_tile.dart';
+import 'widgets/conversation_tile.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // InboxScreen
@@ -96,12 +97,12 @@ class _InboxView extends StatelessWidget {
                   onRetry: provider.loadMessages,
                 ),
               )
-            else if (provider.filteredMessages.isEmpty)
+            else if (provider.filteredConversations.isEmpty)
               SliverFillRemaining(
                 child: _EmptyState(filter: provider.activeFilter),
               )
             else
-              _MessageList(messages: provider.filteredMessages),
+              _MessageList(conversations: provider.filteredConversations),
           ],
         ),
       ),
@@ -264,16 +265,16 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _MessageList extends StatelessWidget {
-  const _MessageList({required this.messages});
+  const _MessageList({required this.conversations});
 
-  final List<SmsMessage> messages;
+  final List<Conversation<SmsMessage>> conversations;
 
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       sliver: SliverList.separated(
-        itemCount: messages.length,
+        itemCount: conversations.length,
         separatorBuilder: (_, __) => Divider(
           indent: 80,
           endIndent: 16,
@@ -283,13 +284,13 @@ class _MessageList extends StatelessWidget {
               Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.35),
         ),
         itemBuilder: (context, index) {
-          final msg = messages[index];
+          final conv = conversations[index];
           return _AnimatedTile(
-            key: ValueKey(msg.id),
+            key: ValueKey(conv.sender),
             index: index,
-            child: SmsMessageTile(
-              message: msg,
-              onTap: () => _onTap(context, msg),
+            child: ConversationTile(
+              conversation: conv,
+              onTap: () => _onTap(context, conv),
             ),
           );
         },
@@ -297,10 +298,15 @@ class _MessageList extends StatelessWidget {
     );
   }
 
-  void _onTap(BuildContext context, SmsMessage message) {
-    // Mark as read before navigating.
-    context.read<InboxProvider>().markAsRead(message.id);
-    context.push(AppRoutes.analysis, extra: message);
+  void _onTap(BuildContext context, Conversation<SmsMessage> conversation) {
+    context.read<InboxProvider>().markConversationAsRead(conversation.sender);
+    context.push(
+      AppRoutes.conversation,
+      extra: {
+        'sender': conversation.sender,
+        'isSpam': false,
+      },
+    );
   }
 }
 

@@ -8,10 +8,10 @@ class SqfliteInboxRepository {
 
   static final SqfliteInboxRepository instance = SqfliteInboxRepository._();
 
-  /// Fetches all messages from the SQLite database.
+  /// Fetches all messages from the SQLite database that belong to the inbox.
   Future<List<SmsMessage>> fetchMessages() async {
     try {
-      final rows = await DatabaseHelper.instance.queryAllMessages();
+      final rows = await DatabaseHelper.instance.queryInboxMessages();
       return rows.map(_mapToSmsMessage).toList();
     } catch (e, st) {
       debugPrint('SqfliteInboxRepository: Error fetching messages: $e');
@@ -24,8 +24,10 @@ class SqfliteInboxRepository {
   Future<SmsMessage> markAsRead(String id) async {
     try {
       await DatabaseHelper.instance.updateMessage(id, {'is_read': 1});
-      final rows = await DatabaseHelper.instance.queryAllMessages();
-      final updatedRow = rows.firstWhere((r) => r['id'] == id);
+      final updatedRow = await DatabaseHelper.instance.queryMessageById(id);
+      if (updatedRow == null) {
+        throw Exception('Message with id $id not found');
+      }
       return _mapToSmsMessage(updatedRow);
     } catch (e) {
       debugPrint('SqfliteInboxRepository: Error marking message as read: $e');
