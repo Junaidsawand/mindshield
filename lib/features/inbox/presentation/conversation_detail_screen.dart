@@ -6,6 +6,7 @@ import 'conversation_provider.dart';
 import '../../../core/router/app_router.dart';
 import '../../spam/data/sqflite_spam_repository.dart';
 import '../../../core/services/sms_background_service.dart';
+import '../../../core/services/contacts_service.dart';
 
 class ConversationDetailScreen extends StatelessWidget {
   final String sender;
@@ -69,6 +70,8 @@ class _ConversationDetailViewState extends State<_ConversationDetailView> {
     final threadStatus = _getThreadStatus(provider.messages);
     final statusConfig = _StatusConfig.of(threadStatus);
 
+    final displayName = ContactsService.instance.getDisplayName(provider.sender);
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
@@ -83,7 +86,7 @@ class _ConversationDetailViewState extends State<_ConversationDetailView> {
         title: Row(
           children: [
             _SenderAvatar(
-              sender: provider.sender,
+              sender: displayName,
               status: threadStatus,
               ringColor: statusConfig.color,
             ),
@@ -93,7 +96,7 @@ class _ConversationDetailViewState extends State<_ConversationDetailView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    provider.sender,
+                    displayName,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: cs.onSurface,
@@ -120,7 +123,7 @@ class _ConversationDetailViewState extends State<_ConversationDetailView> {
             tooltip: 'Thread details',
             onPressed: () {
               // Information Dialog showing thread summary
-              _showThreadInfoDialog(context, provider.sender, provider.messages);
+              _showThreadInfoDialog(context, displayName, provider.messages);
             },
           ),
           const SizedBox(width: 8),
@@ -454,6 +457,7 @@ class _SecurityActionBar extends StatelessWidget {
   }
 
   void _confirmAndDelete(BuildContext context) {
+    final displayName = ContactsService.instance.getDisplayName(sender);
     showDialog<void>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
@@ -461,7 +465,7 @@ class _SecurityActionBar extends StatelessWidget {
         iconColor: Theme.of(dialogCtx).colorScheme.error,
         title: const Text('Delete conversation?'),
         content: Text(
-          'All messages from "$sender" will be removed permanently.',
+          'All messages from "$displayName" will be removed permanently.',
         ),
         actions: [
           TextButton(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/sms_message.dart';
 import '../../domain/conversation.dart';
 import 'ai_status_badge.dart';
+import '../../../../core/services/contacts_service.dart';
 
 class ConversationTile extends StatelessWidget {
   final Conversation<SmsMessage> conversation;
@@ -24,6 +25,8 @@ class ConversationTile extends StatelessWidget {
     // Count of unread messages in this thread
     final unreadMsgsCount = conversation.messages.where((m) => !m.isRead).length;
 
+    final displayName = ContactsService.instance.getDisplayName(conversation.sender);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -38,7 +41,7 @@ class ConversationTile extends StatelessWidget {
             children: [
               // Avatar
               _SenderAvatar(
-                sender: conversation.sender,
+                sender: displayName,
                 status: threadStatus,
               ),
               const SizedBox(width: 14),
@@ -53,7 +56,7 @@ class ConversationTile extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            conversation.sender,
+                            displayName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleSmall!.copyWith(

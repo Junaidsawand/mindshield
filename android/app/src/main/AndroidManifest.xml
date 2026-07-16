@@ -6,6 +6,7 @@
     <!-- READ_PHONE_STATE is declared here for future telephony features;        -->
     <!-- it is shown as an informational card but does NOT block navigation.     -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <application
         android:label="mindshield"
         android:name="${applicationName}"

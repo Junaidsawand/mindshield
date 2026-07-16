@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../inbox/domain/sms_message.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/services/contacts_service.dart';
 
 /// A card displaying a brief summary of a previously analyzed SMS message.
 class HistoryCard extends StatelessWidget {
@@ -44,7 +45,7 @@ class HistoryCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      message.sender,
+                      ContactsService.instance.getDisplayName(message.sender),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

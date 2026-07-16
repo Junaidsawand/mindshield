@@ -277,6 +277,7 @@ class _PermissionCard extends StatelessWidget {
     'message': Icons.message_rounded,
     'inbox': Icons.move_to_inbox_rounded,
     'phone_in_talk': Icons.phone_in_talk_rounded,
+    'contacts': Icons.contacts_rounded,
   };
 
   @override

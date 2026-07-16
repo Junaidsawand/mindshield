@@ -3,6 +3,7 @@ import '../../domain/spam_message.dart';
 import '../../../inbox/domain/conversation.dart';
 import 'risk_level_badge.dart';
 import 'confidence_indicator.dart';
+import '../../../../core/services/contacts_service.dart';
 
 class SpamConversationTile extends StatelessWidget {
   final Conversation<SpamMessage> conversation;
@@ -28,6 +29,8 @@ class SpamConversationTile extends StatelessWidget {
     final threadRisk = conversation.riskLevel;
     final ringColor = _ringColor(threadRisk);
 
+    final displayName = ContactsService.instance.getDisplayName(conversation.sender);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -44,7 +47,7 @@ class SpamConversationTile extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _SpamAvatar(sender: conversation.sender, ringColor: ringColor),
+                  _SpamAvatar(sender: displayName, ringColor: ringColor),
                   const SizedBox(width: 12),
 
                   Expanded(
@@ -56,7 +59,7 @@ class SpamConversationTile extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                conversation.sender,
+                                displayName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.titleSmall!.copyWith(

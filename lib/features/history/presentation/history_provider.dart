@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../data/sqflite_history_repository.dart';
 import '../../inbox/domain/sms_message.dart';
 import '../../../core/services/sms_background_service.dart';
+import '../../../core/services/contacts_service.dart';
 
 /// Manages state for the History screen, including loading, filtering,
 /// searching, and sorting of previously analyzed SMS messages.
@@ -49,7 +50,9 @@ class HistoryProvider extends ChangeNotifier {
       // 2. Apply search query
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
-        final matchesSender = msg.sender.toLowerCase().contains(query);
+        final displayName = ContactsService.instance.getDisplayName(msg.sender);
+        final matchesSender = msg.sender.toLowerCase().contains(query) ||
+            displayName.toLowerCase().contains(query);
         final matchesBody = msg.body.toLowerCase().contains(query);
         if (!matchesSender && !matchesBody) {
           return false;

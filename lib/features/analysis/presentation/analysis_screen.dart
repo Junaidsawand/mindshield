@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../inbox/domain/sms_message.dart';
+import '../../../core/services/contacts_service.dart';
 import 'analysis_provider.dart';
 import 'widgets/threat_score_gauge.dart';
 import 'widgets/confidence_bar.dart';
@@ -276,7 +277,7 @@ class _HeroAppBar extends StatelessWidget {
                       const SizedBox(width: 5),
                       Expanded(
                         child: Text(
-                          'From: ${message.sender}',
+                          'From: ${ContactsService.instance.getDisplayName(message.sender)}',
                           style: theme.textTheme.bodySmall!.copyWith(
                             color: cfg.heroForeground.withValues(alpha: 0.75),
                           ),

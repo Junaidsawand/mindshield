@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/contacts_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PermissionItem — lightweight data class describing one permission entry.
@@ -88,6 +89,16 @@ class PermissionsProvider extends ChangeNotifier {
       icon: 'message',
       required: true,
     ),
+    const PermissionItem(
+      permission: Permission.contacts,
+      title: 'Contacts Integration',
+      rationale:
+          'MindShield accesses your contacts to display actual contact names '
+          'instead of raw phone numbers. Contact data remains fully private '
+          'on your device.',
+      icon: 'contacts',
+      required: false, // optional — does NOT block navigation
+    ),
     PermissionItem(
       permission: Permission.phone,
       title: 'Phone State',
@@ -171,6 +182,9 @@ class PermissionsProvider extends ChangeNotifier {
       }
       _statuses = updated;
       _errorMessage = null;
+      if (_statuses[Permission.contacts]?.isGranted ?? false) {
+        await ContactsService.instance.fetchContacts();
+      }
       if (allGranted) await _persistGrantedFlag();
     } catch (e, st) {
       _errorMessage = 'Failed to query permissions: $e';
@@ -202,6 +216,11 @@ class PermissionsProvider extends ChangeNotifier {
         // [List<Permission>.request()] returns Map<Permission, PermissionStatus>.
         final results = await toRequest.request();
         _statuses = {..._statuses, ...results};
+      }
+
+      // Pre-fetch contacts if contacts permission has been granted
+      if (_statuses[Permission.contacts]?.isGranted ?? false) {
+        await ContactsService.instance.fetchContacts();
       }
 
       if (allGranted) await _persistGrantedFlag();

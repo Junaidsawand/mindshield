@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/analysis_result.dart';
+import '../../../../core/services/contacts_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SenderInfoCard
@@ -25,6 +26,7 @@ class SenderInfoCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isScammer = senderInfo.isKnownScammer;
+    final displayName = ContactsService.instance.getDisplayName(senderInfo.phoneNumber);
     final accentColor =
         isScammer ? const Color(0xFFC62828) : const Color(0xFF2E7D32);
 
@@ -59,7 +61,7 @@ class SenderInfoCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    senderInfo.displayName,
+                    displayName,
                     style: theme.textTheme.titleSmall!.copyWith(
                       fontWeight: FontWeight.w700,
                     ),

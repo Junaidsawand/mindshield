@@ -7,12 +7,17 @@ import 'features/permissions/presentation/permissions_provider.dart';
 import 'features/settings/presentation/settings_provider.dart';
 import 'core/services/sms_background_service.dart';
 
+import 'core/services/contacts_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   
   // Start analysis sync for any pending SMS messages in background
   SmsBackgroundService.instance.syncPendingMessages();
+
+  // Pre-fetch contacts if permission is already granted
+  ContactsService.instance.fetchContacts();
   
   runApp(MindShieldApp(prefs: prefs));
 }
