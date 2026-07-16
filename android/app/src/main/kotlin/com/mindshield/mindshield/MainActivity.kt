@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -14,6 +15,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.mindshield/sms_receiver"
     private val CONTACTS_CHANNEL = "com.mindshield/contacts"
+    private val ACTIONS_CHANNEL = "com.mindshield/actions"
     private var methodChannel: MethodChannel? = null
     
     private val smsReceiver = object : BroadcastReceiver() {
@@ -41,6 +43,78 @@ class MainActivity : FlutterActivity() {
             } else {
                 result.notImplemented()
             }
+        }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ACTIONS_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "launchSms" -> {
+                    val number = call.argument<String>("number")
+                    if (number != null) {
+                        launchSms(number)
+                        result.success(true)
+                    } else {
+                        result.error("BAD_ARGS", "Phone number is null", null)
+                    }
+                }
+                "launchDialer" -> {
+                    val number = call.argument<String>("number")
+                    if (number != null) {
+                        launchDialer(number)
+                        result.success(true)
+                    } else {
+                        result.error("BAD_ARGS", "Phone number is null", null)
+                    }
+                }
+                "shareText" -> {
+                    val text = call.argument<String>("text")
+                    if (text != null) {
+                        shareText(text)
+                        result.success(true)
+                    } else {
+                        result.error("BAD_ARGS", "Text is null", null)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
+    }
+
+    private fun launchSms(number: String) {
+        try {
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("smsto:$number")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            // Safe fallback
+        }
+    }
+
+    private fun launchDialer(number: String) {
+        try {
+            val intent = Intent(Intent.ACTION_DIAL).apply {
+                data = Uri.parse("tel:$number")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            // Safe fallback
+        }
+    }
+
+    private fun shareText(text: String) {
+        try {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
+            }
+            val chooser = Intent.createChooser(intent, "Share message").apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(chooser)
+        } catch (e: Exception) {
+            // Safe fallback
         }
     }
 

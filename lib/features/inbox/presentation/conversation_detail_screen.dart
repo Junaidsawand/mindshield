@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../domain/sms_message.dart';
@@ -7,6 +8,7 @@ import '../../../core/router/app_router.dart';
 import '../../spam/data/sqflite_spam_repository.dart';
 import '../../../core/services/sms_background_service.dart';
 import '../../../core/services/contacts_service.dart';
+import '../../../core/services/native_actions_service.dart';
 
 class ConversationDetailScreen extends StatelessWidget {
   final String sender;
@@ -119,11 +121,26 @@ class _ConversationDetailViewState extends State<_ConversationDetailView> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.phone_rounded),
+            tooltip: 'Call sender',
+            onPressed: () => NativeActionsService.launchDialer(provider.sender),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline_rounded),
+            tooltip: 'Reply via SMS app',
+            onPressed: () => NativeActionsService.launchSms(provider.sender),
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline_rounded),
             tooltip: 'Thread details',
             onPressed: () {
-              // Information Dialog showing thread summary
-              _showThreadInfoDialog(context, displayName, provider.messages);
+              context.push(
+                AppRoutes.conversationDetails,
+                extra: {
+                  'sender': provider.sender,
+                  'isSpam': provider.isSpam,
+                },
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -183,37 +200,6 @@ class _ConversationDetailViewState extends State<_ConversationDetailView> {
     if (messages.any((m) => m.aiStatus == AiStatus.pending)) return AiStatus.pending;
     return AiStatus.safe;
   }
-
-  void _showThreadInfoDialog(BuildContext context, String sender, List<SmsMessage> messages) {
-    final scamCount = messages.where((m) => m.aiStatus == AiStatus.scam).length;
-    final suspiciousCount = messages.where((m) => m.aiStatus == AiStatus.suspicious).length;
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Conversation Audit'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Sender: $sender', style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Text('Total Messages: ${messages.length}'),
-            const SizedBox(height: 6),
-            Text('Scam Detections: $scamCount', style: TextStyle(color: scamCount > 0 ? Colors.red : null)),
-            const SizedBox(height: 6),
-            Text('Suspicious Flags: $suspiciousCount', style: TextStyle(color: suspiciousCount > 0 ? Colors.orange : null)),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -228,6 +214,74 @@ class _ChatBubble extends StatelessWidget {
     required this.message,
     required this.onTap,
   });
+
+  void _showBubbleActionsSheet(BuildContext context, SmsMessage message, VoidCallback onViewAnalysis) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  message.body,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.6),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.analytics_rounded, color: Colors.blue),
+                title: const Text('View AI Analysis'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onViewAnalysis();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy_rounded),
+                title: const Text('Copy Message Text'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await Clipboard.setData(ClipboardData(text: message.body));
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text('Copied to clipboard'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share_rounded),
+                title: const Text('Share Message'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  NativeActionsService.shareText(message.body);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -253,6 +307,7 @@ class _ChatBubble extends StatelessWidget {
               ),
               child: InkWell(
                 onTap: onTap,
+                onLongPress: () => _showBubbleActionsSheet(context, message, onTap),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),

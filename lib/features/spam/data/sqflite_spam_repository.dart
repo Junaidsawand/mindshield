@@ -100,6 +100,17 @@ class SqfliteSpamRepository {
     }
   }
 
+  /// Unblocks the sender for an entire conversation thread.
+  Future<void> unblockConversation(String sender) async {
+    try {
+      await DatabaseHelper.instance.unblockConversation(sender);
+      debugPrint('SqfliteSpamRepository: Unblocked conversation for $sender.');
+    } catch (e) {
+      debugPrint('SqfliteSpamRepository: Error unblocking conversation: $e');
+      rethrow;
+    }
+  }
+
   /// Permanently deletes an entire conversation thread.
   Future<void> deleteConversation(String sender) async {
     try {

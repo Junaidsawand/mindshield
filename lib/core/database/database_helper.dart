@@ -317,6 +317,16 @@ class DatabaseHelper {
     ''', [_normalizeSender(sender)]);
   }
 
+  Future<int> unblockConversation(String sender) async {
+    final db = await database;
+    return await db.rawUpdate('''
+      UPDATE sms_messages
+      SET spam_status = 'quarantined'
+      WHERE LOWER(REPLACE(REPLACE(REPLACE(REPLACE(sender, ' ', ''), '-', ''), '(', ''), ')', '')) = ?
+        AND is_spam = 1
+    ''', [_normalizeSender(sender)]);
+  }
+
   Future<int> deleteConversation(String sender) async {
     final db = await database;
     return await db.rawDelete('''

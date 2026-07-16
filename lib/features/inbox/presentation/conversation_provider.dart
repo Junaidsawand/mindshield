@@ -25,10 +25,12 @@ class ConversationProvider extends ChangeNotifier {
   List<SmsMessage> _messages = [];
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isBlocked = false;
 
   List<SmsMessage> get messages => _messages;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get isBlocked => _isBlocked;
 
   /// Fetches messages matching this conversation's sender, ordered chronologically.
   Future<void> loadMessages() async {
@@ -40,8 +42,10 @@ class ConversationProvider extends ChangeNotifier {
 
     try {
       final normalizedTarget = normalizeSender(sender);
+      final spamMsgs = await SqfliteSpamRepository.instance.fetchSpamMessages();
+      _isBlocked = spamMsgs.any((m) => normalizeSender(m.sender) == normalizedTarget && m.status == SpamStatus.blocked);
+
       if (isSpam) {
-        final spamMsgs = await SqfliteSpamRepository.instance.fetchSpamMessages();
         final filtered = spamMsgs.where((m) => normalizeSender(m.sender) == normalizedTarget).toList();
         
         _messages = filtered.map((spam) => SmsMessage(
