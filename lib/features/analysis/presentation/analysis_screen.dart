@@ -224,7 +224,7 @@ class _HeroAppBar extends StatelessWidget {
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 60, 20, 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,8 +233,7 @@ class _HeroAppBar extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 46,
-                        height: 46,
+                        padding: const EdgeInsets.all(11),
                         decoration: BoxDecoration(
                           color: cfg.heroForeground.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
@@ -243,8 +242,10 @@ class _HeroAppBar extends StatelessWidget {
                             color: cfg.heroForeground, size: 24),
                       ),
                       const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             cfg.verdictLabel,
@@ -260,11 +261,12 @@ class _HeroAppBar extends StatelessWidget {
                                   cfg.heroForeground.withValues(alpha: 0.75),
                             ),
                           ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   // Sender & time row
                   Row(
                     children: [
@@ -286,10 +288,13 @@ class _HeroAppBar extends StatelessWidget {
                           size: 13,
                           color: cfg.heroForeground.withValues(alpha: 0.7)),
                       const SizedBox(width: 5),
-                      Text(
-                        _formatFull(message.timestamp),
-                        style: theme.textTheme.bodySmall!.copyWith(
-                          color: cfg.heroForeground.withValues(alpha: 0.75),
+                      Flexible(
+                        child: Text(
+                          _formatFull(message.timestamp),
+                          style: theme.textTheme.bodySmall!.copyWith(
+                            color: cfg.heroForeground.withValues(alpha: 0.75),
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -455,11 +460,13 @@ class _AnalysisCard extends StatelessWidget {
                   child: Icon(icon, size: 17, color: cs.onPrimaryContainer),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: theme.textTheme.titleSmall!.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleSmall!.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
                   ),
                 ),
               ],

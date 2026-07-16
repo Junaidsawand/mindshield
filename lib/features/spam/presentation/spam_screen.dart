@@ -78,25 +78,28 @@ class _SpamView extends StatelessWidget {
               delegate: _FilterBarDelegate(
                 child: ColoredBox(
                   color: Theme.of(context).colorScheme.surface,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 8),
-                      SpamFilterBar(
-                        activeFilter: provider.activeFilter,
-                        countFor: provider.countFor,
-                        onFilterSelected: provider.setFilter,
-                      ),
-                      const SizedBox(height: 8),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outlineVariant
-                            .withValues(alpha: 0.4),
-                      ),
-                    ],
+                  child: SizedBox(
+                    height: 61,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 8),
+                        SpamFilterBar(
+                          activeFilter: provider.activeFilter,
+                          countFor: provider.countFor,
+                          onFilterSelected: provider.setFilter,
+                        ),
+                        const SizedBox(height: 8),
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outlineVariant
+                              .withValues(alpha: 0.4),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -104,16 +107,21 @@ class _SpamView extends StatelessWidget {
 
             // ── Body: loading / error / empty / grouped list ───────────────
             if (provider.isLoading)
-              const SliverFillRemaining(child: _LoadingState())
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: _LoadingState(),
+              )
             else if (provider.errorMessage != null)
               SliverFillRemaining(
+                hasScrollBody: false,
                 child: _ErrorState(
-                  message: provider.errorMessage!,
+                  message: provider.errorMessage ?? 'Unknown error',
                   onRetry: provider.loadMessages,
                 ),
               )
             else if (provider.filteredMessages.isEmpty)
               SliverFillRemaining(
+                hasScrollBody: false,
                 child: _EmptyState(filter: provider.activeFilter),
               )
             else
@@ -206,14 +214,15 @@ class _SpamSliverAppBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
                 children: [
                   _StatPill(
                     label: '$totalCount quarantined',
                     icon: Icons.folder_special_rounded,
                     color: criticalRed,
                   ),
-                  const SizedBox(width: 8),
                   if (criticalCount > 0)
                     _StatPill(
                       label: '$criticalCount critical',
@@ -263,7 +272,7 @@ class _StatPill extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall!.copyWith(
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: color,
                   fontWeight: FontWeight.w600,
                 ),
@@ -284,9 +293,9 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 
   @override
-  double get minExtent => 62;
+  double get minExtent => 61;
   @override
-  double get maxExtent => 62;
+  double get maxExtent => 61;
 
   @override
   Widget build(
@@ -330,11 +339,15 @@ class _GroupedMessageList extends StatelessWidget {
           final item = items[index];
           if (item.isHeader) {
             return SpamSectionHeader(
-              riskLevel: item.riskLevel!,
-              count: item.headerCount!,
+              riskLevel: item.riskLevel ?? SpamRiskLevel.medium,
+              count: item.headerCount ?? 0,
             );
           }
-          return _buildTile(context, item.message!, item.tileIndex!);
+          return _buildTile(
+            context,
+            item.message ?? SpamMessage(id: '', sender: '', body: '', timestamp: DateTime.now(), riskLevel: SpamRiskLevel.medium, attackType: AttackType.phishing, aiConfidence: 0.0, status: SpamStatus.quarantined, detectedThreats: []),
+            item.tileIndex ?? 0,
+          );
         },
       ),
     );
@@ -601,7 +614,7 @@ class _SortSheet extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12, left: 4),
               child: Text(
                 'Sort Messages',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
               ),
@@ -676,7 +689,7 @@ class _LoadingState extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'Scanning spam folder…',
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.6),
                 ),
           ),
@@ -707,14 +720,14 @@ class _ErrorState extends StatelessWidget {
               'Something went wrong',
               style: Theme.of(context)
                   .textTheme
-                  .titleMedium!
-                  .copyWith(fontWeight: FontWeight.w600),
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.55),
                   ),
             ),
@@ -761,14 +774,14 @@ class _EmptyState extends StatelessWidget {
               title,
               style: Theme.of(context)
                   .textTheme
-                  .titleMedium!
-                  .copyWith(fontWeight: FontWeight.w600),
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.55),
                   ),
             ),

@@ -59,7 +59,7 @@ class SpamSectionHeader extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         riskLevel.label,
-                        style: theme.textTheme.titleSmall!.copyWith(
+                        style: theme.textTheme.titleSmall?.copyWith(
                           color: cfg.color,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.2,
@@ -78,7 +78,7 @@ class SpamSectionHeader extends StatelessWidget {
                         ),
                         child: Text(
                           '$count',
-                          style: theme.textTheme.labelSmall!.copyWith(
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: cfg.color,
                             fontWeight: FontWeight.w700,
                           ),
@@ -89,7 +89,7 @@ class SpamSectionHeader extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     riskLevel.subtitle,
-                    style: theme.textTheme.bodySmall!.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: cs.onSurface.withValues(alpha: 0.55),
                       fontSize: 11,
                     ),
