@@ -6,7 +6,7 @@
 > **Project**: MindShield — AI-Powered SMS Cybersecurity Application
 > **Module**: 1 — System Architecture Design
 > **Stack**: Flutter · Dart · Material 3 · Provider · Dio · GoRouter · SQLite
-> **Author**: [Your Name] | Final Year Project | [University Name] | [Year]
+> **Author**: Junaid Ahmed| Final Year Project | University of Sindh| 2026
 
 ---
 
