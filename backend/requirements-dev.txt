@@ -1,0 +1,23 @@
+# ==============================================================================
+# MindShield Backend — Development & Testing Dependencies
+# Phase 2.1: FastAPI Foundation
+# ==============================================================================
+
+# --- Production deps (included) ---
+-r requirements.txt
+
+# --- Testing ---
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+anyio==4.7.0
+
+# --- Linting & Formatting ---
+flake8==7.1.1
+flake8-bugbear==24.12.12
+flake8-docstrings==1.7.0
+black==24.10.0
+isort==5.13.2
+
+# --- Type Checking ---
+mypy==1.14.0

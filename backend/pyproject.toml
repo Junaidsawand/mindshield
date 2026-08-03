@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "mindshield-backend"
+version = "2.1.0"
+description = "MindShield AI-Powered SMS Cybersecurity — FastAPI Backend"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Junaid Ahmed", email = "junaid@mindshield.app" }]
+keywords = ["fastapi", "sms", "cybersecurity", "ai", "smishing"]
+
+# ---------------------------------------------------------------------------
+# Black — Code Formatting
+# ---------------------------------------------------------------------------
+[tool.black]
+line-length = 88
+target-version = ["py311", "py312", "py313"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  | .venv
+  | __pycache__
+)/
+'''
+
+# ---------------------------------------------------------------------------
+# isort — Import Sorting
+# ---------------------------------------------------------------------------
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["app"]
+skip_glob = [".venv/*"]
+
+# ---------------------------------------------------------------------------
+# pytest — Test Runner
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--tb=short",
+    "-v",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+]
+markers = [
+    "unit: Pure unit tests with no I/O",
+    "integration: Tests that exercise the full HTTP stack",
+]
+
+# ---------------------------------------------------------------------------
+# mypy — Static Type Checking
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+warn_return_any = true
+warn_unused_configs = true
+exclude = [".venv", "htmlcov"]
+
+# ---------------------------------------------------------------------------
+# coverage — Coverage Reporting
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["app"]
+omit = ["*/tests/*", "*/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@abstractmethod",
+]

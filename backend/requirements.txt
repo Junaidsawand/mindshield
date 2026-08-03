@@ -1,0 +1,21 @@
+# ==============================================================================
+# MindShield Backend — Production Dependencies
+# Phase 2.1: FastAPI Foundation
+# ==============================================================================
+
+# --- Web Framework ---
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# --- Data Validation & Settings ---
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# --- Environment ---
+python-dotenv==1.0.1
+
+# --- Utilities ---
+python-multipart==0.0.20
+
+# --- HTTP (async client — for future integration tests) ---
+httpx==0.28.1
