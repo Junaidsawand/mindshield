@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.0] — 2026-08-03
+
+### Added — Phase 2.5: Backend Production Verification & Quality Audit
+
+#### Empirical System Verification
+- **Automated Test Suite**: 169 unit & integration tests executed via `pytest` (**100% pass rate in 9.45s**).
+- **Code Coverage**: Achieved **92% total statement coverage** (100% on routers, schemas, validators, middleware).
+- **Static Analysis**: Verified PEP 8 code compliance via `flake8` (**FLAKE8_CLEAN, 0 violations**).
+- **Application Startup**: Smoke test verified clean `lifespan` initialization and route registration for 7 routes.
+- **Health Probe**: Empirical verification of `GET /health` returning `200 OK`, `model_loaded: true`, uptime metrics, `x-request-id`, and `x-process-time-ms` headers.
+- **Analysis Endpoint**: Verified `POST /api/v1/analyze` classification pipeline across Phishing, Suspicious, Safe, and Credential Harvest inputs.
+- **OpenAPI Audit**: Confirmed valid OpenAPI 3.1.0 specification (`GET /openapi.json`) with 4 rich request/response examples.
+- **Global Error Handling**: Verified unified `APIResponse` JSON error envelopes for HTTP 400, 404, 422, 500, and 503 error codes.
+
+#### Thesis Documentation & Viva Artifacts
+- `backend/docs/05_Backend_Verification.md` — 9-section technical verification report with Mermaid sequence, flow, and architecture diagrams, master verification checklist, and empirical trace proofs.
+- `docs/thesis-preparation/Backend_Verification_Viva.md` — 10 academic Q&A questions for BS Computer Science FYP viva examination.
+
+---
+
 ## [2.4.0] — 2026-08-03
 
 ### Added — Phase 2.4: Comprehensive API Testing Infrastructure & Suite
