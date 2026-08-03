@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] — 2026-08-03
+
+### Added — Phase 2.4: Comprehensive API Testing Infrastructure & Suite
+
+#### Postman Collection & Environment (`backend/tests/`)
+- `MindShield_API_v1.postman_collection.json` — Postman Schema v2.1.0 JSON test collection containing 12 request suites with embedded JavaScript (`pm.test`) assertions for status codes, schema validation, headers, SLA latency thresholds, and error envelopes.
+- `MindShield_Dev_Environment.postman_environment.json` — Postman environment configuration file parametrizing `{{base_url}}`, `{{api_version}}`, and `{{auth_token}}`.
+
+#### Automated Pytest API Test Suite (`tests/test_api_testing.py`)
+- Programmatic Python API test suite covering:
+  - Health & Liveness probes (`GET /health`)
+  - Operational Status metadata (`GET /api/v1/analyze/status`)
+  - SMS Classification Happy Path (Phishing/Dangerous, Suspicious, Safe, Credential Harvesting)
+  - Boundary Value Analysis & Input Validation (Missing message, empty, whitespace-only, short, long, numeric)
+  - HTTP Routing & Protocol Errors (404 Not Found, 422 Unprocessable Entity)
+  - SLA Response Time Benchmarks (`< 500ms` for analysis, `< 200ms` for health probes)
+
+#### Verification & Thesis Documentation (`backend/docs/`, `docs/thesis-preparation/`)
+- Total test count expanded to **169 tests (100% pass rate, 92% total coverage)**.
+- Flake8 static analysis **clean with 0 violations**.
+- `backend/docs/04_API_Testing.md` — 13-section thesis technical reference with Mermaid sequence and workflow diagrams, BVA matrix, SLA benchmarks, and CI automation specs.
+- `docs/thesis-preparation/API_Testing_Viva.md` — 10 academic Q&A questions for BS Computer Science FYP viva examination.
+
+---
+
 ## [2.3.0] — 2026-08-03
 
 ### Added — Phase 2.3: AI Model Loading & Inference Architecture

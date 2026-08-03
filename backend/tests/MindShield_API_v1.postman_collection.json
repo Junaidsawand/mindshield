@@ -1,0 +1,542 @@
+{
+  "info": {
+    "_postman_id": "b6a8e5f2-9c1d-4e8b-8a2f-3d4e5f6a7b8c",
+    "name": "MindShield API v1 — Test Suite (Phase 2.4)",
+    "description": "Comprehensive Postman API test collection for MindShield backend.\n\nCovered Test Categories:\n  1. Health & Liveness Checks (/health)\n  2. Operational Status (/api/v1/analyze/status)\n  3. Happy Path Classification (Dangerous, Suspicious, Safe, Credential Harvest)\n  4. Schema & Field Validation (Missing message, empty, whitespace, short, long, numeric)\n  5. Error Handling (404 Not Found, 422 Unprocessable Entity, 400 Bad Request)\n  6. SLA & Performance Verification (Response time < 500ms, processing_time_ms validation)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Health & Operations",
+      "item": [
+        {
+          "name": "GET Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is under 200ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                  "});",
+                  "",
+                  "pm.test('Health status payload is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql('ok');",
+                  "    pm.expect(jsonData.model_loaded).to.eql(true);",
+                  "    pm.expect(jsonData.version).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test('Headers include X-Request-ID and X-Process-Time-Ms', function () {",
+                  "    pm.response.to.have.header('x-request-id');",
+                  "    pm.response.to.have.header('x-process-time-ms');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Returns application liveness, model load status, uptime, and app version."
+          },
+          "response": []
+        },
+        {
+          "name": "GET API v1 Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('API v1 status payload is valid', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.api_version).to.eql('v1');",
+                  "    pm.expect(jsonData.data.mock_mode).to.be.a('boolean');",
+                  "    pm.expect(jsonData.data.endpoints).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze", "status"]
+            },
+            "description": "Returns API v1 endpoint directory and operational metadata."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. SMS Classification (Happy Path)",
+      "item": [
+        {
+          "name": "POST Analyze — Dangerous Phishing SMS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response SLA: under 500ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
+                  "});",
+                  "",
+                  "pm.test('Verdict is dangerous', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.threat_level).to.eql('dangerous');",
+                  "    pm.expect(jsonData.data.label).to.eql('phishing');",
+                  "    pm.expect(jsonData.data.confidence).to.be.at.least(0.75);",
+                  "});",
+                  "",
+                  "pm.test('Indicators list contains 6 elements', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.indicators).to.be.an('array');",
+                  "    pm.expect(jsonData.data.indicators.length).to.eql(6);",
+                  "    var urlInd = jsonData.data.indicators.find(i => i.name === 'url_detected');",
+                  "    pm.expect(urlInd.present).to.eql(true);",
+                  "});",
+                  "",
+                  "pm.test('Request ID echoed in payload and headers', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.request_id).to.be.a('string');",
+                  "    pm.response.to.have.header('x-request-id');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"URGENT: Your Lloyds Bank account has been suspended. Verify your identity immediately: http://lloydssecure-verify.example.com\",\n  \"sender\": \"LLOYDS\",\n  \"metadata\": {\n    \"app_version\": \"1.0.0\",\n    \"locale\": \"en-GB\",\n    \"network\": \"mobile\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Classifies a smishing SMS impersonating a financial institution with a URL and urgency."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Analyze — Suspicious Prize Scam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Verdict is suspicious', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.threat_level).to.eql('suspicious');",
+                  "    pm.expect(jsonData.data.confidence).to.be.within(0.60, 0.84);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"You have won a prize! Reply WIN to claim your reward.\",\n  \"sender\": \"+447700900123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Classifies a message with prize/lottery language as suspicious."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Analyze — Safe Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Verdict is safe', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.threat_level).to.eql('safe');",
+                  "    pm.expect(jsonData.data.confidence).to.be.at.least(0.70);",
+                  "});",
+                  "",
+                  "pm.test('All indicator flags present=false', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var presentFlags = jsonData.data.indicators.filter(i => i.present === true);",
+                  "    pm.expect(presentFlags.length).to.eql(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hi! Are you coming to lunch tomorrow?\",\n  \"sender\": \"+447700900456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Classifies a benign, conversational message."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Analyze — Credential Harvesting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Credential indicator is present', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.threat_level).to.eql('dangerous');",
+                  "    var credInd = jsonData.data.indicators.find(i => i.name === 'credential_request');",
+                  "    pm.expect(credInd.present).to.eql(true);",
+                  "    pm.expect(credInd.weight).to.eql('critical');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Security alert: someone accessed your account. Enter your password and OTP here: http://secure-verify.example.com\",\n  \"sender\": \"SecureAlert\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Classifies a credential harvesting message as dangerous."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Validation & Boundary Tests (HTTP 422 / 400)",
+      "item": [
+        {
+          "name": "ERR — Missing Message Field (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 422 Unprocessable Entity', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test('Error structure matches validation envelope', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(false);",
+                  "    pm.expect(jsonData.error.error_code).to.eql('validation_error');",
+                  "    pm.expect(jsonData.error.details).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sender\": \"+447700900123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Verifies 422 response when message property is omitted."
+          },
+          "response": []
+        },
+        {
+          "name": "ERR — Empty Message String (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 422 Unprocessable Entity', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Verifies 422 response when message is empty string."
+          },
+          "response": []
+        },
+        {
+          "name": "ERR — Whitespace Only Message (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 422 Unprocessable Entity', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"      \"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Verifies 422 response when message consists solely of spaces."
+          },
+          "response": []
+        },
+        {
+          "name": "ERR — Message Below Min Length (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 422 Unprocessable Entity', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"ab\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Verifies 422 response when message length is 2 chars (min_length=3)."
+          },
+          "response": []
+        },
+        {
+          "name": "ERR — Purely Numeric Message (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 422 Unprocessable Entity', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test('Business rule validation error details', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(false);",
+                  "    pm.expect(jsonData.error.error_code).to.eql('validation_error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "analyze"]
+            },
+            "description": "Verifies business rule failure for purely numeric message content."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Route & Protocol Errors (HTTP 404 / 405)",
+      "item": [
+        {
+          "name": "ERR — Non-Existent Endpoint (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Error code is http_404', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(false);",
+                  "    pm.expect(jsonData.error.error_code).to.eql('http_404');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/non_existent_route",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "non_existent_route"]
+            },
+            "description": "Verifies 404 envelope structure for unknown endpoints."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
