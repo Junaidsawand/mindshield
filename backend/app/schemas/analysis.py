@@ -36,12 +36,18 @@ API Contract (Phase 2.2):
         "data": {
             "label": "phishing",
             "threat_level": "dangerous",
-            "confidence": 0.94,
+            "confidence": 0.87,
             "explanation": "⚠️ HIGH THREAT — ...",
             "indicators": [
-                {"name": "url_detected",       "present": true,  "weight": "high"},
-                {"name": "urgency_language",   "present": true,  "weight": "high"},
-                {"name": "financial_keywords", "present": true,  "weight": "medium"}
+                {"name": "credential_request", "present": false, "weight": "critical", "detail": null},  # noqa: E501
+                {"name": "url_detected",       "present": true,  "weight": "high",
+                 "detail": "Suspicious URL or shortened link detected in message body"},
+                {"name": "urgency_language",   "present": true,  "weight": "high",
+                 "detail": "Urgency/imperative language detected (e.g. 'urgent', 'suspended')"},  # noqa: E501
+                {"name": "financial_keywords", "present": true,  "weight": "medium",
+                 "detail": "References financial institutions or transactions"},
+                {"name": "prize_language",     "present": false, "weight": "medium", "detail": null},  # noqa: E501
+                {"name": "excessive_caps",     "present": false, "weight": "low",    "detail": null}  # noqa: E501
             ],
             "model_version": "mock-heuristic-v1",
             "mock_mode": true,
@@ -112,11 +118,21 @@ class ThreatIndicator(BaseModel):
     transparency into the classification decision. The Flutter UI
     renders these as an expandable evidence list below the verdict.
 
+    The service always returns all 6 indicators (both ``present=True``
+    and ``present=False``), in this fixed order:
+
+    1. credential_request (critical)
+    2. url_detected       (high)
+    3. urgency_language   (high)
+    4. financial_keywords (medium)
+    5. prize_language     (medium)
+    6. excessive_caps     (low)
+
     Attributes:
         name:    Machine-readable signal identifier (snake_case).
         present: Whether this signal was detected in the message.
         weight:  Relative importance of this signal to the verdict.
-        detail:  Optional human-readable annotation for this signal.
+        detail:  Human-readable annotation when ``present=True``, else null.
     """
 
     name: str = Field(
@@ -131,8 +147,11 @@ class ThreatIndicator(BaseModel):
     )
     detail: str | None = Field(
         default=None,
-        description="Optional human-readable annotation.",
-        examples=["Shortened URL detected: bit.ly/abc123"],
+        description=(
+            "Human-readable annotation when ``present=True``; "
+            "``null`` when the signal is absent."
+        ),
+        examples=["Suspicious URL or shortened link detected in message body"],
     )
 
 
@@ -212,7 +231,8 @@ class AnalysisRequest(BaseModel):
                     "summary": "Dangerous — phishing SMS",
                     "description": (
                         "A realistic smishing message impersonating a bank, "
-                        "containing a suspicious URL and urgency language."
+                        "containing a suspicious URL and urgency language. "
+                        "Triggers url_detected + urgency_language + financial_keywords."
                     ),
                     "value": {
                         "message": (
@@ -231,13 +251,13 @@ class AnalysisRequest(BaseModel):
                 {
                     "summary": "Suspicious — prize/lottery scam",
                     "description": (
-                        "A message using prize language without a direct URL — "
-                        "classified as suspicious rather than dangerous."
+                        "A message using prize language only — no URL or urgency. "
+                        "Scores a single medium-weight signal → suspicious."
                     ),
                     "value": {
                         "message": (
-                            "Congratulations! You have won a £500 gift card. "
-                            "Reply YES to claim your prize before it expires."
+                            "You have won a prize! "
+                            "Reply WIN to claim your reward."
                         ),
                         "sender": "+447700900123",
                     },
@@ -255,8 +275,9 @@ class AnalysisRequest(BaseModel):
                 {
                     "summary": "Dangerous — credential harvest",
                     "description": (
-                        "A message requesting OTP / password — "
-                        "highest threat signal weight."
+                        "A message requesting OTP and password — "
+                        "highest-weight signal (credential_request=critical) "
+                        "combined with URL detection."
                     ),
                     "value": {
                         "message": (
@@ -286,12 +307,17 @@ class AnalysisResult(BaseModel):
     indicates whether the result was produced by the heuristic mock
     engine (Phase 2.2) or a real NLP model (Phase 2.3+).
 
+    The ``indicators`` list always contains exactly 6 entries in the
+    order defined by ``_INDICATOR_MAP`` in ``analysis_service.py``:
+    credential_request, url_detected, urgency_language, financial_keywords,
+    prize_language, excessive_caps.
+
     Attributes:
         label:              Raw classifier label (e.g. ``phishing``, ``safe``).
         threat_level:       Normalised severity bucket (safe|suspicious|dangerous).
         confidence:         Model confidence in [0.0, 1.0].
         explanation:        Human-readable rationale for the verdict.
-        indicators:         List of individual signals detected in the message.
+        indicators:         All 6 threat signals (present=True or False).
         model_version:      Version identifier of the active model/mock.
         mock_mode:          True when produced by the mock engine, not real AI.
         processing_time_ms: Server-side classification time in milliseconds.
@@ -319,7 +345,7 @@ class AnalysisResult(BaseModel):
             "Model confidence score in [0.0, 1.0]. "
             "Values ≥ 0.85 indicate high confidence."
         ),
-        examples=[0.94, 0.73, 0.82],
+        examples=[0.87, 0.65, 0.89],
     )
     explanation: str = Field(
         description=(
@@ -330,8 +356,10 @@ class AnalysisResult(BaseModel):
     indicators: list[ThreatIndicator] = Field(
         default_factory=list,
         description=(
-            "List of individual threat signals detected in the message. "
-            "Rendered as an expandable evidence list in the Flutter UI."
+            "All 6 threat signals checked for this message. "
+            "Each indicator is always present with ``present=True`` or "
+            "``present=False``. Rendered as an expandable evidence panel "
+            "in the Flutter UI."
         ),
     )
     model_version: str = Field(
@@ -371,46 +399,69 @@ class AnalysisResult(BaseModel):
     model_config = {
         "json_schema_extra": {
             "examples": [
+                # ── Example 1: Dangerous — phishing SMS ─────────────────────
+                # Live-verified from MockModelLoader against:
+                # "URGENT: Your Lloyds Bank account has been suspended.
+                #  Verify your identity immediately to avoid permanent
+                #  closure: http://lloydssecure-verify.example.com"
                 {
-                    "summary": "Dangerous result",
+                    "summary": "Dangerous result — phishing SMS",
                     "value": {
                         "label": "phishing",
                         "threat_level": "dangerous",
-                        "confidence": 0.94,
+                        "confidence": 0.87,
                         "explanation": (
-                            "⚠️ HIGH THREAT — contains a URL or shortened link; "
-                            "uses urgency/imperative language; references financial "
-                            "institutions or transactions. "
-                            "[Mock heuristic — not a real AI prediction]"
+                            "\u26a0\ufe0f HIGH THREAT \u2014 "
+                            "contains a URL or shortened link; "
+                            "uses urgency/imperative language; "
+                            "references financial institutions or transactions. "
+                            "[Mock heuristic \u2014 not a real AI prediction]"
                         ),
                         "indicators": [
+                            {
+                                "name": "credential_request",
+                                "present": False,
+                                "weight": "critical",
+                                "detail": None,
+                            },
                             {
                                 "name": "url_detected",
                                 "present": True,
                                 "weight": "high",
-                                "detail": "Suspicious URL detected in message body",
+                                "detail": (
+                                    "Suspicious URL or shortened link "
+                                    "detected in message body"
+                                ),
                             },
                             {
                                 "name": "urgency_language",
                                 "present": True,
                                 "weight": "high",
-                                "detail": "Keywords: 'urgent', 'suspended'",
+                                "detail": (
+                                    "Urgency/imperative language detected "
+                                    "(e.g. 'urgent', 'suspended')"
+                                ),
                             },
                             {
                                 "name": "financial_keywords",
                                 "present": True,
                                 "weight": "medium",
-                                "detail": "Keywords: 'bank', 'account'",
-                            },
-                            {
-                                "name": "credential_request",
-                                "present": False,
-                                "weight": "critical",
+                                "detail": (
+                                    "References financial institutions "
+                                    "or transactions"
+                                ),
                             },
                             {
                                 "name": "prize_language",
                                 "present": False,
                                 "weight": "medium",
+                                "detail": None,
+                            },
+                            {
+                                "name": "excessive_caps",
+                                "present": False,
+                                "weight": "low",
+                                "detail": None,
                             },
                         ],
                         "model_version": "mock-heuristic-v1",
@@ -420,27 +471,118 @@ class AnalysisResult(BaseModel):
                         "predicted_at": "2026-08-03T21:00:00Z",
                     },
                 },
+                # ── Example 2: Suspicious — prize language only ──────────────
+                # Live-verified: "You have won a prize! Reply WIN to claim."
+                # threat_level=suspicious conf=0.65
                 {
-                    "summary": "Safe result",
+                    "summary": "Suspicious result — prize/lottery language",
                     "value": {
-                        "label": "safe",
-                        "threat_level": "safe",
-                        "confidence": 0.89,
+                        "label": "suspicious",
+                        "threat_level": "suspicious",
+                        "confidence": 0.65,
                         "explanation": (
-                            "✅ LOW RISK — uses casual, friendly language; "
-                            "no suspicious indicators detected. "
-                            "[Mock heuristic — not a real AI prediction]"
+                            "\U0001f7e1 MODERATE RISK \u2014 "
+                            "uses prize, lottery, or reward language. "
+                            "[Mock heuristic \u2014 not a real AI prediction]"
                         ),
                         "indicators": [
+                            {
+                                "name": "credential_request",
+                                "present": False,
+                                "weight": "critical",
+                                "detail": None,
+                            },
                             {
                                 "name": "url_detected",
                                 "present": False,
                                 "weight": "high",
+                                "detail": None,
                             },
                             {
                                 "name": "urgency_language",
                                 "present": False,
                                 "weight": "high",
+                                "detail": None,
+                            },
+                            {
+                                "name": "financial_keywords",
+                                "present": False,
+                                "weight": "medium",
+                                "detail": None,
+                            },
+                            {
+                                "name": "prize_language",
+                                "present": True,
+                                "weight": "medium",
+                                "detail": (
+                                    "Prize, lottery, or reward language detected"
+                                ),
+                            },
+                            {
+                                "name": "excessive_caps",
+                                "present": False,
+                                "weight": "low",
+                                "detail": None,
+                            },
+                        ],
+                        "model_version": "mock-heuristic-v1",
+                        "mock_mode": True,
+                        "processing_time_ms": 1.92,
+                        "request_id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+                        "predicted_at": "2026-08-03T21:00:02Z",
+                    },
+                },
+                # ── Example 3: Safe — normal conversation ────────────────────
+                # Live-verified: "Hi! Are you coming to lunch tomorrow?"
+                # threat_level=safe conf=0.89 all indicators present=False
+                {
+                    "summary": "Safe result — normal conversation",
+                    "value": {
+                        "label": "safe",
+                        "threat_level": "safe",
+                        "confidence": 0.89,
+                        "explanation": (
+                            "\u2705 LOW RISK \u2014 "
+                            "uses casual, friendly language; "
+                            "no suspicious indicators detected. "
+                            "[Mock heuristic \u2014 not a real AI prediction]"
+                        ),
+                        "indicators": [
+                            {
+                                "name": "credential_request",
+                                "present": False,
+                                "weight": "critical",
+                                "detail": None,
+                            },
+                            {
+                                "name": "url_detected",
+                                "present": False,
+                                "weight": "high",
+                                "detail": None,
+                            },
+                            {
+                                "name": "urgency_language",
+                                "present": False,
+                                "weight": "high",
+                                "detail": None,
+                            },
+                            {
+                                "name": "financial_keywords",
+                                "present": False,
+                                "weight": "medium",
+                                "detail": None,
+                            },
+                            {
+                                "name": "prize_language",
+                                "present": False,
+                                "weight": "medium",
+                                "detail": None,
+                            },
+                            {
+                                "name": "excessive_caps",
+                                "present": False,
+                                "weight": "low",
+                                "detail": None,
                             },
                         ],
                         "model_version": "mock-heuristic-v1",
@@ -448,6 +590,78 @@ class AnalysisResult(BaseModel):
                         "processing_time_ms": 1.83,
                         "request_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
                         "predicted_at": "2026-08-03T21:00:01Z",
+                    },
+                },
+                # ── Example 4: Dangerous — credential harvest ────────────────
+                # Live-verified:
+                # "Security alert: … Enter your password and OTP here to verify:
+                #  http://secure-verify.example.com"
+                # threat_level=dangerous conf=0.88
+                {
+                    "summary": "Dangerous result — credential harvest",
+                    "value": {
+                        "label": "phishing",
+                        "threat_level": "dangerous",
+                        "confidence": 0.88,
+                        "explanation": (
+                            "\u26a0\ufe0f HIGH THREAT \u2014 "
+                            "requests sensitive credentials (password, OTP, PIN); "
+                            "contains a URL or shortened link; "
+                            "references financial institutions or transactions. "
+                            "[Mock heuristic \u2014 not a real AI prediction]"
+                        ),
+                        "indicators": [
+                            {
+                                "name": "credential_request",
+                                "present": True,
+                                "weight": "critical",
+                                "detail": (
+                                    "Requests sensitive credentials "
+                                    "(password, OTP, PIN)"
+                                ),
+                            },
+                            {
+                                "name": "url_detected",
+                                "present": True,
+                                "weight": "high",
+                                "detail": (
+                                    "Suspicious URL or shortened link "
+                                    "detected in message body"
+                                ),
+                            },
+                            {
+                                "name": "urgency_language",
+                                "present": False,
+                                "weight": "high",
+                                "detail": None,
+                            },
+                            {
+                                "name": "financial_keywords",
+                                "present": True,
+                                "weight": "medium",
+                                "detail": (
+                                    "References financial institutions "
+                                    "or transactions"
+                                ),
+                            },
+                            {
+                                "name": "prize_language",
+                                "present": False,
+                                "weight": "medium",
+                                "detail": None,
+                            },
+                            {
+                                "name": "excessive_caps",
+                                "present": False,
+                                "weight": "low",
+                                "detail": None,
+                            },
+                        ],
+                        "model_version": "mock-heuristic-v1",
+                        "mock_mode": True,
+                        "processing_time_ms": 3.14,
+                        "request_id": "d4e5f6a7-b8c9-0123-defa-234567890123",
+                        "predicted_at": "2026-08-03T21:00:03Z",
                     },
                 },
             ]

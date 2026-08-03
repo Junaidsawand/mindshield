@@ -56,9 +56,9 @@ def get_model_loader(settings: Settings | None = None) -> BaseModelLoader:
     the lifespan startup completes.
 
     Args:
-        settings: Unused in Phase 2.1 — signature kept for forward
+        settings: Unused in Phase 2.2 — signature kept for forward
                   compatibility when different loader types are chosen
-                  based on settings.
+                  based on settings (Phase 2.3+).
 
     Returns:
         The active ``BaseModelLoader`` implementation.
@@ -279,9 +279,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         description=(
             "MindShield is an AI-powered SMS cybersecurity platform. "
             "This API classifies SMS messages as safe, suspicious, or "
-            "dangerous using NLP-based machine learning models.\n\n"
-            "**Phase 2.1** — Backend foundation with placeholder model. "
-            "Real inference will be activated in Phase 2.2."
+            "dangerous using heuristic and NLP-based analysis.\n\n"
+            "**Phase 2.2** — REST API layer with heuristic mock engine. "
+            "All results carry ``mock_mode: true``; real NLP inference "
+            "activates in **Phase 2.3**."
         ),
         contact={
             "name": "Junaid Ahmed",
@@ -299,7 +300,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             {
                 "name": "Analysis",
                 "description": (
-                    "SMS classification endpoints. " "Placeholder in Phase 2.1."
+                    "SMS classification endpoints (Phase 2.2 — heuristic mock engine). "
+                    "All results carry ``mock_mode: true`` until Phase 2.3."
                 ),
             },
         ],
