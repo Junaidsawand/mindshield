@@ -1,0 +1,48 @@
+{
+  "pipeline_name": "MindShield NLP Preprocessing Pipeline",
+  "pipeline_version": "3.2.0",
+  "mode": "classical",
+  "total_documents_processed": 5148,
+  "vocabulary_size_before": 8063,
+  "vocabulary_size_after": 6713,
+  "token_count_statistics": {
+    "total_raw_tokens": 81877,
+    "unique_raw_tokens": 8063,
+    "unique_stemmed_tokens": 6713,
+    "unique_lemmatized_tokens": 7090
+  },
+  "average_message_length": {
+    "raw_character_length_mean": 78.94,
+    "normalized_character_length_mean": 76.33
+  },
+  "vocabulary_reduction_metrics": {
+    "stemming_vocabulary_reduction_percent": 16.74,
+    "lemmatization_vocabulary_reduction_percent": 12.07
+  },
+  "processing_performance": {
+    "total_processing_time_seconds": 6.2895,
+    "throughput_documents_per_second": 818.51
+  },
+  "oov_statistics": {
+    "stemming_collapsed_terms": 1350,
+    "lemmatization_collapsed_terms": 973
+  },
+  "configuration": {
+    "lowercase": true,
+    "url_policy": "replace",
+    "email_policy": "replace",
+    "number_policy": "replace",
+    "phone_policy": "replace",
+    "emoji_policy": "demojize",
+    "punctuation_policy": "remove",
+    "whitespace_cleanup": true,
+    "url_placeholder": "[URL]",
+    "email_placeholder": "[EMAIL]",
+    "number_placeholder": "[NUMBER]",
+    "phone_placeholder": "[PHONE]",
+    "remove_stopwords": true,
+    "custom_stopwords": [],
+    "stemmer": "porter",
+    "lemmatizer": "none"
+  }
+}

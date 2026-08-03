@@ -5,6 +5,30 @@ All notable changes to the MindShield backend are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] — 2026-08-04
+
+### Added — Phase 3.2: Production-Quality NLP Preprocessing & Feature Extraction Engine
+
+#### Model-Agnostic & Future-Proof Preprocessing Architecture (`app/nlp/`)
+- `NLPPreprocessingConfig` (`app/nlp/config.py`) — declarative configuration dataclass supporting preset constructors `create_classical_config()` and `create_transformer_config()`.
+- `TextNormalizer` (`app/nlp/normalizer.py`) — regex and rule-based text cleaning handling URLs (`[URL]`), emails (`[EMAIL]`), phone numbers (`[PHONE]`), numbers (`[NUMBER]`), emojis (`demojize`/`remove`/`preserve`), punctuation, lowercasing, and whitespace cleanup.
+- `NLPTokenizer` (`app/nlp/tokenizer.py`) — word boundary tokenization and customizable stopword filtering.
+- `StemmerLemmatizerComparer` (`app/nlp/comparer.py`) — comparative analyzer evaluating Porter Stemming vs WordNet Lemmatization vs Raw tokenization metrics (vocabulary reduction %, average token lengths, OOV statistics).
+- `NLPVectorizer` & `BaseVectorizer` (`app/nlp/vectorizer.py`) — extensible vectorizer abstraction wrapping `CountVectorizer` and `TfidfVectorizer` while supporting future dense neural embeddings.
+- `NLPPreprocessingPipeline` (`app/nlp/pipeline.py`) — master pipeline orchestrator for text transformation, metadata metric generation, and JSON serialization (`save_pipeline`, `load_pipeline`).
+- `PreprocessingService` (`app/services/preprocessing_service.py`) — high-level reusable backend service layer for single and batch text transformations.
+
+#### CLI Pipeline & Research Notebook Artifacts
+- `scripts/run_nlp_pipeline.py` — CLI execution runner for dataset feature extraction, Count/TF-IDF matrix fitting, and exporting `preprocessing_comparison.json`.
+- `scripts/generate_notebook_02.py` — automated generator script creating research notebook `backend/notebooks/02_NLP_Preprocessing.ipynb`.
+
+#### Test Suite & Thesis Documentation
+- `tests/test_preprocessing_pipeline.py` — 11 unit & integration tests covering config presets, entity replacement, emoji handling, punctuation cleanup, tokenization, stemming/lemmatization metrics, vectorizers, serialization, metadata JSON export, batch execution, and PakScam compatibility.
+- `backend/docs/07_NLP_Preprocessing_Pipeline.md` — thesis-quality technical documentation with 3 Mermaid diagrams.
+- `docs/thesis-preparation/NLP_Preprocessing_Viva.md` — 10 academic Q&A questions for BS Computer Science FYP viva defense.
+
+---
+
 ## [3.1.0] — 2026-08-04
 
 ### Added — Phase 3.1: UCI Dataset Preparation & Exploratory Data Analysis (EDA)
