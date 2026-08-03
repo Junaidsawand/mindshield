@@ -5,6 +5,27 @@ All notable changes to the MindShield backend are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] — 2026-08-04
+
+### Added — Phase 3.1: UCI Dataset Preparation & Exploratory Data Analysis (EDA)
+
+#### Dataset-Agnostic & Model-Compatible Pipeline Architecture (`app/data/`)
+- `DatasetConfig` (`app/data/config.py`) — configuration model parameterizing URLs, delimiters, column mappings, label mappings, random seeds, and split ratios. Built-in pre-configurations for `UCI_SMS_CONFIG` and `PAKSCAM_CONFIG_TEMPLATE`.
+- `DatasetDownloader` (`app/data/downloader.py`) — dataset retrieval manager with zip extraction, retry handling, directory setup, and offline mock fallback generation.
+- `DatasetLoader` (`app/data/loader.py`) — raw dataset ingestion reading TSV/CSV/JSON files and standardizing column names.
+- `SMSDatasetCleaner` (`app/data/cleaner.py`) — non-destructive text cleaner for DistilBERT transformer compatibility. Preserves case, punctuation, URLs, phone numbers, and emojis; strips null bytes; normalizes line endings; removes 405 exact duplicates; generates stratified 80/10/10 splits (`train`, `val`, `test`, `cleaned_full`).
+- `SMSDatasetEDA` (`app/data/eda.py`) — exploratory data analysis engine computing class distribution, balance ratio (6.92:1 ham:spam), text length summary statistics ($\mu, \sigma, Q_1, Q_2, Q_3, \text{IQR}$), missing values, duplicate counts, and top n-gram frequencies.
+- `SMSDatasetVisualizer` (`app/data/visualizer.py`) — publication-grade (300 DPI) figure generator producing 6 charts (`01_class_distribution.png`, `02_message_length_distribution.png`, `03_length_boxplots.png`, `04_top_words_comparison.png`, `05_ngram_frequency.png`, `06_split_distribution.png`).
+- `GenericDataPipeline` (`app/data/pipeline.py`) — reproducible pipeline orchestrator managing download -> load -> clean -> eda -> split -> save datasets & metadata -> generate figures.
+- `scripts/prepare_uci_dataset.py` — CLI execution runner (`python scripts/prepare_uci_dataset.py`).
+
+#### Automated Test Suite & Verification (`tests/test_data_pipeline.py`)
+- Created `tests/test_data_pipeline.py` — comprehensive unit & integration tests covering config validation, downloader fallbacks, raw loading, non-destructive cleaning, EDA statistics, stratified splitting, publication figure generation, end-to-end pipeline execution, and PakScam template dataset-agnostic compatibility.
+
+#### Thesis Documentation & Viva Artifacts
+- `backend/docs/06_UCI_Dataset_EDA.md` — 8-section thesis technical reference with Mermaid class, sequence, and data flow diagrams, empirical EDA summary tables, length statistics breakdown, and PakScam integration blueprint.
+- `docs/thesis-preparation/Dataset_Preparation_Viva.md` — 10 academic Q&A questions for BS Computer Science FYP viva defense.
+
 ---
 
 ## [2.5.0] — 2026-08-03

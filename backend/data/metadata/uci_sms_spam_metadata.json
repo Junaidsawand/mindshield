@@ -1,0 +1,804 @@
+{
+  "dataset_name": "uci_sms_spam",
+  "pipeline_version": "3.1.0",
+  "executed_at": "2026-08-03T20:00:41.586606+00:00",
+  "execution_duration_seconds": 6.659,
+  "config": {
+    "download_url": "https://archive.ics.uci.edu/static/public/228/sms+spam+collection.zip",
+    "raw_filename": "SMSSpamCollection",
+    "random_seed": 42,
+    "train_ratio": 0.8,
+    "val_ratio": 0.1,
+    "test_ratio": 0.1,
+    "label_mapping": {
+      "ham": 0,
+      "spam": 1
+    }
+  },
+  "deduplication_audit": {
+    "initial_raw_records": 5562,
+    "missing_or_empty_dropped": 0,
+    "exact_duplicates_removed": 414,
+    "final_cleaned_records": 5148
+  },
+  "raw_eda_summary": {
+    "dataset_name": "uci_sms_spam",
+    "dataset_stage": "raw",
+    "total_records": 5562,
+    "missing_values": 0,
+    "exact_duplicates": 403,
+    "class_distribution": {
+      "ham_count": 4815,
+      "spam_count": 747,
+      "ham_percentage": 86.57,
+      "spam_percentage": 13.43,
+      "imbalance_ratio": 6.45
+    },
+    "overall_metrics": {
+      "char_length": {
+        "min": 2.0,
+        "max": 910.0,
+        "mean": 80.37,
+        "std": 59.84,
+        "median": 61.0,
+        "q25": 36.0,
+        "q75": 122.0,
+        "iqr": 86.0
+      },
+      "word_count": {
+        "min": 1.0,
+        "max": 171.0,
+        "mean": 15.58,
+        "std": 11.39,
+        "median": 12.0,
+        "q25": 7.0,
+        "q75": 23.0,
+        "iqr": 16.0
+      },
+      "sentence_count": {
+        "min": 1.0,
+        "max": 40.0,
+        "mean": 2.89,
+        "std": 1.85,
+        "median": 3.0,
+        "q25": 2.0,
+        "q75": 4.0,
+        "iqr": 2.0
+      },
+      "avg_word_length": {
+        "min": 2.0,
+        "max": 49.0,
+        "mean": 5.18,
+        "std": 1.13,
+        "median": 5.0,
+        "q25": 4.58,
+        "q75": 5.58,
+        "iqr": 1.01
+      }
+    },
+    "ham_metrics": {
+      "char_length": {
+        "min": 2.0,
+        "max": 910.0,
+        "mean": 71.32,
+        "std": 58.29,
+        "median": 52.0,
+        "q25": 33.0,
+        "q75": 92.0,
+        "iqr": 59.0
+      },
+      "word_count": {
+        "min": 1.0,
+        "max": 171.0,
+        "mean": 14.28,
+        "std": 11.5,
+        "median": 11.0,
+        "q25": 7.0,
+        "q75": 19.0,
+        "iqr": 12.0
+      },
+      "sentence_count": {
+        "min": 1.0,
+        "max": 40.0,
+        "mean": 2.73,
+        "std": 1.79,
+        "median": 2.0,
+        "q25": 2.0,
+        "q75": 3.0,
+        "iqr": 1.0
+      },
+      "avg_word_length": {
+        "min": 2.0,
+        "max": 49.0,
+        "mean": 5.06,
+        "std": 1.11,
+        "median": 4.92,
+        "q25": 4.5,
+        "q75": 5.43,
+        "iqr": 0.93
+      }
+    },
+    "spam_metrics": {
+      "char_length": {
+        "min": 13.0,
+        "max": 223.0,
+        "mean": 138.67,
+        "std": 28.87,
+        "median": 149.0,
+        "q25": 133.0,
+        "q75": 157.0,
+        "iqr": 24.0
+      },
+      "word_count": {
+        "min": 2.0,
+        "max": 35.0,
+        "mean": 23.91,
+        "std": 5.78,
+        "median": 25.0,
+        "q25": 22.0,
+        "q75": 28.0,
+        "iqr": 6.0
+      },
+      "sentence_count": {
+        "min": 1.0,
+        "max": 10.0,
+        "mean": 3.98,
+        "std": 1.83,
+        "median": 4.0,
+        "q25": 3.0,
+        "q75": 5.0,
+        "iqr": 2.0
+      },
+      "avg_word_length": {
+        "min": 4.25,
+        "max": 18.166666666666668,
+        "mean": 5.92,
+        "std": 0.98,
+        "median": 5.81,
+        "q25": 5.37,
+        "q75": 6.3,
+        "iqr": 0.94
+      }
+    },
+    "vocabulary_analysis": {
+      "top_unigrams_ham": [
+        [
+          "i'm",
+          386
+        ],
+        [
+          "gt",
+          317
+        ],
+        [
+          "lt",
+          315
+        ],
+        [
+          "get",
+          302
+        ],
+        [
+          "ok",
+          288
+        ],
+        [
+          "go",
+          252
+        ],
+        [
+          "know",
+          236
+        ],
+        [
+          "call",
+          236
+        ],
+        [
+          "good",
+          234
+        ],
+        [
+          "like",
+          233
+        ],
+        [
+          "got",
+          232
+        ],
+        [
+          "come",
+          230
+        ],
+        [
+          "time",
+          202
+        ],
+        [
+          "day",
+          200
+        ],
+        [
+          "love",
+          199
+        ],
+        [
+          "going",
+          169
+        ],
+        [
+          "i'll",
+          168
+        ],
+        [
+          "home",
+          165
+        ],
+        [
+          "want",
+          165
+        ],
+        [
+          "one",
+          165
+        ]
+      ],
+      "top_unigrams_spam": [
+        [
+          "call",
+          355
+        ],
+        [
+          "free",
+          224
+        ],
+        [
+          "txt",
+          163
+        ],
+        [
+          "mobile",
+          127
+        ],
+        [
+          "text",
+          125
+        ],
+        [
+          "stop",
+          123
+        ],
+        [
+          "claim",
+          113
+        ],
+        [
+          "reply",
+          104
+        ],
+        [
+          "www",
+          98
+        ],
+        [
+          "prize",
+          93
+        ],
+        [
+          "get",
+          86
+        ],
+        [
+          "cash",
+          76
+        ],
+        [
+          "won",
+          73
+        ],
+        [
+          "send",
+          71
+        ],
+        [
+          "150p",
+          71
+        ],
+        [
+          "new",
+          69
+        ],
+        [
+          "uk",
+          67
+        ],
+        [
+          "nokia",
+          67
+        ],
+        [
+          "win",
+          64
+        ],
+        [
+          "urgent",
+          63
+        ]
+      ],
+      "top_bigrams_spam": [
+        [
+          "co uk",
+          49
+        ],
+        [
+          "please call",
+          46
+        ],
+        [
+          "po box",
+          27
+        ],
+        [
+          "1000 cash",
+          23
+        ],
+        [
+          "guaranteed call",
+          23
+        ],
+        [
+          "prize guaranteed",
+          22
+        ],
+        [
+          "send stop",
+          20
+        ],
+        [
+          "national rate",
+          20
+        ],
+        [
+          "selected receive",
+          19
+        ],
+        [
+          "every week",
+          19
+        ],
+        [
+          "await collection",
+          19
+        ],
+        [
+          "urgent mobile",
+          18
+        ],
+        [
+          "land line",
+          18
+        ],
+        [
+          "customer service",
+          17
+        ],
+        [
+          "valid 12hrs",
+          17
+        ]
+      ]
+    }
+  },
+  "cleaned_eda_summary": {
+    "dataset_name": "uci_sms_spam",
+    "dataset_stage": "cleaned",
+    "total_records": 5148,
+    "missing_values": 0,
+    "exact_duplicates": 0,
+    "class_distribution": {
+      "ham_count": 4506,
+      "spam_count": 642,
+      "ham_percentage": 87.53,
+      "spam_percentage": 12.47,
+      "imbalance_ratio": 7.02
+    },
+    "overall_metrics": {
+      "char_length": {
+        "min": 2.0,
+        "max": 910.0,
+        "mean": 78.94,
+        "std": 58.18,
+        "median": 60.0,
+        "q25": 36.0,
+        "q75": 117.0,
+        "iqr": 81.0
+      },
+      "word_count": {
+        "min": 1.0,
+        "max": 171.0,
+        "mean": 15.4,
+        "std": 11.1,
+        "median": 12.0,
+        "q25": 7.0,
+        "q75": 22.0,
+        "iqr": 15.0
+      },
+      "sentence_count": {
+        "min": 1.0,
+        "max": 40.0,
+        "mean": 2.86,
+        "std": 1.75,
+        "median": 3.0,
+        "q25": 2.0,
+        "q75": 4.0,
+        "iqr": 2.0
+      },
+      "avg_word_length": {
+        "min": 2.0,
+        "max": 49.0,
+        "mean": 5.15,
+        "std": 1.12,
+        "median": 5.0,
+        "q25": 4.57,
+        "q75": 5.53,
+        "iqr": 0.96
+      }
+    },
+    "ham_metrics": {
+      "char_length": {
+        "min": 2.0,
+        "max": 910.0,
+        "mean": 70.61,
+        "std": 56.42,
+        "median": 52.0,
+        "q25": 34.0,
+        "q75": 91.0,
+        "iqr": 57.0
+      },
+      "word_count": {
+        "min": 1.0,
+        "max": 171.0,
+        "mean": 14.21,
+        "std": 11.16,
+        "median": 11.0,
+        "q25": 7.0,
+        "q75": 19.0,
+        "iqr": 12.0
+      },
+      "sentence_count": {
+        "min": 1.0,
+        "max": 40.0,
+        "mean": 2.71,
+        "std": 1.69,
+        "median": 2.0,
+        "q25": 2.0,
+        "q75": 3.0,
+        "iqr": 1.0
+      },
+      "avg_word_length": {
+        "min": 2.0,
+        "max": 49.0,
+        "mean": 5.03,
+        "std": 1.09,
+        "median": 4.9,
+        "q25": 4.5,
+        "q75": 5.39,
+        "iqr": 0.89
+      }
+    },
+    "spam_metrics": {
+      "char_length": {
+        "min": 13.0,
+        "max": 223.0,
+        "mean": 137.41,
+        "std": 29.98,
+        "median": 148.0,
+        "q25": 131.0,
+        "q75": 157.0,
+        "iqr": 26.0
+      },
+      "word_count": {
+        "min": 2.0,
+        "max": 35.0,
+        "mean": 23.7,
+        "std": 5.97,
+        "median": 25.0,
+        "q25": 21.25,
+        "q75": 28.0,
+        "iqr": 6.75
+      },
+      "sentence_count": {
+        "min": 1.0,
+        "max": 10.0,
+        "mean": 3.92,
+        "std": 1.8,
+        "median": 4.0,
+        "q25": 3.0,
+        "q75": 5.0,
+        "iqr": 2.0
+      },
+      "avg_word_length": {
+        "min": 4.25,
+        "max": 18.166666666666668,
+        "mean": 5.93,
+        "std": 1.03,
+        "median": 5.81,
+        "q25": 5.35,
+        "q75": 6.33,
+        "iqr": 0.98
+      }
+    },
+    "vocabulary_analysis": {
+      "top_unigrams_ham": [
+        [
+          "i'm",
+          370
+        ],
+        [
+          "get",
+          294
+        ],
+        [
+          "gt",
+          287
+        ],
+        [
+          "lt",
+          286
+        ],
+        [
+          "ok",
+          256
+        ],
+        [
+          "go",
+          244
+        ],
+        [
+          "got",
+          226
+        ],
+        [
+          "know",
+          225
+        ],
+        [
+          "like",
+          223
+        ],
+        [
+          "good",
+          216
+        ],
+        [
+          "come",
+          214
+        ],
+        [
+          "time",
+          193
+        ],
+        [
+          "call",
+          190
+        ],
+        [
+          "love",
+          180
+        ],
+        [
+          "day",
+          179
+        ],
+        [
+          "going",
+          164
+        ],
+        [
+          "want",
+          161
+        ],
+        [
+          "lor",
+          159
+        ],
+        [
+          "home",
+          156
+        ],
+        [
+          "one",
+          156
+        ]
+      ],
+      "top_unigrams_spam": [
+        [
+          "call",
+          302
+        ],
+        [
+          "free",
+          190
+        ],
+        [
+          "txt",
+          132
+        ],
+        [
+          "stop",
+          111
+        ],
+        [
+          "text",
+          108
+        ],
+        [
+          "mobile",
+          105
+        ],
+        [
+          "reply",
+          96
+        ],
+        [
+          "claim",
+          95
+        ],
+        [
+          "www",
+          81
+        ],
+        [
+          "prize",
+          79
+        ],
+        [
+          "get",
+          70
+        ],
+        [
+          "cash",
+          64
+        ],
+        [
+          "new",
+          64
+        ],
+        [
+          "150p",
+          61
+        ],
+        [
+          "send",
+          59
+        ],
+        [
+          "urgent",
+          57
+        ],
+        [
+          "won",
+          56
+        ],
+        [
+          "uk",
+          53
+        ],
+        [
+          "nokia",
+          53
+        ],
+        [
+          "msg",
+          50
+        ]
+      ],
+      "top_bigrams_spam": [
+        [
+          "please call",
+          40
+        ],
+        [
+          "co uk",
+          39
+        ],
+        [
+          "po box",
+          21
+        ],
+        [
+          "guaranteed call",
+          20
+        ],
+        [
+          "prize guaranteed",
+          19
+        ],
+        [
+          "send stop",
+          18
+        ],
+        [
+          "1000 cash",
+          17
+        ],
+        [
+          "urgent mobile",
+          17
+        ],
+        [
+          "national rate",
+          17
+        ],
+        [
+          "call 08000930705",
+          16
+        ],
+        [
+          "selected receive",
+          16
+        ],
+        [
+          "txt stop",
+          16
+        ],
+        [
+          "land line",
+          16
+        ],
+        [
+          "valid 12hrs",
+          15
+        ],
+        [
+          "account statement",
+          15
+        ]
+      ]
+    }
+  },
+  "split_summaries": {
+    "train": {
+      "total_records": 4118,
+      "ham_count": 3604,
+      "spam_count": 514,
+      "ham_percentage": 87.52,
+      "spam_percentage": 12.48
+    },
+    "val": {
+      "total_records": 515,
+      "ham_count": 451,
+      "spam_count": 64,
+      "ham_percentage": 87.57,
+      "spam_percentage": 12.43
+    },
+    "test": {
+      "total_records": 515,
+      "ham_count": 451,
+      "spam_count": 64,
+      "ham_percentage": 87.57,
+      "spam_percentage": 12.43
+    },
+    "cleaned_full": {
+      "total_records": 5148,
+      "ham_count": 4506,
+      "spam_count": 642,
+      "ham_percentage": 87.53,
+      "spam_percentage": 12.47
+    }
+  },
+  "processed_file_paths": {
+    "train": "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\processed\\train.csv",
+    "val": "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\processed\\val.csv",
+    "test": "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\processed\\test.csv",
+    "cleaned_full": "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\processed\\cleaned_full.csv"
+  },
+  "generated_figure_paths": [
+    "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\figures\\01_class_distribution.png",
+    "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\figures\\02_message_length_distribution.png",
+    "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\figures\\03_length_boxplots.png",
+    "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\figures\\04_top_words_comparison.png",
+    "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\figures\\05_ngram_frequency.png",
+    "C:\\Users\\n tech\\OneDrive\\Desktop\\mindshield\\backend\\data\\figures\\06_split_distribution.png"
+  ]
+}
