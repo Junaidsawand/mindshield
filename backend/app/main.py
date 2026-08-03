@@ -1,5 +1,5 @@
 """
-MindShield Backend — FastAPI Application Factory.
+MindShield Backend — FastAPI Application Factory (Phase 2.3).
 
 This module is the composition root of the backend. It:
   1. Instantiates the FastAPI application with metadata.
@@ -7,15 +7,15 @@ This module is the composition root of the backend. It:
   3. Registers middleware (CORS, request logger).
   4. Registers global exception handlers.
   5. Registers all API routers.
-  6. Manages the model loader lifecycle via ``lifespan``.
+  6. Manages the model loader & InferenceService lifecycle via ``lifespan``.
 
 Architecture Rationale:
-    The ``create_app()`` factory pattern (rather than a module-level
-    ``app = FastAPI()``) allows tests to construct fresh, isolated
+    The ``create_app()`` factory pattern allows tests to construct fresh, isolated
     application instances without shared state between test cases.
 
-    The ``lifespan`` context manager handles startup/shutdown events
-    as recommended by FastAPI 0.93+ (replaces ``@app.on_event``).
+    The ``lifespan`` context manager handles startup/shutdown events, initialising
+    the ``ModelLoaderFactory`` and ``InferenceService`` with graceful fallback
+    handling.
 """
 
 from __future__ import annotations
@@ -31,40 +31,29 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import Settings, get_settings
 from app.core.exceptions import MindShieldException
-from app.core.model_loader import BaseModelLoader
 from app.core.mock_model_loader import MockModelLoader
+from app.core.model_loader import BaseModelLoader, ModelLoaderFactory
 from app.logging.logger import configure_logging, get_logger
 from app.middleware.cors import configure_cors
 from app.middleware.request_logger import RequestLoggerMiddleware
 from app.routers import health as health_router
 from app.routers.v1 import analysis as analysis_router
+from app.services.inference_service import InferenceService
 
 logger = get_logger(__name__)
 
 # ---------------------------------------------------------------------------
-# Module-level model loader registry (application singleton).
-# Populated during lifespan startup, accessed via get_model_loader().
+# Module-level registry singletons (populated during lifespan startup).
 # ---------------------------------------------------------------------------
 _model_loader: BaseModelLoader | None = None
+_inference_service: InferenceService | None = None
 _startup_time: float = 0.0
 
 
 def get_model_loader(settings: Settings | None = None) -> BaseModelLoader:
     """Return the application-wide model loader instance.
 
-    Called by router dependencies. Guaranteed to be non-None after
-    the lifespan startup completes.
-
-    Args:
-        settings: Unused in Phase 2.2 — signature kept for forward
-                  compatibility when different loader types are chosen
-                  based on settings (Phase 2.3+).
-
-    Returns:
-        The active ``BaseModelLoader`` implementation.
-
-    Raises:
-        RuntimeError: If called before application startup completes.
+    Guaranteed to be non-None after the lifespan startup completes.
     """
     if _model_loader is None:
         raise RuntimeError(
@@ -74,6 +63,21 @@ def get_model_loader(settings: Settings | None = None) -> BaseModelLoader:
     return _model_loader
 
 
+def get_inference_service(settings: Settings | None = None) -> InferenceService:
+    """Return the application-wide InferenceService singleton.
+
+    Called by dependency injection providers.
+    """
+    if _inference_service is None:
+        if _model_loader is not None:
+            return InferenceService(loader=_model_loader)
+        raise RuntimeError(
+            "InferenceService has not been initialised. "
+            "Ensure the FastAPI lifespan has completed startup."
+        )
+    return _inference_service
+
+
 # ---------------------------------------------------------------------------
 # Lifespan — Startup & Shutdown
 # ---------------------------------------------------------------------------
@@ -81,20 +85,22 @@ def get_model_loader(settings: Settings | None = None) -> BaseModelLoader:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Manage application startup and shutdown lifecycle.
+    """Manage application startup and shutdown lifecycle (Phase 2.3).
 
     Startup:
-        1. Configure logging.
-        2. Load mock engine (MockModelLoader in Phase 2.2).
-        3. Log server-ready message.
+        1. Configure structured logging.
+        2. Resolve model backend from Settings ('mock', 'huggingface', 'placeholder').
+        3. Instantiate primary model loader via ModelLoaderFactory.
+        4. Load model weights & warm up.
+        5. If primary loading fails and fallback is enabled, initialize MockModelLoader.
+        6. Instantiate InferenceService with fallback recovery.
+        7. Log server readiness and active model health.
 
     Shutdown:
         1. Log shutdown signal.
-        2. Release any model resources (no-op in Phase 2.2).
-
-    The ``yield`` statement is where FastAPI handles requests.
+        2. Unload primary & fallback model loaders.
     """
-    global _model_loader, _startup_time
+    global _model_loader, _inference_service, _startup_time
 
     settings = get_settings()
 
@@ -107,17 +113,55 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         settings.app_env,
     )
 
-    # Step 2 — Initialise mock model loader (Phase 2.2)
-    _model_loader = MockModelLoader()
-    _model_loader.load()
-    model_health = _model_loader.health()
+    # Step 2 & 3 — Factory instantiate primary model loader
+    fallback_loader: BaseModelLoader | None = None
+    if settings.model_fallback_enabled and settings.model_backend != "mock":
+        fallback_loader = MockModelLoader()
+        fallback_loader.load()
+
+    try:
+        _model_loader = ModelLoaderFactory.create_loader(
+            backend=settings.model_backend,
+            model_path=settings.model_path,
+            model_version=settings.model_version,
+        )
+        _model_loader.load()
+        logger.info(
+            "Primary model loader '%s' loaded successfully.",
+            _model_loader.backend_type,
+        )
+    except Exception as exc:
+        logger.error(
+            "Failed to load primary model loader backend '%s': %s",
+            settings.model_backend,
+            exc,
+            exc_info=True,
+        )
+        if settings.model_fallback_enabled:
+            logger.warning(
+                "Activating fallback MockModelLoader due to primary load error."
+            )
+            _model_loader = fallback_loader or MockModelLoader()
+            if not _model_loader.is_loaded:
+                _model_loader.load()
+        else:
+            raise
+
+    # Step 6 — Create InferenceService singleton
+    _inference_service = InferenceService(
+        loader=_model_loader,
+        fallback_loader=fallback_loader,
+        fallback_enabled=settings.model_fallback_enabled,
+    )
 
     _startup_time = time.monotonic()
+    health_info = _inference_service.health()
 
     logger.info(
-        "Model loader ready: %s (loaded=%s)",
-        model_health.model_version,
-        model_health.is_loaded,
+        "InferenceService ready | backend=%s version=%s loaded=%s",
+        health_info.backend_type,
+        health_info.model_version,
+        health_info.is_loaded,
     )
     logger.info(
         "%s is ready — listening on %s:%d",
@@ -126,11 +170,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         settings.port,
     )
 
-    yield  # ← FastAPI handles all requests here
+    yield  # ← FastAPI handles requests here
 
     # Shutdown
-    logger.info("Shutdown signal received — cleaning up.")
+    logger.info("Shutdown signal received — cleaning up model resources.")
+    if _model_loader:
+        try:
+            _model_loader.unload()
+        except Exception as exc:  # pragma: no cover
+            logger.warning("Error unloading primary model loader: %s", exc)
+    if fallback_loader:
+        try:
+            fallback_loader.unload()
+        except Exception as exc:  # pragma: no cover
+            logger.warning("Error unloading fallback model loader: %s", exc)
+
     _model_loader = None
+    _inference_service = None
     logger.info("Shutdown complete.")
 
 
@@ -140,13 +196,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def _mindshield_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Handle all ``MindShieldException`` subclasses.
-
-    Converts application exceptions into a consistent JSON envelope
-    matching the ``APIResponse.fail()`` structure. The HTTP status
-    code is read from the exception class attribute set in
-    ``app/core/exceptions.py``.
-    """
+    """Handle all ``MindShieldException`` subclasses."""
     assert isinstance(exc, MindShieldException)
     logger.warning(
         "Application exception [%s]: %s",
@@ -168,24 +218,13 @@ def _mindshield_exception_handler(request: Request, exc: Exception) -> JSONRespo
 
 
 def _validation_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Handle Pydantic RequestValidationError (HTTP 422).
-
-    Rewrites Pydantic's default validation error into the standard
-    ``APIResponse`` envelope format for consistent client parsing.
-
-    Note:
-        Pydantic v2 may embed raw ``ValueError`` objects inside the
-        ``ctx`` key of error dicts. These are not JSON-serialisable,
-        so we serialise the details list to plain strings here.
-    """
+    """Handle Pydantic RequestValidationError (HTTP 422)."""
     assert isinstance(exc, RequestValidationError)
     errors = exc.errors()
     first_error = errors[0] if errors else {}
     field = " → ".join(str(loc) for loc in first_error.get("loc", []))
     message = f"Validation failed on '{field}': {first_error.get('msg', 'unknown')}"
 
-    # Pydantic v2 may include non-serialisable objects (e.g. ValueError)
-    # inside `ctx`. Stringify each error dict to guarantee JSON safety.
     safe_details = [
         {
             "loc": list(e.get("loc", [])),
@@ -212,10 +251,7 @@ def _validation_exception_handler(request: Request, exc: Exception) -> JSONRespo
 
 
 def _http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Handle Starlette's HTTPException (e.g., 404 Not Found).
-
-    Wraps FastAPI's built-in HTTP errors in the standard envelope.
-    """
+    """Handle Starlette's HTTPException."""
     assert isinstance(exc, StarletteHTTPException)
     return JSONResponse(
         status_code=exc.status_code,
@@ -232,11 +268,7 @@ def _http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
 
 
 def _unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Catch-all handler for unexpected exceptions.
-
-    Logs the full traceback and returns a generic 500 response.
-    Never exposes internal details to the client.
-    """
+    """Catch-all handler for unexpected exceptions."""
     logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -258,19 +290,7 @@ def _unhandled_exception_handler(request: Request, exc: Exception) -> JSONRespon
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
-    """Construct and configure the FastAPI application.
-
-    The factory pattern allows tests to call ``create_app()`` with
-    custom ``settings`` (e.g., ``DEBUG=True``, test origins) without
-    affecting the global singleton used in production.
-
-    Args:
-        settings: Optional ``Settings`` override. Defaults to the
-                  cached production settings from ``get_settings()``.
-
-    Returns:
-        A fully configured ``FastAPI`` application instance.
-    """
+    """Construct and configure the FastAPI application."""
     cfg = settings or get_settings()
 
     app = FastAPI(
@@ -279,10 +299,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         description=(
             "MindShield is an AI-powered SMS cybersecurity platform. "
             "This API classifies SMS messages as safe, suspicious, or "
-            "dangerous using heuristic and NLP-based analysis.\n\n"
-            "**Phase 2.2** — REST API layer with heuristic mock engine. "
-            "All results carry ``mock_mode: true``; real NLP inference "
-            "activates in **Phase 2.3**."
+            "dangerous using heuristic and AI model analysis.\n\n"
+            "**Phase 2.3** — AI Model Loading & Inference Architecture. "
+            "Supports decoupled ModelLoaders (Mock, HuggingFace, ONNX), "
+            "InferenceService orchestration, and graceful failure recovery."
         ),
         contact={
             "name": "Junaid Ahmed",
@@ -300,24 +320,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             {
                 "name": "Analysis",
                 "description": (
-                    "SMS classification endpoints (Phase 2.2 — heuristic mock engine). "
-                    "All results carry ``mock_mode: true`` until Phase 2.3."
+                    "SMS classification endpoints powered by InferenceService."
                 ),
             },
         ],
     )
 
-    # ------------------------------------------------------------------
-    # Middleware (order matters — registered in reverse execution order)
-    # ------------------------------------------------------------------
+    # Middleware
     configure_cors(app, cfg)
-
-    # RequestLoggerMiddleware must be added AFTER CORSMiddleware
     app.add_middleware(RequestLoggerMiddleware)
 
-    # ------------------------------------------------------------------
     # Exception Handlers
-    # ------------------------------------------------------------------
     app.add_exception_handler(  # type: ignore[arg-type]
         MindShieldException, _mindshield_exception_handler
     )
@@ -329,9 +342,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.add_exception_handler(Exception, _unhandled_exception_handler)
 
-    # ------------------------------------------------------------------
     # Routers
-    # ------------------------------------------------------------------
     app.include_router(health_router.router)
     app.include_router(
         analysis_router.router,
@@ -342,7 +353,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     return app
 
 
-# ---------------------------------------------------------------------------
-# ASGI entry point (used by uvicorn)
-# ---------------------------------------------------------------------------
+# ASGI entry point
 app = create_app()

@@ -1,37 +1,38 @@
 """
-MindShield Backend — Analysis Service (Phase 2.2).
+MindShield Backend — Analysis Service (Phase 2.3).
 
 Orchestrates the SMS classification pipeline:
     1. Input validation (length, content rules).
     2. Text sanitisation (Unicode normalisation, whitespace collapse).
     3. Feature extraction (logged for observability).
-    4. Model inference (delegates to injected BaseModelLoader).
+    4. Model inference pass (delegated to InferenceService).
     5. Indicator construction (from feature flags → ThreatIndicator list).
     6. Result mapping (ModelPrediction → AnalysisResult schema).
 
-Phase 2.2 additions:
-    - ``_build_indicators()`` — constructs a ``ThreatIndicator`` list
-      from the features extracted by the validators module, providing
-      per-signal transparency in the response.
-    - ``processing_time_ms`` — measures and records the end-to-end
-      classification duration in milliseconds.
-    - ``request_id`` — propagated from the HTTP request state to the
-      response for client-side log correlation.
+Phase 2.3 Architecture Enhancements:
+    - Delegates model inference execution, batch handling, latency profiling,
+      and graceful fallback recovery to ``InferenceService``.
+    - Decoupled from concrete loader implementations (Mock, HuggingFace, ONNX).
+    - Supports receiving either an ``InferenceService`` or a ``BaseModelLoader``.
 
 Design Principles (SOLID):
-    S — Single Responsibility: service handles orchestration only.
-    O — Open/Closed: new pipeline steps added here; routers unchanged.
-    D — Dependency Inversion: depends on BaseModelLoader abstraction.
+    S — Single Responsibility: AnalysisService handles domain orchestration
+        & indicator mapping only.
+    O — Open/Closed: Model loaders and inference pipelines change without
+        altering this service.
+    D — Dependency Inversion: Depends on InferenceService / BaseModelLoader
+        abstractions.
 """
 
 from __future__ import annotations
 
 import time
 
-from app.core.exceptions import ModelNotReadyException, ValidationException
+from app.core.exceptions import ValidationException
 from app.core.model_loader import BaseModelLoader, ModelPrediction
 from app.logging.logger import get_logger
 from app.schemas.analysis import AnalysisResult, ThreatIndicator
+from app.services.inference_service import InferenceService
 from app.utils.validators import (
     compute_message_features,
     is_valid_message,
@@ -44,7 +45,6 @@ logger = get_logger(__name__)
 # Indicator Definitions
 # ---------------------------------------------------------------------------
 
-# Maps feature flag → (indicator name, weight, detail template)
 _INDICATOR_MAP: list[tuple[str, str, str, str]] = [
     (
         "credential_request",
@@ -88,22 +88,10 @@ _INDICATOR_MAP: list[tuple[str, str, str, str]] = [
 def _build_indicators(
     features: dict[str, bool | int],
 ) -> list[ThreatIndicator]:
-    """Construct a ``ThreatIndicator`` list from extracted features.
-
-    Each indicator is always included in the response — whether
-    ``present=True`` or ``present=False`` — so the Flutter UI can
-    display the full evidence panel including absent signals.
-
-    Args:
-        features: Feature dict from ``compute_message_features()``.
-
-    Returns:
-        Ordered list of ``ThreatIndicator`` objects.
-    """
+    """Construct a ``ThreatIndicator`` list from extracted features."""
     indicators: list[ThreatIndicator] = []
 
     for name, weight, detail, feature_key in _INDICATOR_MAP:
-        # has_credentials / has_url / etc are bool; has_uppercase_ratio is bool
         present = bool(features.get(feature_key, False))
         indicators.append(
             ThreatIndicator(
@@ -130,17 +118,37 @@ class AnalysisService:
     across concurrent requests.
 
     Attributes:
-        _model_loader: Injected ``BaseModelLoader`` implementation.
+        _inference_service: Injected ``InferenceService`` instance.
     """
 
-    def __init__(self, model_loader: BaseModelLoader) -> None:
-        """Initialise the service with a model loader.
+    def __init__(
+        self,
+        model_loader_or_inference_service: (
+            BaseModelLoader | InferenceService | None
+        ) = None,
+        model_loader: BaseModelLoader | InferenceService | None = None,
+    ) -> None:
+        """Initialise the service with an InferenceService or BaseModelLoader.
 
         Args:
-            model_loader: Any ``BaseModelLoader`` concrete implementation.
-                          Phase 2.2 uses ``MockModelLoader``.
+            model_loader_or_inference_service: An ``InferenceService``
+                or ``BaseModelLoader``.
+            model_loader: Alias for model_loader_or_inference_service.
         """
-        self._model_loader = model_loader
+        target = model_loader_or_inference_service or model_loader
+        if target is None:
+            raise ValueError("Must provide model_loader or inference_service")
+
+        if isinstance(target, InferenceService):
+            self._inference_service = target
+        else:
+            # Wrap bare BaseModelLoader in InferenceService for backwards compatibility
+            self._inference_service = InferenceService(loader=target)
+
+    @property
+    def inference_service(self) -> InferenceService:
+        """Return the underlying InferenceService instance."""
+        return self._inference_service
 
     def analyse(
         self,
@@ -154,11 +162,10 @@ class AnalysisService:
             1. Validate raw input (length, content rules).
             2. Sanitise text (NFKC normalisation, whitespace collapse).
             3. Extract heuristic features (for indicators + logging).
-            4. Check model health; raise if not loaded.
-            5. Delegate to model loader for prediction.
-            6. Build ``ThreatIndicator`` list from features.
-            7. Measure and record processing duration.
-            8. Map ``ModelPrediction`` + indicators → ``AnalysisResult``.
+            4. Delegate ML inference pass to ``InferenceService``.
+            5. Build ``ThreatIndicator`` list from features.
+            6. Measure and record processing duration.
+            7. Map ``ModelPrediction`` + indicators → ``AnalysisResult``.
 
         Args:
             message:    Raw SMS body text from the HTTP request.
@@ -171,6 +178,7 @@ class AnalysisService:
         Raises:
             ValidationException:    If the message fails content validation.
             ModelNotReadyException: If the model loader is not initialised.
+            ModelInferenceException: If inference fails during processing.
         """
         pipeline_start = time.perf_counter()
 
@@ -195,36 +203,34 @@ class AnalysisService:
         features = compute_message_features(clean_text)
         logger.debug("Features: %s", features)
 
-        # Step 4 — Model health check
-        model_health = self._model_loader.health()
-        if not model_health.is_loaded:
-            raise ModelNotReadyException(
-                f"Model '{model_health.model_version}' is not loaded."
-            )
+        # Step 4 — Model inference pass via InferenceService
+        prediction: ModelPrediction = self._inference_service.predict(clean_text)
 
-        # Step 5 — Model inference
-        prediction: ModelPrediction = self._model_loader.predict(clean_text)
-
-        # Step 6 — Build indicators
+        # Step 5 — Build indicators
         indicators = _build_indicators(features)
 
-        # Step 7 — Measure duration
+        # Step 6 — Measure duration
         processing_ms = round((time.perf_counter() - pipeline_start) * 1_000, 2)
 
         logger.info(
-            "Analysis complete | label=%s threat=%s conf=%.2f " "mock=%s ms=%.2f id=%s",
+            "Analysis complete | label=%s threat=%s conf=%.2f backend=%s "
+            "mock=%s fallback=%s ms=%.2f id=%s",
             prediction.label,
             prediction.threat_level,
             prediction.confidence,
+            prediction.backend_type,
             prediction.model_version.startswith("mock"),
+            prediction.fallback_mode,
             processing_ms,
             request_id or "-",
         )
 
-        # Step 8 — Map to response schema
-        mock_mode = prediction.model_version.startswith(
-            "mock"
-        ) or prediction.model_version.startswith("placeholder")
+        # Step 7 — Map to response schema
+        mock_mode = (
+            prediction.backend_type in {"mock", "placeholder"}
+            or prediction.model_version.startswith("mock")
+            or prediction.model_version.startswith("placeholder")
+        )
 
         return AnalysisResult(
             label=prediction.label,

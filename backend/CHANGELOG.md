@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] — 2026-08-03
+
+### Added — Phase 2.3: AI Model Loading & Inference Architecture
+
+#### Model Loading Architecture (`app/core/model_loader.py`)
+- Enhanced `BaseModelLoader` abstract contract with `unload()`, `predict_batch()`, `backend_type`, and `is_loaded`.
+- `HuggingFaceModelLoader` — HuggingFace Transformers & ONNX model loader architecture stub supporting path resolution, tokenization pipelines, logit extraction, and softmax normalization.
+- `ModelLoaderFactory` — static factory pattern for declarative backend instantiation (`mock`, `huggingface`, `placeholder`).
+- `ModelPrediction` DTO enhanced with `backend_type`, `logits`, and `fallback_mode` fields.
+
+#### Inference Orchestration Service (`app/services/inference_service.py`)
+- `InferenceService` — dedicated service managing ML model inference execution, single and batch predictions (`predict`, `predict_batch`), latency profiling, and graceful error recovery.
+- Automatic Fallback Engine — if primary model is unready or raises an inference exception (e.g. OOM or crash), seamlessly redirects execution to a secondary fallback loader (e.g. `MockModelLoader`) and tags predictions with `fallback_mode=True`.
+
+#### Application Core & Configuration (`app/core/config.py`, `app/core/exceptions.py`, `app/main.py`)
+- Added `ModelLoadException` for model initialization & weight downloading errors.
+- Added `model_backend` (`mock` | `huggingface` | `placeholder`) and `model_fallback_enabled` to `Settings`.
+- `main.py` lifespan updated to initialize `InferenceService` singleton with warm-up passes and fallback failover.
+- API dependencies updated to inject `InferenceService` into `AnalysisService`.
+
+#### Test Suite & Verification (`tests/`)
+- Created `tests/test_inference_service.py` — 10 unit tests for single prediction, batch prediction, health checks, and fallback failover recovery.
+- Created `tests/test_model_loader_factory.py` — 14 unit tests for `ModelLoaderFactory`, `HuggingFaceModelLoader`, and `PlaceholderModelLoader`.
+- Updated `tests/conftest.py` with `InferenceService` fixture support.
+- All **155 tests passed (100% pass rate, 91% coverage)**. Flake8 lint clean (**0 violations**).
+
+#### Thesis Documentation
+- `backend/docs/03_Model_Loader.md` — 14-section technical reference with Mermaid sequence, class, component, and flow diagrams; SOLID architectural analysis; HuggingFace compatibility specs; verification results.
+- `docs/thesis-preparation/Model_Loader_Viva.md` — 15 academic Q&A questions for BS Computer Science FYP viva examination.
+
+---
+
 ## [2.2.0] — 2026-08-03
 
 ### Added — Phase 2.2: REST API Layer with Mock Analysis Engine

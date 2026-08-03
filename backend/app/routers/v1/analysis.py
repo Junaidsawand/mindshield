@@ -36,6 +36,7 @@ from app.logging.logger import get_logger
 from app.schemas.analysis import AnalysisRequest, AnalysisResult
 from app.schemas.common import APIResponse
 from app.services.analysis_service import AnalysisService
+from app.services.inference_service import InferenceService
 
 router = APIRouter(prefix="/analyze", tags=["Analysis"])
 logger = get_logger(__name__)
@@ -139,11 +140,20 @@ def _get_model_loader(
     return get_model_loader(settings)
 
 
+def _get_inference_service(
+    settings: Settings = Depends(get_settings),
+) -> InferenceService:
+    """Resolve the active InferenceService from application state."""
+    from app.main import get_inference_service  # noqa: PLC0415
+
+    return get_inference_service(settings)
+
+
 def _get_analysis_service(
-    model_loader: BaseModelLoader = Depends(_get_model_loader),
+    inference_service: InferenceService = Depends(_get_inference_service),
 ) -> AnalysisService:
     """Construct a stateless ``AnalysisService`` for this request."""
-    return AnalysisService(model_loader=model_loader)
+    return AnalysisService(model_loader_or_inference_service=inference_service)
 
 
 # ---------------------------------------------------------------------------

@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # Application Metadata
     # ------------------------------------------------------------------
     app_name: str = Field(default="MindShield API", description="Human-readable name")
-    app_version: str = Field(default="2.2.0", description="Semantic version")
+    app_version: str = Field(default="2.3.0", description="Semantic version")
     app_env: Literal["development", "staging", "production"] = Field(
         default="development",
         description="Deployment environment",
@@ -93,16 +93,27 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
-    # Model (Phase 2.2+ placeholder)
+    # Model (Phase 2.3 AI Model Loading Architecture)
     # ------------------------------------------------------------------
-    model_path: str = Field(default="", description="Path to the ML model artifact")
+    model_backend: Literal["mock", "huggingface", "placeholder"] = Field(
+        default="mock",
+        description="Active model loader backend implementation",
+    )
+    model_path: str = Field(
+        default="",
+        description="Path or HF hub ID for model weights",
+    )
     model_version: str = Field(
-        default="placeholder-v0",
+        default="mock-heuristic-v1",
         description="Model version identifier",
     )
     model_enabled: bool = Field(
-        default=False,
-        description="Whether the real model is active (False in Phase 2.1)",
+        default=True,
+        description="Whether model inference is enabled",
+    )
+    model_fallback_enabled: bool = Field(
+        default=True,
+        description="Whether to fall back to mock loader if primary loader fails",
     )
 
     # ------------------------------------------------------------------

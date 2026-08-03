@@ -121,6 +121,19 @@ class ModelInferenceException(MindShieldException):
         super().__init__(message)
 
 
+class ModelLoadException(MindShieldException):
+    """Raised when model loading, weight downloading, or warm-up fails."""
+
+    http_status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
+    error_code = "model_load_error"
+
+    def __init__(
+        self,
+        message: str = "Failed to load model weights or architecture.",
+    ) -> None:
+        super().__init__(message)
+
+
 # ---------------------------------------------------------------------------
 # Rate Limiting / Abuse Prevention (HTTP 429)
 # ---------------------------------------------------------------------------

@@ -314,9 +314,23 @@ class MockModelLoader(BaseModelLoader):
         """Initialise the mock loader."""
         self._loaded: bool = False
 
+    @property
+    def backend_type(self) -> str:
+        """Return backend identifier string."""
+        return "mock"
+
+    @property
+    def is_loaded(self) -> bool:
+        """Return True if mock model loader is ready."""
+        return self._loaded
+
     def load(self) -> None:
         """Simulate model loading."""
         self._loaded = True
+
+    def unload(self) -> None:
+        """Unload mock loader resources."""
+        self._loaded = False
 
     def predict(self, text: str) -> ModelPrediction:
         """Classify SMS text using heuristic rules.
@@ -340,16 +354,21 @@ class MockModelLoader(BaseModelLoader):
             confidence=confidence,
             explanation=explanation,
             model_version=self._VERSION,
+            backend_type=self.backend_type,
             predicted_at=datetime.now(tz=timezone.utc),
         )
+
+    def predict_batch(self, texts: list[str]) -> list[ModelPrediction]:
+        """Classify a batch of SMS messages."""
+        return [self.predict(t) for t in texts]
 
     def health(self) -> ModelHealth:
         """Return the health status of the mock loader."""
         return ModelHealth(
             is_loaded=self._loaded,
             model_version=self._VERSION,
+            backend_type=self.backend_type,
             status_message=(
-                "Mock heuristic model active — Phase 2.2. "
-                "Real NLP model will replace this in Phase 2.3."
+                "Mock heuristic engine ready — Phase 2.3 architecture."
             ),
         )
