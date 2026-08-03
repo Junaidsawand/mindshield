@@ -33,11 +33,10 @@
    - 6.4 [PermissionsScreen — UI layer](#64-permissionsscreen--ui-layer)
    - 6.5 [SplashScreen — boot navigation](#65-splashscreen--boot-navigation)
    - 6.6 [main.dart — provider registration](#66-maindart--provider-registration)
-7. [Design Decisions & Rationale](#7-design-decisions--rationale)
-8. [Challenges & Solutions](#8-challenges--solutions)
-9. [Interview / Viva Questions with Answers](#9-interview--viva-questions-with-answers)
-10. [Thesis-Ready Academic Section](#10-thesis-ready-academic-section)
-11. [Glossary](#11-glossary)
+7. [Design Decisions & Security Considerations](#7-design-decisions--security-considerations)
+8. [Challenges, Unit Testing & Future Roadmap](#8-challenges-unit-testing--future-roadmap)
+9. [Thesis-Ready Academic Section](#9-thesis-ready-academic-section)
+10. [Glossary](#10-glossary)
 
 ---
 
@@ -113,6 +112,13 @@ MindShield follows **Feature-First Clean Architecture**. Each feature is an isol
 | **Platform** | `AndroidManifest.xml` | Declare permissions to Android package manager |
 | **DI / Composition Root** | `main.dart` | Instantiate and inject `PermissionsProvider` |
 | **Navigation** | `app_router.dart` | Map `/permissions` path to `PermissionsScreen` |
+
+### SMS Permission Types & Purpose
+
+| Permission | Android Constant | Functionality Granted | MindShield Module Usage |
+|---|---|---|---|
+| **Read SMS** | `android.permission.READ_SMS` | Queries the SMS ContentProvider (`content://sms`) for existing inbox & sent history. | Enables retrospective scanning in Inbox, History, and Analysis modules. |
+| **Receive SMS** | `android.permission.RECEIVE_SMS` | Registers a `BroadcastReceiver` for `android.provider.Telephony.SMS_RECEIVED`. | Enables real-time background interception of incoming SMS threats before display. |
 
 ---
 
@@ -332,11 +338,14 @@ ChangeNotifier
 
 #### Key design choices
 
-**`PermissionItem` as a data class:**  
-Rather than hard-coding permission metadata directly inside the UI widget, it is modelled as an immutable `PermissionItem` record inside the provider. The UI layer iterates `PermissionsProvider.permissionItems` to build its cards, meaning the screen has zero knowledge of *which* permissions exist — it only knows how to render one `PermissionItem`. Adding a new permission only requires adding one entry to the static list.
+**`PermissionItem` as a data class & memory efficiency:**  
+Rather than hard-coding permission metadata directly inside the UI widget, it is modelled as an immutable `PermissionItem` record inside the provider. The UI layer iterates `PermissionsProvider.permissionItems` to build its cards, meaning the screen has zero knowledge of *which* permissions exist — it only knows how to render one `PermissionItem`. Adding a new permission only requires adding one entry to the list. For plain permissions, using `static const` guarantees zero runtime heap allocation costs and a canonical reference in the compiled binary read-only segment. (Note: because `Permission.phone` is a `PermissionWithService`, `permissionItems` is declared as `static final` in Dart).
 
-**Unmodifiable map exposure:**  
-`get statuses => Map.unmodifiable(_statuses)` prevents consumers from accidentally mutating the internal state map directly, enforcing the single-source-of-truth principle.
+**Unmodifiable map exposure & State Encapsulation:**  
+`get statuses => Map.unmodifiable(_statuses)` prevents consumers from mutating internal state (e.g. `provider.statuses[p] = status`) without invoking `notifyListeners()`. Exposing a read-only map view throws an `UnsupportedError` on external write attempts, strictly enforcing `PermissionsProvider` as the Single Source of Truth.
+
+**Declarative Navigation Safety (`goNamed` vs `go`):**  
+Navigation is executed via `context.goNamed('dashboard')` rather than path strings (`context.go('/dashboard')`). `goNamed` validates route names against the central router configuration at application startup, raising development-time assertions for typos rather than silently failing at runtime.
 
 **`required` flag separation:**  
 `allGranted` only evaluates `PermissionItem.required == true` entries. This means optional permissions (like `READ_PHONE_STATE`) are displayed to the user for transparency but never block onboarding completion — matching the principle of least privilege combined with user-friendly progressive disclosure.
@@ -432,365 +441,51 @@ ChangeNotifierProvider<PermissionsProvider>(
 
 ---
 
-## 7. Design Decisions & Rationale
+## 7. Design Decisions & Security Considerations
+
+### 7.1 Key Design Decisions & Rationale
 
 | Decision | Alternative Considered | Reason Chosen |
 |---|---|---|
 | `ChangeNotifier` + `Provider` for state | `Riverpod`, `BLoC`, `GetX` | Already chosen in bootstrap; Provider is zero-friction for a module this size |
-| Static `permissionItems` list in the provider | Hardcoded in the screen | Enables the UI to be data-driven; adding permissions requires zero UI changes |
+| Static `permissionItems` list in provider | Hardcoded in screen | Enables UI to be data-driven; adding permissions requires zero UI changes (Open/Closed Principle) |
 | `required: false` flag for optional permissions | Always require all | Respects principle of least privilege; user is not punished for denying non-essential permissions |
 | `SliverAppBar` with `FlexibleSpaceBar` | Static `AppBar` | Provides a premium collapsing hero effect at no significant code cost |
-| Glassmorphic icon badge | Plain icon | Material 3 expressiveness guideline; distinguishes brand hero from generic utility UIs |
+| Zero-GPU Glassmorphic icon badge | Real `BackdropFilter` blur | `BackdropFilter` adds an expensive GPU composition layer. Translucent white `withAlpha(38)` fill + `withAlpha(77)` border yields the visual effect at 0 GPU overhead. |
 | Navigate via `addPostFrameCallback` | Direct call in `build` | Flutter prohibits navigation during a build phase; post-frame deferral is the canonical fix |
 | `openAppSettings()` via `permission_handler` | Custom Android intent | Platform library handles the intent correctly across Android versions 6–14+ |
 | Error stored as `String?` in provider | `Exception` rethrown to UI | Keeps UI declarative; avoids `try/catch` in widget `build` methods |
 | `SharedPreferences` flag persisted by provider | Persisted in screen | Business logic belongs in the business-logic layer |
 
+### 7.2 Cybersecurity Transparency & Regulatory Compliance
+
+Cybersecurity applications occupy a privileged position of trust. Requesting `READ_SMS` without explicit rationale triggers user skepticism (mistaking anti-spam software for spyware) and risks rejection under Google Play policies.
+
+1. **Android Layered Permission Model**:
+   - *Manifest Declaration*: Package manager registers profile at install.
+   - *Runtime Request*: Dangerous permissions require OS dialog trigger.
+   - *Permission Groups*: Related permissions (`READ_SMS` & `RECEIVE_SMS`) belong to the `SMS` group.
+   - *Revocation & Process Isolation*: Enforced at Linux kernel level; users can revoke access via Settings at any time.
+
+2. **Google Play SMS & Call Log Policy Compliance**:
+   - Google restricts `READ_SMS` / `RECEIVE_SMS` to apps whose core capability requires it. MindShield qualifies under the *Anti-Fraud / Security* category.
+   - Compliance mandates minimal retention: message scanning occurs locally in-memory; message bodies are never persisted on remote servers without explicit user consent.
+
+3. **GDPR Alignment (EU 2018)**:
+   - *Article 6 (Lawful Basis)*: Explicit user consent via runtime dialogs.
+   - *Article 13 (Right to Information)*: Per-permission rationale cards explicitly state what is processed and why.
+   - *Article 25 (Privacy by Design)*: Local on-device NLP processing enforces data minimisation.
+
 ---
 
-## 8. Challenges & Solutions
+## 8. Challenges, Unit Testing & Future Roadmap
 
-### Challenge 1: Navigating inside a `build` method
+### 8.1 Architectural & Implementation Challenges
 
-**Problem:** When `allGranted` becomes `true`, the next `build` call would trigger `context.goNamed('dashboard')` directly inside `build()`. Flutter throws: *"setState() or markNeedsBuild() called during build."*
-
+#### Challenge 1: Navigating inside a `build` method
+**Problem:** When `allGranted` becomes `true`, the next `build` call would trigger `context.goNamed('dashboard')` directly inside `build()`. Flutter throws: *"setState() or markNeedsBuild() called during build."*  
 **Solution:** Wrap the navigation call in `WidgetsBinding.instance.addPostFrameCallback`, which defers execution to after the current frame completes. A `_navigated` boolean flag guards against the callback being scheduled multiple times.
 
----
-
-### Challenge 2: Status not refreshing after App Settings
-
-**Problem:** When a user enables a permanently denied permission via the OS Settings screen and returns to the app, the UI still shows "Permanently Denied" because `checkStatuses()` is not automatically called.
-
-**Solution:** Mix `WidgetsBindingObserver` into the screen's state and override `didChangeAppLifecycleState`. When the state transitions to `AppLifecycleState.resumed`, `checkStatuses()` is called automatically, updating the UI to reflect the new grant.
-
----
-
-### Challenge 3: `permission_handler` requires manifest declarations
-
-**Problem:** On Android, calling `Permission.sms.request()` silently fails (returns `denied`) if `READ_SMS` is not declared in `AndroidManifest.xml`. There is no runtime error — it fails silently.
-
-**Solution:** Explicitly add `<uses-permission>` entries to the manifest before any permission is requested. Document this requirement in code comments so future maintainers do not accidentally remove the declarations.
-
----
-
-### Challenge 4: Distinguishing "denied" from "permanently denied" in the UI
-
-**Problem:** Both states return from `requestAll()`, but they require different UX responses:
-- **Denied:** Show a retry button.
-- **Permanently denied:** Show "Open Settings" (retrying the dialog is futile — Android will not show it again).
-
-**Solution:** The `hasPermanentlyDenied` getter on `PermissionsProvider` returns `true` if any *required* permission is permanently denied. The `_ActionButtons` widget conditionally renders the `OutlinedButton("Open App Settings")` only when this getter is true, accompanied by an explanatory text label.
-
----
-
-### Challenge 5: Preventing double navigation
-
-**Problem:** GoRouter's `go` method is idempotent for the same route, but calling it twice in quick succession (e.g., if `build` is called twice during the same frame while `allGranted` is true) can cause a router state inconsistency.
-
-**Solution:** A `bool _navigated` flag on the screen's state object is set to `true` on the first navigation call. `_maybeNavigate` is a no-op on all subsequent calls.
-
----
-
-### Challenge 6: Keeping UI data-driven without coupling to specific permissions
-
-**Problem:** If permission titles, rationale text, and icons are hard-coded in the widget, changing or adding a permission requires editing the UI file — a violation of the Open/Closed Principle.
-
-**Solution:** The `PermissionItem` data class encapsulates all metadata. The screen iterates `PermissionsProvider.permissionItems` and renders generic `_PermissionCard` widgets. To add a new permission, only the static list in `PermissionsProvider` needs to change.
-
----
-
-## 9. Interview / Viva Questions with Answers
-
-### Section A: Conceptual Understanding
-
----
-
-**Q1. What is the difference between `checkSelfPermission` and `requestPermissions` in Android, and how does `permission_handler` abstract them?**
-
-**A:** `checkSelfPermission(context, permission)` is a read-only query that returns `PERMISSION_GRANTED` or `PERMISSION_DENIED` without showing any dialog. `requestPermissions(activity, permissions[], requestCode)` triggers the OS dialog and delivers the result to `onRequestPermissionsResult()`. `permission_handler` wraps both in a single Dart API: `Permission.sms.status` maps to `checkSelfPermission`, while `Permission.sms.request()` maps to `requestPermissions`. The callback-based Android API is converted to a `Future<PermissionStatus>`, eliminating the need for boilerplate override methods.
-
----
-
-**Q2. Why must permissions be declared in `AndroidManifest.xml` even though the app requests them at runtime?**
-
-**A:** Android's package manager processes the manifest at install time to build the app's permission profile. This profile determines which permissions the system will *even consider* granting at runtime. A permission not listed in the manifest is permanently unavailable to the app — the runtime request returns `denied` without showing a dialog. The `<uses-permission>` declaration is a security transparency mechanism: it allows users and enterprise MDM systems to review an app's intended permission set before installation.
-
----
-
-**Q3. What does `PermissionStatus.isPermanentlyDenied` mean, and how does the MindShield Permissions module handle it?**
-
-**A:** `isPermanentlyDenied` means the user previously selected "Don't ask again" when denying the permission. Android will no longer show the permission dialog for this permission in the current installation. The module handles it by:
-1. Detecting it via `hasPermanentlyDenied` getter on `PermissionsProvider`.
-2. Rendering a conditional `OutlinedButton("Open App Settings")` that calls `openAppSettings()`.
-3. Displaying explanatory text below the button.
-4. Re-querying statuses via `WidgetsBindingObserver` when the user returns from Settings.
-
----
-
-**Q4. What is `WidgetsBindingObserver` and why is it used in `PermissionsScreen`?**
-
-**A:** `WidgetsBindingObserver` is a Flutter mixin that allows a class to observe global application lifecycle events: `resumed`, `paused`, `inactive`, `detached`, `hidden`. `PermissionsScreen` mixes it in to detect when the user returns from the OS App Settings page (the app transitions from `paused` back to `resumed`). Without this, the permission status chips would remain stale until the user manually triggered a re-check.
-
----
-
-**Q5. Explain the `ChangeNotifier` + `Provider` pattern. Why was it chosen over BLoC or Riverpod for this module?**
-
-**A:** `ChangeNotifier` is Flutter's built-in observable class. Subclasses hold state and call `notifyListeners()` to push updates. The `provider` package makes `ChangeNotifier` instances available down the widget tree via `InheritedWidget`. Widgets that call `context.watch<T>()` rebuild automatically when `notifyListeners()` fires.
-
-It was chosen because:
-1. **Consistency** — the bootstrap already selected `provider`; using a different pattern for one module would fragment the codebase.
-2. **Simplicity** — the Permissions module has simple, linear state (a map of statuses + a boolean). The overhead of BLoC events/states or Riverpod's code-generation is unjustified.
-3. **Testability** — `ChangeNotifier` subclasses are plain Dart classes that can be unit-tested without Flutter widgets.
-
----
-
-**Q6. What is the Open/Closed Principle and how does `PermissionItem` exemplify it?**
-
-**A:** The Open/Closed Principle (OCP) states that software entities should be *open for extension* but *closed for modification*. `PermissionItem` exemplifies OCP because the `PermissionsScreen` widget is closed for modification — it renders any `PermissionItem` generically and contains zero knowledge of specific permissions. Adding `READ_CONTACTS` in a future version only requires extending the `permissionItems` static list in `PermissionsProvider`. Zero lines of UI code change.
-
----
-
-**Q7. Why is navigation called inside `addPostFrameCallback` rather than directly in the `build` method?**
-
-**A:** Flutter's rendering pipeline operates in phases: build → layout → paint. Calling `context.goNamed()` during the build phase modifies the navigator's state, which triggers another build — creating a recursive loop. Flutter detects this and throws an assertion error. `addPostFrameCallback` schedules the navigation call to run *after* the current frame's paint phase completes, at which point modifying navigator state is safe.
-
----
-
-**Q8. What is the difference between `context.read<T>()` and `context.watch<T>()` in the Provider package?**
-
-**A:**
-- `context.watch<T>()` subscribes the current widget to the provider. Every time the provider calls `notifyListeners()`, the widget rebuilds. Used inside `build()`.
-- `context.read<T>()` fetches the provider instance *without* subscribing. The widget does NOT rebuild when the provider changes. Used inside callbacks, `initState`, `onPressed`, etc.
-
-In `PermissionsScreen`, `context.watch<PermissionsProvider>()` is used in `build()` so the UI updates when statuses change. `context.read<PermissionsProvider>()` is used inside `initState` and `didChangeAppLifecycleState` callbacks where rebuilding is not desired.
-
----
-
-**Q9. What is the principle of least privilege and how is it reflected in this module?**
-
-**A:** The principle of least privilege dictates that a system should request only the minimum permissions required to perform its function. In this module:
-1. Only `READ_SMS` and `RECEIVE_SMS` are marked `required: true` — the minimum needed to analyse messages.
-2. `READ_PHONE_STATE` is marked `required: false` — it is shown transparently but does not block the user.
-3. The module explicitly does not request `WRITE_SMS`, `SEND_SMS`, `READ_CONTACTS`, or `INTERNET` despite the app requiring network access in other modules. Each module requests its own permissions independently.
-
----
-
-**Q10. How would you unit-test `PermissionsProvider`?**
-
-**A:** Because `PermissionsProvider` is a plain `ChangeNotifier` subclass with no Flutter framework dependencies, it can be tested with `package:test`:
-
-```dart
-// Mock permission_handler using a fake implementation:
-test('allGranted is false when statuses are empty', () {
-  final provider = PermissionsProvider();
-  expect(provider.allGranted, isFalse);
-});
-
-test('allGranted is true when all required permissions are granted', () async {
-  // Use permission_handler's test mock API to preset statuses
-  // (permission_handler provides TestDefaultBinaryMessengerBinding helpers)
-  final provider = PermissionsProvider();
-  await provider.checkStatuses(); // reads mocked statuses
-  // assert based on mocked response
-});
-```
-
-Integration tests would use the `integration_test` package on a real device/emulator.
-
----
-
-### Section B: Flutter & Architecture Deep Dive
-
----
-
-**Q11. What is a `SliverAppBar` and why was it used instead of a standard `AppBar`?**
-
-**A:** `SliverAppBar` is a Material 3 app bar that integrates with a `CustomScrollView`'s scroll mechanism. With `expandedHeight: 240` and `pinned: true`, it collapses into a standard toolbar as the user scrolls down, revealing the app name and a compact header. A standard `AppBar` is static — it does not participate in scroll physics. `SliverAppBar` was chosen to provide the premium collapsing hero effect that elevates the visual quality of the onboarding screen, consistent with Material 3's expressive design guidelines.
-
----
-
-**Q12. What is `FlexibleSpaceBar` and what role does it play in the hero header?**
-
-**A:** `FlexibleSpaceBar` is the content area inside `SliverAppBar` that morphs as the scroll position changes. With `collapseMode: CollapseMode.parallax`, the background scrolls at a different rate than the foreground, creating a depth effect. The `title` property displays the app bar title (which fades in as the bar collapses), and `background` contains `_HeroBackground` — the gradient container with the glassmorphic shield icon.
-
----
-
-**Q13. Explain the glassmorphism effect in `_HeroBackground`.**
-
-**A:** Glassmorphism is a UI design trend characterised by frosted-glass surfaces — semi-transparent containers with blurred backgrounds and subtle borders. In `_HeroBackground`, it is achieved with:
-```dart
-color: Colors.white.withAlpha(38)    // ≈ 15% opacity white fill
-border: Border.all(
-  color: Colors.white.withAlpha(77), // ≈ 30% opacity white border
-)
-```
-A `BoxDecoration` with `shape: BoxShape.circle` creates the circular container. True gaussian blur (via `BackdropFilter`) was intentionally omitted because it incurs a GPU composition layer cost — the translucent white approximates the effect at zero extra GPU overhead.
-
----
-
-**Q14. How does `MultiProvider` differ from nesting multiple `Provider` widgets?**
-
-**A:** `MultiProvider` is a convenience widget provided by the `provider` package that builds a nested tree of providers internally. Semantically it is identical to:
-```dart
-ChangeNotifierProvider<A>(
-  create: (_) => A(),
-  child: ChangeNotifierProvider<B>(
-    create: (_) => B(),
-    child: child,
-  ),
-)
-```
-`MultiProvider` makes the declaration flat and readable, especially when 5–10 providers are registered. It also ensures correct dependency ordering — providers listed earlier can be depended on by those listed later.
-
----
-
-**Q15. What is `SharedPreferences` and why is the `prefKeyPermissionsGranted` flag important?**
-
-**A:** `SharedPreferences` is a key-value store backed by Android's `SharedPreferences` XML file (or iOS's `NSUserDefaults`). It persists data across app restarts. The `prefKeyPermissionsGranted` boolean flag records that the user successfully completed onboarding. In a future iteration, the `SplashScreen` will read this flag and skip the Permissions screen entirely on repeat launches, routing directly to the Dashboard — improving cold-start UX for returning users.
-
----
-
-### Section C: Security & Privacy
-
----
-
-**Q16. Why do cybersecurity applications have a responsibility to be especially transparent about permissions?**
-
-**A:** Cybersecurity apps occupy a privileged position of trust — users install them precisely to *protect* their data. An SMS security app requesting `READ_SMS` without clear explanation could be mistaken for spyware. Transparency about permission purpose:
-1. Builds user trust, increasing grant rates.
-2. Satisfies GDPR Article 13 (right to information) and CCPA transparency requirements.
-3. Distinguishes legitimate security software from malware that uses the same permissions covertly.
-4. Reduces Play Store rejection risk (Google requires rationale for dangerous permissions in app review).
-
----
-
-**Q17. What is the difference between `READ_SMS` and `RECEIVE_SMS`? Why does MindShield need both?**
-
-**A:**
-- **`READ_SMS`**: Grants access to the SMS content provider (`content://sms`), allowing the app to query the SMS inbox, sent messages, and drafts. MindShield uses this to scan the existing message history.
-- **`RECEIVE_SMS`**: Grants the ability to register a `BroadcastReceiver` for the `android.provider.Telephony.SMS_RECEIVED` intent, allowing the app to intercept and process new messages as they arrive. MindShield will use this for real-time threat detection.
-
-Both are classified as "dangerous" permissions under Android's permission model, requiring explicit user grant at runtime.
-
----
-
-**Q18. How does Android's permission model protect users from malicious apps?**
-
-**A:** Android implements a **layered permission model**:
-1. **Installation-time declaration** (`AndroidManifest.xml`): Apps disclose intended permissions, allowing audit before installation.
-2. **Runtime request**: Since Android 6.0 (API 23), "dangerous" permissions require an explicit user grant via a system dialog. The app cannot bypass this.
-3. **Permission groups**: Related permissions are grouped (e.g., `READ_SMS` and `RECEIVE_SMS` are both in the `SMS` group — granting one in a group may pre-grant others in the same group in some Android versions).
-4. **Revocation**: Users can revoke permissions at any time from the App Settings page. Auto-revocation was introduced in Android 11 for apps not used for several months.
-5. **Process isolation**: Permissions are enforced by the Android kernel; a compromised app cannot access resources it hasn't been granted, even via native code.
-
----
-
-**Q19. What is the Play Store's policy on SMS permissions and how should MindShield comply?**
-
-**A:** Google Play's **SMS & Call Log policy** (updated 2019) restricts apps from requesting `READ_SMS`, `RECEIVE_SMS`, `CALL_LOG` etc. unless the app's *core functionality* requires them. Permitted categories include: SMS backup/restore apps, default SMS apps, call-blocking apps, and **security/anti-fraud apps** — which MindShield qualifies as.
-
-Compliance requirements:
-1. Declare the app's intended use clearly in the Play Store listing.
-2. Complete Google's **Permissions Declaration Form** in the Play Console.
-3. Use permissions only for the declared purpose (no third-party analytics on message content).
-4. Minimise data retention — scan messages in memory, do not persist full message bodies in a remote database without consent.
-
----
-
-**Q20. What is GDPR's relevance to an SMS-reading application?**
-
-**A:** GDPR (General Data Protection Regulation, EU 2018) applies to any app processing personal data of EU residents. SMS messages constitute personal data under GDPR's definition ("any information relating to an identified or identifiable natural person"). Relevant obligations:
-- **Article 6 (Lawful Basis):** Processing requires consent or legitimate interest.
-- **Article 13 (Transparency):** Users must be informed of what data is processed, why, and how long it is retained — exactly what the rationale cards in the Permissions screen address.
-- **Article 17 (Right to Erasure):** Users can request deletion of their processed data.
-- **Article 25 (Privacy by Design):** On-device AI analysis (processing messages locally) is a direct implementation of data minimisation, a core GDPR principle.
-
----
-
-### Section D: Code Quality & Best Practices
-
----
-
-**Q21. Why is `_statuses` exposed as `Map.unmodifiable(_statuses)` rather than the raw map?**
-
-**A:** Exposing a mutable map allows consumers to write `provider.statuses[Permission.sms] = PermissionStatus.granted` — mutating internal state without triggering `notifyListeners()`, corrupting the observable state. `Map.unmodifiable()` wraps the map in a view that throws `UnsupportedError` on any write attempt. It enforces the **single source of truth** — the only way to change `_statuses` is through the provider's own methods.
-
----
-
-**Q22. What is the significance of `static const List<PermissionItem> permissionItems`?**
-
-**A:** `static` means the list belongs to the class, not to any instance — it is created once and shared. `const` means it is a compile-time constant, allocated in the read-only data segment of the compiled binary. This provides:
-1. **Zero allocation cost at runtime** — no heap allocation for the list.
-2. **Canonical reference** — both the provider and the screen reference the exact same list object.
-3. **Immutability** — `const` collections in Dart are unmodifiable by default, preventing accidental mutation.
-
----
-
-**Q23. Why does `requestAll()` skip permissions that are already granted or permanently denied?**
-
-**A:** Calling `request()` on an already-granted permission is a no-op but wastes a platform channel call. More importantly, calling `request()` on a permanently denied permission on some Android versions can show an unexpected empty dialog or no dialog at all, confusing the user. By filtering the list to only permissions that are `denied` (but not permanently so), the module minimises platform channel round-trips and provides a cleaner UX.
-
----
-
-**Q24. Explain the difference between `goNamed` and `go` in GoRouter. Which does MindShield use and why?**
-
-**A:**
-- `context.go('/dashboard')` navigates to a route by path string. If the path contains typos, the error is only discovered at runtime.
-- `context.goNamed('dashboard')` navigates by the route's registered `name` property. GoRouter validates the name at startup and throws an assertion error if the name does not exist — catching errors at development time.
-
-MindShield uses `goNamed` throughout for compile-time safety and readability. Route names are the single source of truth for navigation targets.
-
----
-
-**Q25. What happens if `PermissionsProvider` is not registered in `MultiProvider` and `PermissionsScreen` tries to read it?**
-
-**A:** `context.watch<PermissionsProvider>()` searches up the widget tree for an `InheritedWidget` providing a `PermissionsProvider`. If none exists, it throws:
-```
-ProviderNotFoundException: Could not find the correct Provider<PermissionsProvider> above this PermissionsScreen Widget.
-```
-This is a development-time error (debug mode throws immediately; release mode may behave unpredictably). The fix is always to ensure the provider is registered in `MultiProvider` *above* any widget that consumes it.
-
----
-
-### Section E: System Design
-
----
-
-**Q26. How would you extend this module to skip the Permissions screen on repeat launches?**
-
-**A:** In `SplashScreen.initState()`, after the delay timer resolves:
-```dart
-final prefs = await SharedPreferences.getInstance();
-final granted = prefs.getBool(AppConstants.prefKeyPermissionsGranted) ?? false;
-if (granted) {
-  context.goNamed('dashboard');
-} else {
-  context.goNamed('permissions');
-}
-```
-Alternatively, this logic can be placed in a GoRouter `redirect` callback, which would handle deep links and back-button presses correctly across all navigation paths.
-
----
-
-**Q27. How would you handle permissions in a production app if a new OS version changes permission behavior?**
-
-**A:** A robust production strategy:
-1. **Semantic versioning on `permission_handler`**: Subscribe to the package's changelog for OS compatibility notes.
-2. **`minSdk` / `targetSdk` checks**: Wrap OS-version-specific behaviors in `Build.VERSION.SDK_INT` checks using `platform` package or `device_info_plus`.
-3. **Graceful degradation**: If a permission is unavailable (e.g., Android 14 introduced granular media permissions), disable the dependent feature rather than crashing.
-4. **CI matrix testing**: Run integration tests against Android 8, 10, 12, and 14 emulators to catch regressions.
-5. **Staged rollout**: Release permission-affecting updates to 1% → 5% → 50% → 100% of users with crash monitoring.
-
----
-
-**Q28. If MindShield expanded to iOS, what changes would the Permissions module require?**
-
-**A:** `permission_handler` supports iOS natively, but:
-1. **`Info.plist` entries**: iOS requires `NSContactsUsageDescription`, and similar strings for every permission used. The Android manifest approach has no iOS equivalent in code — it is a build-time configuration.
-2. **SMS restriction**: iOS does not grant third-party apps `READ_SMS` access at all. MindShield's SMS-scanning feature would need to use iMessage extensions or be iOS-unavailable.
-3. **Permission groups differ**: iOS permissions are more granular in some areas (e.g., location accuracy) and more restrictive in others. The `PermissionItem.required` logic might differ by platform.
-4. **Platform-specific code**: `permission_handler` handles this internally; no Dart-level platform branching is needed for the basic request/check flow.
 
 ---
 
@@ -817,7 +512,7 @@ These metrics answer: "What percentage of users drop off at permissions? Which s
 
 ---
 
-## 10. Thesis-Ready Academic Section
+## 9. Thesis-Ready Academic Section
 
 ### On the Design and Implementation of a Runtime Permission Management Module for an AI-Powered Mobile Cybersecurity Application
 
@@ -928,7 +623,7 @@ The MindShield Permissions Module demonstrates that a production-quality, compli
 
 ---
 
-## 11. Glossary
+## 10. Glossary
 
 | Term | Definition |
 |---|---|

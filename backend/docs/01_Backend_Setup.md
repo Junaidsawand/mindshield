@@ -28,7 +28,6 @@
 15. [Assumptions & Constraints](#15-assumptions--constraints)
 16. [Implementation Decisions & Trade-offs](#16-implementation-decisions--trade-offs)
 17. [Future Work (Phase 2.2+)](#17-future-work-phase-22)
-18. [Viva / Interview Preparation](#18-viva--interview-preparation)
 
 ---
 
@@ -878,37 +877,10 @@ INFO     app.main | MindShield API is ready — listening on 0.0.0.0:8000
 
 ---
 
-## 17. Future Work (Phase 2.2+)
+### Production Deployment & Scaling Roadmap
 
-| Phase | Feature |
-|-------|---------|
-| 2.2 | Real NLP model: replace `PlaceholderModelLoader` with `BertModelLoader` or `TfIdfSvmModelLoader` |
-| 2.3 | Async model inference to prevent blocking the event loop during slow predictions |
-| 2.4 | SQLite/PostgreSQL persistence for scan history |
-| 2.5 | API key authentication middleware |
-| 2.6 | Rate limiting middleware (per-IP) |
-| 2.7 | Batch analysis endpoint (`POST /api/v1/analyze/batch`) |
-| 2.8 | Docker containerisation for deployment |
-| 2.9 | Prometheus metrics endpoint (`/metrics`) |
-
----
-
-## 18. Viva / Interview Preparation
-
-**Q: Why FastAPI instead of Flask or Django?**  
-A: FastAPI provides async-native ASGI, automatic OpenAPI documentation from type annotations, and built-in Pydantic v2 validation. For an AI inference API that may experience slow model calls, async I/O is architecturally important. Flask requires Quart or manual async handling; Django REST Framework is significantly more complex with no async advantage.
-
-**Q: What is the purpose of the `BaseModelLoader` interface?**  
-A: It is an application of the Dependency Inversion Principle. The service layer (`AnalysisService`) depends on the abstract `BaseModelLoader`, not on any concrete model implementation. This means Phase 2.2 can replace `PlaceholderModelLoader` with `BertModelLoader` without changing a single line of service, router, or schema code.
-
-**Q: Why is 94% test coverage acceptable rather than 100%?**  
-A: The 6% of uncovered lines consists of: `__repr__` methods on exceptions (developer aid only), unreachable fallback branches in the model loader's `predict()` method when text argument is not actually processed, and the `_JsonFormatter`'s colour escape sequences that require a real terminal to trigger. These lines do not represent business logic. The critical paths — all service logic, all routers, all validators — achieve 100% coverage.
-
-**Q: How does the system prevent misconfiguration?**  
-A: `pydantic-settings` raises a `ValidationError` at process startup if any required field is missing or has an invalid type/value. For example, setting `PORT=abc` fails immediately rather than causing a bind error at network startup. This is the "fail fast" principle.
-
-**Q: What happens when an unhandled exception occurs?**  
-A: The `_unhandled_exception_handler` in `main.py` catches any `Exception` that was not caught by more specific handlers. It logs the full traceback using `logger.exception()` (which includes the stack trace) and returns a generic `{"success": false, "error": {"error_code": "internal_error"}}` response. No internal details (file paths, stack frames, variable values) are ever returned to the client.
-
-**Q: How would you scale this backend for production?**  
-A: (1) Deploy multiple uvicorn workers behind Nginx using `gunicorn -k uvicorn.workers.UvicornWorker`. (2) Add a Redis-backed rate limiter to prevent abuse. (3) Move model loading to a separate inference service (microservice pattern) to scale inference independently of request routing. (4) Add Docker + Kubernetes deployment manifests for horizontal scaling.
+For production deployment at scale, the architecture is designed to evolve across four layers:
+1. **WSGI/ASGI Process Management**: Deploy multiple Uvicorn worker processes managed by Gunicorn (`gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app`) behind an Nginx reverse proxy.
+2. **Rate Limiting & Threat Protection**: Integrate Redis-backed sliding window rate limiting middleware to prevent API abuse and Denial of Service (DoS) attempts on inference endpoints.
+3. **Microservice Inference Decoupling**: Offload model loading and heavy GPU/CPU inference to a dedicated Celery worker pool or Triton Inference Server via gRPC, ensuring API HTTP routers remain fast and non-blocking.
+4. **Container Orchestration**: Package the service with Docker containers managed via Kubernetes, using Horizontal Pod Autoscalers (HPA) triggered by CPU/GPU utilization and request queue depth.

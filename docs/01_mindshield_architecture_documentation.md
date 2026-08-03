@@ -27,7 +27,6 @@
 13. [Design Decisions & Trade-offs](#13-design-decisions)
 14. [Anticipated Challenges & Mitigations](#14-challenges)
 15. [Thesis-Ready Academic Content](#15-thesis-content)
-16. [Viva / Interview Questions & Answers](#16-viva-questions)
 
 ---
 
@@ -823,6 +822,25 @@ One table serves three features. No redundancy.
 
 ---
 
+### Decision 6: API Key Security Architecture
+
+**Decision**: Compile static prototype keys in `api_constants.dart` for v1.0, with a documented production backend proxy architecture.
+
+**Rationale**: Storing the API key in client constants enables rapid prototyping and offline evaluation. For production deployment, client-side API keys risk extraction via APK reverse engineering. The production architecture routes all AI classification calls through an API Gateway microservice that authenticates mobile clients via short-lived OAuth2/JWT tokens, forwarding authorized requests to the AI model endpoint with server-held secrets.
+
+---
+
+### Decision 7: Multi-Tiered Test Automation Strategy
+
+**Decision**: Structured 3-tier testing hierarchy (Unit -> Repository -> Widget).
+
+**Rationale**: 
+1. **Domain Use-Case Unit Tests**: Mock `AnalysisRepository`; assert `AnalyzeSmsUseCase.call(payload)` maps raw API outputs to `ScanResult` entities without rendering UI.
+2. **Repository Integration Tests**: Mock `AnalysisRemoteDataSource` and `AnalysisLocalDataSource`; verify fallback logic throws `NetworkFailure` when offline and persists SQLite records upon successful API responses.
+3. **Widget Tests**: Inject mock `AnalysisProvider` states into `AnalysisResultPage`; verify UI components (`VerdictBanner`, risk gauge) reflect state transitions cleanly.
+
+---
+
 ## 14. Anticipated Challenges & Mitigations
 
 | # | Challenge | Risk | Mitigation Strategy |
@@ -887,159 +905,7 @@ The following academic and industry references should be cited in your literatur
 | APK size | `flutter build apk --analyze-size` |
 | SQLite query time for 1,000 records | Stopwatch around datasource call |
 
----
 
-## 16. Viva / Interview Questions & Answers
-
-### Section A — Architecture
-
-**Q1. What is Clean Architecture and why did you use it?**
-
-> Clean Architecture, proposed by Robert C. Martin, is a software design philosophy that organises code into concentric layers where the inner layers (domain/business logic) are completely independent of outer layers (UI, database, APIs). I used it in MindShield because it allows me to test the AI classification logic without running the app, change the UI without touching business rules, and swap data sources (e.g., replace the REST API with a local model) without modifying any UI code.
-
----
-
-**Q2. What is the difference between Feature-First and Layer-First architecture?**
-
-> Layer-First organises by technical concern: all data code in `/data`, all domain code in `/domain`, all UI in `/presentation`. This means understanding any single feature requires opening three separate top-level folders. Feature-First organises by business capability: all code for the SMS analysis feature lives in `/features/analysis/`, with data, domain, and presentation sub-folders inside it. This means a developer or examiner can understand an entire feature by reading one folder.
-
----
-
-**Q3. What is the Dependency Rule? Does MindShield follow it?**
-
-> The Dependency Rule states that source code dependencies must point inward — outer layers depend on inner layers, never the reverse. In MindShield: `presentation/` depends on `domain/` use-cases; `data/` implements `domain/` repository interfaces; `domain/` imports nothing external. The domain layer has zero knowledge of Flutter, Dio, or SQLite. Yes, MindShield strictly follows this rule.
-
----
-
-**Q4. Why is the domain layer "pure Dart"?**
-
-> Making the domain layer pure Dart means it has no dependency on Flutter widgets, on Dio, on SQLite, or on any other framework. This has two key benefits: (1) the domain can be unit-tested using `dart test` with no Flutter environment — tests run in milliseconds; (2) if we decided to rewrite the UI in a completely different framework, the business logic classes remain untouched.
-
----
-
-**Q5. What is a Use Case and why have one class per action?**
-
-> A Use Case encapsulates a single, discrete business operation — for example, `AnalyzeSmsUseCase` handles exactly the action of sending an SMS for analysis and receiving a verdict. Having one class per action enforces the Single Responsibility Principle: the class has only one reason to change (if the business rule for analysis changes). It also makes the codebase self-documenting; reading the `usecases/` folder gives an instant overview of everything the app can do.
-
----
-
-### Section B — State Management
-
-**Q6. Why Provider over BLoC or Riverpod?**
-
-> Provider is the official Flutter team recommendation for applications of this scale. BLoC adds significant boilerplate — Events, States, Blocs — that is appropriate for large teams but excessive for a single-developer project. Riverpod is technically superior to Provider but has a steeper learning curve and requires understanding of providers-as-global-variables, which can obscure the dependency graph. Provider maps cleanly to the `ChangeNotifier` pattern, which is simple to explain and reason about.
-
----
-
-**Q7. How does Provider notify the UI of state changes?**
-
-> The Provider in MindShield extends `ChangeNotifier`. When an asynchronous operation completes (e.g., the AI API returns a result), the provider calls `notifyListeners()`. Any widget wrapped in `context.watch<AnalysisProvider>()` is automatically rebuilt with the latest state. This is a push model — the UI does not poll; it is notified.
-
----
-
-**Q8. How do you handle loading, success, and error states in a single Provider?**
-
-> Each Provider exposes three state variables: `isLoading` (bool), `data` (nullable entity), and `error` (nullable string). On method call: `isLoading` is set to `true` and `notifyListeners()` is called — the UI shows a spinner. On success: `data` is populated, `isLoading` is `false`. On failure: `error` is populated, `isLoading` is `false`. The UI switches between these three states based on which combination is active.
-
----
-
-### Section C — Networking
-
-**Q9. Why Dio instead of the built-in `http` package?**
-
-> The built-in `http` package handles basic GET/POST but lacks interceptors. MindShield's `error_interceptor.dart` centrally maps HTTP error codes (400, 401, 500) to domain `Failure` objects without duplicating error handling in every datasource. Dio also supports request cancellation (important if the user leaves the analysis screen mid-scan) and granular timeout configuration — the AI API may take 5–10 seconds, so `receiveTimeout` is set to 30 seconds independently of `connectTimeout` (5 seconds).
-
----
-
-**Q10. What is an interceptor in Dio? What interceptors does MindShield use?**
-
-> An interceptor is a middleware component that intercepts every HTTP request before it is sent and every response before it reaches the datasource. MindShield uses two interceptors: (1) `ErrorInterceptor` — converts HTTP 4xx and 5xx responses into typed `Failure` objects so that datasources never see raw HTTP exceptions; (2) `LogInterceptor` — in debug mode only, logs the full request URL, headers, body, and response for debugging purposes.
-
----
-
-**Q11. How does MindShield handle offline scenarios?**
-
-> Before making any API call, `AnalysisRepositoryImpl` invokes `ConnectivityChecker.isConnected`. If the device is offline, it immediately throws a `NetworkFailure` without initiating an HTTP request. This failure propagates to the Provider, which sets `_error` to "No internet connection" and calls `notifyListeners()`. The UI then renders `ErrorView` with a retry button. The History, Spam, and Dashboard features are entirely local (SQLite) and remain fully functional offline.
-
----
-
-### Section D — Local Storage
-
-**Q12. Why SQLite over Hive or Firestore?**
-
-> The History and Spam features require filtering by multiple criteria simultaneously — for example, "all dangerous messages from this week, ordered by date". This is a natural SQL `WHERE threat_level = 'dangerous' AND scanned_at > ? ORDER BY scanned_at DESC` query. Hive is a key-value store that would require loading all records into memory and filtering in Dart — inefficient for large datasets. Firestore would require an internet connection and raises privacy concerns about SMS content leaving the device.
-
----
-
-**Q13. How do Spam, History, and Dashboard share the same database table?**
-
-> All three features query the `scan_results` table but with different predicates. History queries all records ordered by date. Spam filters `WHERE threat_level != 'safe'`. Dashboard aggregates with `GROUP BY threat_level`. This avoids data duplication and ensures consistency — if a record is updated (future feature), all three views reflect it instantly. The use of database indexes on `threat_level` and `scanned_at` ensures query performance.
-
----
-
-### Section E — Security & Privacy
-
-**Q14. Does MindShield store SMS messages on a server?**
-
-> No. The full SMS body is transmitted to the AI classification API for analysis, but MindShield does not persist any SMS content on a server. The server receives the message body, classifies it, and returns a verdict. All persistent storage of SMS content and scan results is on-device in SQLite. The API call is the only point where SMS data leaves the device.
-
----
-
-**Q15. How is the AI API key secured?**
-
-> In the current FYP implementation, the API key is stored in `api_constants.dart` and compiled into the application binary — a pragmatic approach for prototype purposes. In a production deployment, the API key should be stored server-side, and the mobile app should authenticate with the backend using short-lived tokens, which the backend then uses to forward requests to the AI service. This prevents key extraction via APK reverse engineering.
-
----
-
-**Q16. What permissions does MindShield require and why?**
-
-> MindShield requires two Android permissions: (1) `READ_SMS` — to access the device's SMS inbox so that the user does not need to manually copy-paste messages; (2) `RECEIVE_SMS` — declared for a future real-time background monitoring feature that would automatically scan incoming messages. Both permissions are explained to the user on the `PermissionPage` before the OS dialog is shown, implementing the principle of "privacy by transparency".
-
----
-
-### Section F — Design Patterns
-
-**Q17. What design patterns does MindShield use beyond Clean Architecture?**
-
-> - **Repository Pattern** — Abstracts data access behind an interface, decoupling business logic from infrastructure details.
-> - **Observer Pattern** — Provider/ChangeNotifier implements the Observer pattern; UI widgets observe provider state changes.
-> - **Factory Pattern** — `DioClient` is constructed via a factory method that returns a pre-configured singleton instance.
-> - **Strategy Pattern** (implicit) — `ConnectivityChecker` can be swapped for a mock implementation during testing.
-> - **Facade Pattern** — `DatabaseHelper` provides a simplified interface to the sqflite API.
-
----
-
-**Q18. What is the Repository Pattern and how does MindShield use it?**
-
-> The Repository Pattern defines an abstract interface (`AnalysisRepository`) that specifies *what* data operations are available, without specifying *how* they are implemented. The `AnalysisRepositoryImpl` class provides the concrete implementation. The `AnalyzeSmsUseCase` depends only on the abstract interface. This means during unit testing, a mock repository (`MockAnalysisRepository`) can be injected to simulate API responses without making real network calls.
-
----
-
-### Section G — Scalability & Future
-
-**Q19. How would you add a new feature without modifying existing code?**
-
-> Due to the Feature-First architecture, adding a new feature — for example, a "Bulk Scanner" that processes multiple SMS messages simultaneously — involves: (1) creating a new `features/bulk_scanner/` folder with its own `data/`, `domain/`, and `presentation/` sub-folders; (2) adding a route entry in `app_router.dart`; (3) registering the new Provider in `main.dart`. No existing feature folder is modified. This conforms to the Open/Closed Principle.
-
----
-
-**Q20. If your AI API provider changes, how much code needs to change?**
-
-> Only one file: `analysis_remote_datasource.dart`. This class contains the Dio call to the AI endpoint. If the provider changes from a custom FastAPI server to the Gemini API, only the URL, request format, and response parsing within this single file change. The `AnalysisRepository` interface, the `AnalyzeSmsUseCase`, the `AnalysisProvider`, and the UI pages are completely unchanged. This is the key benefit of the Repository Pattern in Clean Architecture.
-
----
-
-**Q21. How would you implement real-time SMS monitoring (background service)?**
-
-> Real-time monitoring would require a foreground Android service that registers a `BroadcastReceiver` for the `SMS_RECEIVED` intent. In Flutter, this would be implemented using the `flutter_background_service` package. The service would receive the SMS broadcast, extract the message body, call the AI API, and — if classified as dangerous — display a system notification. The `RECEIVE_SMS` permission is already declared in `AndroidManifest.xml` in preparation for this enhancement.
-
----
-
-**Q22. What automated tests would you write for the Analysis feature?**
-
-> - **Unit test for `AnalyzeSmsUseCase`** — Mock `AnalysisRepository`; verify that `useCase.call("phishing text")` returns a `ScanResult` with `threatLevel == dangerous`.
-> - **Unit test for `AnalysisRepositoryImpl`** — Mock `AnalysisRemoteDataSource` and `AnalysisLocalDataSource`; verify offline check throws `NetworkFailure`; verify result is saved to local datasource on successful API call.
-> - **Widget test for `AnalysisResultPage`** — Inject a mock `AnalysisProvider` with pre-set state; verify `VerdictBanner` renders "DANGEROUS" text and uses the correct colour.
 
 ---
 

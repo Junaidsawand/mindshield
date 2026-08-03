@@ -20,9 +20,8 @@
 7. [Design Decisions & Rationale](#7-design-decisions--rationale)
 8. [Engineering Challenges & Resolutions](#8-engineering-challenges--resolutions)
 9. [Verification & Testing](#9-verification--testing)
-10. [Interview / Viva Questions & Answers](#10-interview--viva-questions--answers)
-11. [Thesis-Ready Academic Content](#11-thesis-ready-academic-content)
-12. [References](#12-references)
+10. [Thesis-Ready Academic Content](#10-thesis-ready-academic-content)
+11. [References](#11-references)
 
 ---
 
@@ -692,120 +691,17 @@ A successful debug APK build confirms:
 
 ---
 
-## 10. Interview / Viva Questions & Answers
-
 ---
 
-**Q1. What architectural pattern does MindShield use, and why did you choose it over a simpler approach?**
+## 10. Thesis-Ready Academic Content
 
-**A:** MindShield uses **Feature-First Clean Architecture** — a vertical slicing strategy where the codebase is organised by feature (inbox, spam, analysis) rather than by technical layer (all models together, all repositories together). Within each feature, we still apply Clean Architecture's three horizontal layers: data, domain, and presentation.
-
-I chose this over a flat or layer-first structure for three reasons. First, **discoverability** — everything related to, say, the Inbox feature lives in `lib/features/inbox/`. A new developer can open that folder and understand the entire feature without context-switching across directories. Second, **isolation** — features are loosely coupled; deleting the spam feature doesn't cascade into other folders. Third, **testability** — the domain layer is pure Dart with no framework imports, so it can be unit-tested without a device, emulator, or Flutter test runner.
-
----
-
-**Q2. Explain the dependency rule in Clean Architecture and how MindShield enforces it.**
-
-**A:** The dependency rule states that source-code dependencies must point inward — toward higher-level policies and away from lower-level implementation details. In MindShield's three-layer model: the presentation layer may depend on the domain layer, and the data layer may depend on the domain layer, but the domain layer may not depend on anything outside itself.
-
-We enforce this through Dart's import system. The domain layer's files (`entities/`, `repositories/` interfaces) import only `dart:core` — no Flutter SDK, no Dio, no SQLite. The data layer implements the abstract repository interfaces defined in domain. The presentation layer calls domain use cases through Provider, never directly instantiating data-layer classes. This makes the business logic testable without a database or network connection.
-
----
-
-**Q3. Why did you replace the `telephony` package with `flutter_sms_inbox`?**
-
-**A:** The `telephony` package was last published in 2021 and is officially discontinued. More critically, it is incompatible with Android Gradle Plugin 8.x, which is required by Flutter 3.29.3. AGP 8 mandates that every Android library declares a `namespace` in its `build.gradle` file. The `telephony` plugin predates this requirement, so its build script does not include the declaration, causing a configuration-phase exception: *"Namespace not specified."* This is a compile-time failure, not a runtime warning — the APK cannot be built at all with `telephony` present.
-
-`flutter_sms_inbox` provides equivalent functionality (reading from Android's `content://sms/inbox` ContentProvider), is actively maintained, and correctly declares its namespace for AGP 8 compatibility.
-
----
-
-**Q4. What is the role of `WidgetsFlutterBinding.ensureInitialized()` and when is it required?**
-
-**A:** Flutter's platform channels (the bridge between Dart and native Android/iOS code) are only operational after the Flutter engine's binding layer has been initialised. `WidgetsFlutterBinding.ensureInitialized()` guarantees this initialisation has completed before `runApp()` is called.
-
-It is required whenever `main()` is declared `async` and calls a platform channel before `runApp()` — for example, `SharedPreferences.getInstance()` to read the saved theme mode, or `flutter_local_notifications` initialisation. Without it, such calls throw a `ServicesBinding` error because the binding hasn't registered the platform message handler yet.
-
-In MindShield, we include it proactively even though Module 1 makes no platform calls before `runApp()`, because Module 2 (Permissions) will read SharedPreferences in `main()` to determine the initial route, and we want the pattern established from the start.
-
----
-
-**Q5. How does Material Design 3's `ColorScheme.fromSeed()` differ from Material Design 2's colour system?**
-
-**A:** In Material Design 2, a theme required manually specifying `primaryColor`, `accentColor`, `backgroundColor`, `errorColor`, and several others — typically 6 to 10 colours. Ensuring these were accessible (sufficient contrast ratio) and harmonious required manual work or a design tool.
-
-Material Design 3 replaces this with a **tonal palette** system based on the HCT colour space (Hue, Chroma, Tone). `ColorScheme.fromSeed()` accepts a single seed colour and algorithmically derives a full palette of 30 named colour roles — primary, secondary, tertiary, their container variants, surface variants, and on-colour variants — all at WCAG-compliant contrast ratios. The algorithm also maps these to correct light and dark mode values automatically.
-
-For MindShield, the seed is `#1E88E5` (electric blue), chosen for its psychological associations with trust and technology. Material 3 derives the full dark-mode palette from the same seed, so we do not maintain a separate colour list for dark mode.
-
----
-
-**Q6. Explain GoRouter's declarative model versus Navigator 1.0's imperative model. What problem does it solve in a multi-screen app?**
-
-**A:** Navigator 1.0 is imperative: each screen calls `Navigator.push()` or `Navigator.pop()` to control navigation. The next screen to show is hardcoded inside the current screen. This creates tight coupling — if the permissions check should now redirect to a new onboarding screen, every screen that previously navigated to dashboard must be updated.
-
-GoRouter is declarative: all routing logic lives in a single `GoRouter` configuration object. Routes are defined as a tree of `GoRoute` objects, each mapping a path to a widget builder. A `redirect` callback evaluates application state (e.g., "has the user granted SMS permission?") and can redirect any navigation attempt to a different route — without any individual screen knowing about the redirect. This is analogous to a middleware chain in a web server.
-
-For MindShield, this means the permissions gate will be implemented once in `app_router.dart` as a redirect function. No individual screen will contain permission-checking logic.
-
----
-
-**Q7. What is the Singleton pattern, and why is it appropriate for `DioClient`?**
-
-**A:** The Singleton pattern ensures a class has exactly one instance throughout the application's lifetime, with a global access point to that instance. In Dart, this is implemented via a private constructor and a static `instance` getter that returns the pre-created object.
-
-`DioClient` is a Singleton because `Dio` internally manages an HTTP connection pool — a set of reusable TCP connections to the server. If multiple `Dio` instances were created, each would maintain its own pool, wasting memory and socket descriptors. With a singleton, all network requests in the application share one pool, allowing connection reuse and reducing latency for subsequent requests to the same host.
-
-The `late final Dio dio` field is additionally lazy — the `Dio` object is not constructed until first accessed — and immutable after construction, preventing accidental replacement.
-
----
-
-**Q8. The NDK build warning says plugins require NDK 27 but NDK 26 is installed. Will this cause runtime problems?**
-
-**A:** No. The Android NDK (Native Development Kit) is used to compile C/C++ native code embedded in Flutter plugins. NDK versions within the same major generation are **backward compatible** — native code compiled with NDK 26 runs correctly on all Android versions that NDK 27 would support. The message is an advisory from the Android Gradle Plugin suggesting you use the highest requested version to avoid potential ABI differences, not a statement that the binaries are broken.
-
-In our case, NDK 27 was listed in the SDK directory but its installation was incomplete (only a `.installer` marker present, no actual toolchain binaries). Attempting to use it caused a hard build failure. NDK 26 is fully installed and produces correct output. The warning can be permanently resolved by completing the NDK 27 installation through Android Studio's SDK Manager.
-
----
-
-**Q9. How would you add a new feature module (e.g., "Reports") to this architecture without breaking existing modules?**
-
-**A:** Adding a new feature follows a strict, non-destructive contract:
-
-1. Create `lib/features/reports/` with three subfolders: `data/`, `domain/`, `presentation/`
-2. Define the domain entity (`ReportEntity`) and repository interface (`ReportRepository`) — pure Dart, no imports from other features
-3. Implement the repository in the data layer (`ReportRepositoryImpl`) using SQLite
-4. Create the provider (`ReportProvider extends ChangeNotifier`) in the presentation layer
-5. Add a `GoRoute` for `/reports` in `app_router.dart`
-6. Register `ChangeNotifierProvider<ReportProvider>` in `main.dart`'s `MultiProvider`
-
-No existing feature files are modified. The router gets one new route; `main.dart` gets one new provider registration. All other modules are untouched. This is the **Open/Closed Principle** in practice: the system is open for extension but closed for modification.
-
----
-
-**Q10. What does `flutter analyze` check, and what was the lint error it caught in this project?**
-
-**A:** `flutter analyze` runs the Dart static analyser, which performs:
-- **Type checking**: ensures all expressions have compatible types
-- **Flow analysis**: detects unreachable code and always-null expressions
-- **Lint rules**: style and correctness checks defined in `analysis_options.yaml` (we use the `flutter_lints` package which enforces the Flutter team's recommended rules)
-- **Dead code detection**: finds unused imports, variables, and parameters
-
-The lint caught in this project was `invalid_runtime_check_with_js_interop_types` — the `const` modifier was applied to an empty list literal `providers: const []` inside `MultiProvider`. A `const` list is immutable, but `MultiProvider.providers` is typed as `List<SingleChildWidget>`, which is mutable. The `const` keyword was therefore semantically incorrect and was removed.
-
-Additionally, `flutter analyze` caught a `creation_with_non_type` error in the test file where the auto-generated scaffold test tried to instantiate `MyApp` — a class that no longer existed after we replaced `main.dart`. This was resolved by updating the test to use `MindShieldApp`.
-
----
-
-## 11. Thesis-Ready Academic Content
-
-### 11.1 Abstract (Module 1 Contribution)
+### 10.1 Abstract (Module 1 Contribution)
 
 > The development of a production-grade mobile application requires a foundational engineering phase that, while producing no directly user-observable output, determines the long-term maintainability, scalability, and testability of the entire system. This section documents the architectural bootstrapping of MindShield, an AI-powered Short Message Service (SMS) cybersecurity application developed for the Android platform using the Flutter framework. The bootstrap phase established a Feature-First Clean Architecture directory contract, configured a Material Design 3 visual design system, integrated a declarative navigation framework, and resolved a series of Android build toolchain compatibility issues arising from the use of a contemporary Gradle plugin version. The resulting project skeleton passes static analysis with zero violations and produces a valid Android Package Kit (APK) artefact, providing a verified foundation for subsequent feature development.
 
 ---
 
-### 11.2 Introduction
+### 10.2 Introduction
 
 The proliferation of SMS-based phishing attacks — commonly referred to as "smishing" — has created a pressing need for intelligent, on-device threat detection systems accessible to general users (Mishra & Soni, 2019). MindShield addresses this problem by applying machine learning classification to incoming SMS messages, categorising them as legitimate, suspicious, or spam with an associated confidence score.
 
@@ -815,9 +711,9 @@ This chapter documents the design and implementation of Module 1: the project bo
 
 ---
 
-### 11.3 Architectural Design
+### 10.3 Architectural Design
 
-#### 11.3.1 Feature-First Clean Architecture
+#### 10.3.1 Feature-First Clean Architecture
 
 The architecture adopted for MindShield is a variant of the Clean Architecture framework proposed by Martin (2017), adapted for the vertical-slicing concerns of a feature-rich mobile application. The central principle of Clean Architecture — that the dependency graph must point inward, from low-level implementation details toward high-level business policies — is preserved. However, rather than organising files by technical layer across the entire application, MindShield organises files by feature first, then by layer within each feature.
 
@@ -831,13 +727,13 @@ The three internal layers within each feature follow Clean Architecture's depend
 
 **(iii) Presentation Layer.** Contains Flutter widgets, screen classes, and `ChangeNotifier` subclasses (Providers). The presentation layer reads application state from Providers and dispatches actions (method calls) back to them. It has no direct knowledge of data sources — all state transitions are mediated through the domain layer.
 
-#### 11.3.2 State Management
+#### 10.3.2 State Management
 
 The Provider package (version 6.1.2) was selected as the state management solution for MindShield. Provider implements the Observer pattern through Flutter's `InheritedWidget` mechanism: a `ChangeNotifier` subclass holds application state and broadcasts change notifications via `notifyListeners()`, triggering widget subtrees registered with `Consumer<T>` or `context.watch<T>()` to rebuild.
 
 This choice was made after evaluating three principal alternatives. The BLoC (Business Logic Component) pattern, proposed by Soares (2018), uses asynchronous `Stream`s and explicit `Event` classes to communicate state changes. While BLoC provides clear audit trails of state transitions, its verbosity introduces substantial boilerplate for the CRUD-dominated data flows present in MindShield (fetch messages, insert analysis result, update spam flag). The Riverpod library (Rousselet, 2021) offers a compile-safe, testable extension of Provider's model but requires familiarity with its `ProviderScope`, `Ref`, and `AsyncNotifier` primitives that may reduce accessibility for academic assessment. Provider's explicit method-call model — `context.read<InboxProvider>().fetchMessages()` — was judged most legible for the intended audience.
 
-#### 11.3.3 Navigation
+#### 10.3.3 Navigation
 
 GoRouter (version 14.6.2), the navigation solution officially recommended by the Flutter team, was adopted for its declarative routing model. In contrast to Navigator 1.0's imperative `push`/`pop` API, GoRouter defines all application routes in a single configuration object. Navigation state is expressed as a URL path, enabling deep-link support without additional configuration and facilitating the implementation of cross-cutting navigation concerns — such as permission gating — as `redirect` callbacks applied uniformly to all routes.
 
@@ -845,7 +741,7 @@ The separation of routing logic from screen logic is consistent with the Single 
 
 ---
 
-### 11.4 Implementation
+### 10.4 Implementation
 
 The Flutter project was initialised using the `flutter create` command with the `--org com.mindshield` and `--platforms android` flags, producing the Android-specific project scaffolding including the Gradle build system, `AndroidManifest.xml`, and required directory structure.
 
@@ -855,7 +751,7 @@ Eight named routes were registered in the GoRouter configuration, corresponding 
 
 ---
 
-### 11.5 Challenges and Resolutions
+### 10.5 Challenges and Resolutions
 
 The bootstrapping phase encountered three engineering challenges that required systematic diagnosis and resolution, each offering insight into the complexity of managing cross-platform build toolchains.
 
@@ -867,19 +763,19 @@ The bootstrapping phase encountered three engineering challenges that required s
 
 ---
 
-### 11.6 Verification
+### 10.6 Verification
 
 The correctness of the bootstrap module was verified through three complementary mechanisms. Static analysis using `flutter analyze` confirmed zero violations across all source files. A widget smoke test using `flutter test` validated that the application's root widget mounts without runtime exceptions and that the splash screen renders its title text. Debug APK compilation using `flutter build apk --debug` verified that all Dart source code, Kotlin plugin bindings, and NDK-compiled native libraries link correctly into a deployable Android package. All three checks were executed in sequence and passed, providing high confidence in the module's correctness as a foundation for subsequent development.
 
 ---
 
-### 11.7 Conclusion
+### 10.7 Conclusion
 
 This chapter has presented the design, implementation, and verification of the MindShield project's architectural bootstrap. The Feature-First Clean Architecture structure establishes a scalable, testable codebase organisation that will accommodate the addition of AI inference, database persistence, and real-time SMS monitoring in subsequent modules without architectural refactoring. The resolution of three build toolchain challenges provides a stable and well-understood Android build environment. The resulting artefact — a compilable, routable, and correctly themed Flutter application skeleton — constitutes the necessary and sufficient foundation for the feature development phases documented in subsequent chapters.
 
 ---
 
-## 12. References
+## 11. References
 
 - Flutter Team. (2024). *Flutter documentation: Go Router*. Google. https://pub.dev/packages/go_router
 - Flutter Team. (2024). *Material Design 3 in Flutter*. Google. https://m3.material.io/develop/flutter

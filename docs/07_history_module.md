@@ -38,7 +38,7 @@ lib/features/history/
 - **Lazy Detailed Loading**: The `HistoryCard` only displays summary metadata (sender, date, verdict, confidence, primary threat). It does not hold the heavy `AnalysisResult` object, ensuring the `ListView.builder` remains performant even with thousands of history records.
 
 ## 6. Design Decisions
-- **Reuse of `SmsMessage` Domain Entity**: Instead of creating a unique `HistoryItem` model, we reused `SmsMessage`. This decision was made because the attributes required for the history list view are identical to those needed in the inbox. It significantly reduces boilerplate mapping code and ensures architectural consistency.
+- **Reuse of `SmsMessage` Domain Entity**: Instead of creating a unique `HistoryItem` model, we reused `SmsMessage`. This decision was made because the attributes required for the history list view are identical to those needed in the inbox. It significantly reduces boilerplate mapping code and ensures architectural consistency. *Trade-off analysis*: While reusing `SmsMessage` avoids mapping overhead, it risks violating the Interface Segregation Principle (ISP) if history-specific attributes (e.g. `dispute_status`, `archived_timestamp`) diverge in the future. For the current domain boundary, reuse remains the pragmatic choice.
 - **In-Memory Filtering vs Database Queries**: Currently, filtering and sorting are handled in-memory by the `HistoryProvider` on the `_allMessages` list. This decision prioritizes immediate UI responsiveness during the prototyping phase. In a production environment with millions of rows, this logic will be pushed down to the SQLite repository via SQL `WHERE` and `ORDER BY` clauses to ensure scalability.
 - **Decoupled Data Repository**: We created `DummyHistoryRepository` instead of reusing `DummyInboxRepository` to fetch data. While the data model is identical, the semantic origin of the data differs (archived vs unread). Decoupling them allows independent future implementation (e.g., querying a `history_table` vs an `inbox_table`).
 
@@ -57,19 +57,3 @@ lib/features/history/
 
 ### 8.2. Methodology (Draft Segment)
 *The architecture of the historical analysis ledger employs a decoupled Provider pattern to separate the graphical user interface from the underlying data manipulation logic. To optimize rendering performance within the mobile environment, the system adopts a Lazy Loading strategy for detailed threat metadata. The primary ledger interface constructs a lightweight representation of historical messages—encapsulating only the temporal data, sender heuristics, and the aggregate threat confidence score. High-dimensionality data, such as token-level feature importance weights and psychological tactic matrices, are deferred from memory allocation until explicit user navigation is initiated.*
-
-## 9. Viva / Interview Questions and Answers
-
-**Q: Explain the architectural pattern you used for the History module and why you chose it.**
-**A:** We utilized a Feature-First architecture paired with the Provider pattern (`ChangeNotifier`). This approach was chosen to enforce strict separation of concerns. The `HistoryScreen` acts purely as a declarative UI layer, the `HistoryProvider` encapsulates the business rules for filtering and sorting, and the `DummyHistoryRepository` abstracts the data access. This makes the module highly testable and allows us to easily swap the dummy data source for a real SQLite database without altering the presentation logic.
-
-**Q: You mentioned reusing the `SmsMessage` model. What are the potential drawbacks of this approach compared to creating a dedicated `HistoryItem` model?**
-**A:** The primary risk is the violation of the Interface Segregation Principle if the two contexts eventually diverge significantly. If the History view suddenly requires unique fields that the Inbox view does not (e.g., 'user_dispute_status' or 'archived_date'), stuffing those into `SmsMessage` could bloat the class with nullable fields. However, within the current scope, an SMS is fundamentally the same entity regardless of where it is viewed, making reuse the most pragmatic and efficient choice to avoid unnecessary mapping overhead.
-
-**Q: How does the History screen maintain performance if the user has 10,000 analyzed messages?**
-**A:** Performance is maintained through two primary mechanisms:
-1. **UI Layer:** We utilize `ListView.builder`, which lazily builds child widgets only when they scroll into the viewport, keeping the widget tree footprint small regardless of list size.
-2. **Data Layer (Future):** While currently filtering in-memory for prototyping, the architecture is designed so that the `HistoryProvider` will eventually pass offset and limit parameters to the repository, utilizing SQLite `LIMIT` and `OFFSET` commands for true data-layer pagination.
-
-**Q: How does the History module interact with the Analysis module?**
-**A:** The interaction is loosely coupled via the application router (`GoRouter`). The History module does not depend on the `AnalysisProvider` or `AnalysisResult`. When a user taps a history card, the History module simply pushes the `/analysis` route and passes the tapped `SmsMessage` object as a payload argument. The Analysis module is then independently responsible for using that message to fetch and render the detailed AI explanation.
