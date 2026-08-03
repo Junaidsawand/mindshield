@@ -1,16 +1,14 @@
 """
-MindShield Backend — Test Configuration & Fixtures.
+MindShield Backend — Test Configuration & Fixtures (Phase 2.2).
 
 Provides shared pytest fixtures available to all test modules:
   - ``test_settings`` — test-mode Settings override.
   - ``test_app``      — isolated FastAPI application instance.
   - ``client``        — synchronous TestClient for HTTP assertions.
 
-Design Note:
-    Each test module receives a fresh app instance via the ``test_app``
-    fixture, preventing state leakage between test runs. The Settings
-    cache is cleared in the ``test_settings`` fixture to ensure test
-    values don't pollute production config.
+The ``test_app`` fixture injects a loaded ``MockModelLoader``
+(Phase 2.2 heuristic engine) into the module-level registry so tests
+exercise the full classification pipeline without starting uvicorn.
 """
 
 from __future__ import annotations
@@ -21,7 +19,7 @@ from fastapi.testclient import TestClient
 
 import app.main as main_module
 from app.core.config import Settings, get_settings
-from app.core.model_loader import PlaceholderModelLoader
+from app.core.mock_model_loader import MockModelLoader
 from app.main import create_app
 
 
@@ -42,22 +40,15 @@ def test_settings() -> Settings:
 
 @pytest.fixture()
 def test_app(test_settings: Settings) -> FastAPI:
-    """Return a fresh FastAPI application instance for each test."""
-    # Inject a loaded placeholder into the module-level registry
-    loader = PlaceholderModelLoader()
+    """Return a fresh FastAPI application instance with MockModelLoader."""
+    loader = MockModelLoader()
     loader.load()
     main_module._model_loader = loader
-
-    application = create_app(settings=test_settings)
-    return application
+    return create_app(settings=test_settings)
 
 
 @pytest.fixture()
 def client(test_app: FastAPI) -> TestClient:
-    """Return a synchronous TestClient wrapping the test app.
-
-    Using TestClient (synchronous) avoids the complexity of async
-    test fixtures while still exercising the full ASGI stack.
-    """
+    """Return a synchronous TestClient wrapping the test app."""
     with TestClient(test_app, raise_server_exceptions=True) as c:
         yield c

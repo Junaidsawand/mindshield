@@ -55,10 +55,10 @@ class TestHealthEndpoint:
         data = client.get("/health").json()
         assert data["model_loaded"] is True
 
-    def test_health_model_version_is_placeholder(self, client: TestClient) -> None:
-        """Model version must identify the placeholder in Phase 2.1."""
+    def test_health_model_version_is_mock(self, client: TestClient) -> None:
+        """Model version must identify the mock in Phase 2.1."""
         data = client.get("/health").json()
-        assert "placeholder" in data["model_version"]
+        assert "mock" in data["model_version"]
 
     def test_health_response_has_uptime(self, client: TestClient) -> None:
         """``uptime_seconds`` must be a non-negative number."""

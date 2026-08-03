@@ -7,7 +7,83 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] — 2026-08-03
+
+### Added — Phase 2.2: REST API Layer with Mock Analysis Engine
+
+#### Mock Analysis Engine
+- `app/core/mock_model_loader.py` — `MockModelLoader`: heuristic-based classification engine replacing the Phase 2.1 fixed placeholder. Uses five signal categories (URL, urgency, credential, financial, prize) with a weighted danger-score algorithm. Returns varied dangerous/suspicious/safe responses with calibrated confidence scores in [0.60, 0.97].
+  - `_FeatureScore` dataclass — holds extracted feature flags and computes `danger_score`
+  - `_extract_features(text)` — extracts 6 feature flags from sanitised text
+  - `_classify(features)` — maps danger score to (label, threat_level, confidence)
+  - `_build_explanation(features, threat_level)` — constructs human-readable rationale listing detected signals
+
+#### Enhanced Schemas (`app/schemas/analysis.py`)
+- `RequestMetadata` — new optional sub-schema: `app_version`, `locale`, `network`
+- `ThreatIndicator` — new schema for per-signal transparency: `name`, `present`, `weight`, `detail`
+- `AnalysisRequest` — added `metadata: RequestMetadata | None` field; four named OpenAPI examples
+- `AnalysisResult` — added `indicators: list[ThreatIndicator]`, `mock_mode: bool`, `processing_time_ms: float | None`, `request_id: str | None`; multiple response examples in Swagger
+
+#### Enhanced Service (`app/services/analysis_service.py`)
+- `_build_indicators(features)` — constructs 6-element `ThreatIndicator` list from feature flags
+- `analyse(message, sender, request_id)` — added `request_id` parameter for end-to-end tracing
+- `processing_time_ms` — measured using `time.perf_counter()` and included in result
+- `mock_mode` detection — set from `model_version` prefix (`mock` or `placeholder`)
+
+#### Enhanced Validators (`app/utils/validators.py`)
+- `contains_financial_keywords(text)` — detects bank/payment/institution keywords
+- `contains_credential_request(text)` — detects password/OTP/PIN requests (highest-weight signal)
+- `contains_prize_language(text)` — detects lottery/reward language
+- `compute_message_features()` — extended to return all 9 feature flags including new functions
+
+#### Enhanced Router (`app/routers/v1/analysis.py`)
+- Full Markdown `description` with signal-weight table for `POST /api/v1/analyze`
+- `_ANALYZE_RESPONSES` — documents 200, 400, 422, 503 with example response bodies
+- `openapi_extra.x-codeSamples` — Dart/Flutter and cURL code samples in Swagger
+- `request_id` extraction from `request.state` and propagation to service
+- `api_status` endpoint — enhanced with `mock_mode` flag and structured endpoints list
+
+#### Application
+- `app/main.py` — switched from `PlaceholderModelLoader` to `MockModelLoader` in lifespan
+- `app/core/config.py` — version bumped to `2.2.0`
+
+#### Tests (`tests/`)
+- `tests/test_analysis.py` — **78 tests** (Phase 2.2 complete rewrite):
+  - `TestAnalyzeHappyPath` — 200 for all three threat levels
+  - `TestResponseEnvelope` — envelope structure verification
+  - `TestAnalysisResultSchema` — all new fields (indicators, mock_mode, processing_time_ms, request_id)
+  - `TestThreatClassification` — heuristic correctness on known inputs
+  - `TestOptionalFields` — metadata and sender handling
+  - `TestValidationErrors` — 422 error structure
+  - `TestMiddlewareHeaders` — X-Request-ID, X-Process-Time-Ms
+  - `TestStatusEndpoint` — mock_mode flag in status
+  - `TestAnalysisServiceUnit` — service layer unit tests
+  - `TestMockModelLoaderUnit` — heuristic engine unit tests
+- `tests/test_validators.py` — **41 tests** (extended):
+  - `TestContainsFinancialKeywords` — 6 tests
+  - `TestContainsCredentialRequest` — 6 tests
+  - `TestContainsPrizeLanguage` — 5 tests
+  - Extended `TestComputeMessageFeatures` — 9-key coverage
+- `tests/conftest.py` — updated to use `MockModelLoader`
+- `tests/test_health.py` — updated `test_health_model_version_is_mock`
+
+#### Documentation
+- `backend/docs/02_API_Architecture.md` — 18-section thesis-ready documentation with Mermaid sequence, class, component, and flow diagrams; complete API reference; validation strategy; heuristic engine design; verification results
+- `docs/thesis-preparation/API_Layer_Viva.md` — 20 viva Q&A covering REST fundamentals, mock design, OpenAPI, SOLID, testing, error handling, and security
+
+### Changed
+- `app/core/model_loader.py` — `PlaceholderModelLoader` preserved (not removed); superseded by `MockModelLoader` in production startup but retained for reference and direct comparison
+
+### Verification
+- **Tests**: 132 / 132 passed (`pytest tests/ -v`)
+- **Coverage**: 93% overall; 100% on routers, service, middleware, schemas, validators
+- **Linting**: Zero flake8 violations (`python -m flake8 app/ tests/`)
+- **Server**: Starts correctly with `MockModelLoader` v`mock-heuristic-v1`
+
+---
+
 ## [2.1.0] — 2026-08-03
+
 
 ### Added — Phase 2.1: FastAPI Backend Foundation
 

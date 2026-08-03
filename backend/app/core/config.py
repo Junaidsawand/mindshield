@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # Application Metadata
     # ------------------------------------------------------------------
     app_name: str = Field(default="MindShield API", description="Human-readable name")
-    app_version: str = Field(default="2.1.0", description="Semantic version")
+    app_version: str = Field(default="2.2.0", description="Semantic version")
     app_env: Literal["development", "staging", "production"] = Field(
         default="development",
         description="Deployment environment",

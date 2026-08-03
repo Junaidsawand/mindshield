@@ -31,7 +31,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import Settings, get_settings
 from app.core.exceptions import MindShieldException
-from app.core.model_loader import BaseModelLoader, PlaceholderModelLoader
+from app.core.model_loader import BaseModelLoader
+from app.core.mock_model_loader import MockModelLoader
 from app.logging.logger import configure_logging, get_logger
 from app.middleware.cors import configure_cors
 from app.middleware.request_logger import RequestLoggerMiddleware
@@ -84,12 +85,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     Startup:
         1. Configure logging.
-        2. Load model (PlaceholderModelLoader in Phase 2.1).
+        2. Load mock engine (MockModelLoader in Phase 2.2).
         3. Log server-ready message.
 
     Shutdown:
         1. Log shutdown signal.
-        2. Release any model resources (no-op in Phase 2.1).
+        2. Release any model resources (no-op in Phase 2.2).
 
     The ``yield`` statement is where FastAPI handles requests.
     """
@@ -106,8 +107,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         settings.app_env,
     )
 
-    # Step 2 — Initialise model loader
-    _model_loader = PlaceholderModelLoader()
+    # Step 2 — Initialise mock model loader (Phase 2.2)
+    _model_loader = MockModelLoader()
     _model_loader.load()
     model_health = _model_loader.health()
 
