@@ -1,0 +1,33 @@
+{
+  "metrics": {
+    "accuracy": 0.9709,
+    "precision": 0.9804,
+    "recall": 0.7812,
+    "f1_score": 0.8696,
+    "f1_macro": 0.9266,
+    "f1_weighted": 0.9694,
+    "roc_auc": 0.9952,
+    "pr_auc": 0.9787,
+    "mcc": 0.8604,
+    "cohen_kappa": 0.8534,
+    "training_time_seconds": 0.6163,
+    "prediction_time_seconds": 0.0554,
+    "model_size_mb": 5.5391,
+    "confusion_matrix": [
+      [
+        450,
+        1
+      ],
+      [
+        14,
+        50
+      ]
+    ]
+  },
+  "cv_stats": {
+    "cv_mean_accuracy": 0.9801,
+    "cv_std_accuracy": 0.0038,
+    "cv_mean_f1": 0.916,
+    "cv_std_f1": 0.0134
+  }
+}

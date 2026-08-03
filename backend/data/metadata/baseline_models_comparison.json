@@ -1,0 +1,944 @@
+{
+  "pipeline_name": "MindShield Classical ML Baseline Engine",
+  "pipeline_version": "3.3.0",
+  "total_experiments_evaluated": 8,
+  "best_classical_model": {
+    "selected_best_model": "linear_svm_count",
+    "model_name": "linear_svm",
+    "vectorizer": "count",
+    "metrics": {
+      "accuracy": 0.9825,
+      "precision": 0.9825,
+      "recall": 0.875,
+      "f1_score": 0.9256,
+      "f1_macro": 0.9579,
+      "f1_weighted": 0.9821,
+      "roc_auc": 0.9908,
+      "pr_auc": 0.9776,
+      "mcc": 0.9177,
+      "cohen_kappa": 0.9158,
+      "training_time_seconds": 0.1183,
+      "prediction_time_seconds": 0.005,
+      "model_size_mb": 0.1936,
+      "confusion_matrix": [
+        [
+          450,
+          1
+        ],
+        [
+          8,
+          56
+        ]
+      ]
+    },
+    "cv_stats": {
+      "cv_mean_accuracy": 0.9825,
+      "cv_std_accuracy": 0.0066,
+      "cv_mean_f1": 0.9264,
+      "cv_std_f1": 0.0287
+    },
+    "export_timestamp": "2026-08-04T01:52:11Z"
+  },
+  "experiments": [
+    {
+      "experiment_key": "multinomial_nb_tfidf",
+      "model_name": "multinomial_nb",
+      "vectorizer": "tfidf",
+      "metrics": {
+        "accuracy": 0.9631,
+        "precision": 1.0,
+        "recall": 0.7031,
+        "f1_score": 0.8257,
+        "f1_macro": 0.9025,
+        "f1_weighted": 0.9603,
+        "roc_auc": 0.9706,
+        "pr_auc": 0.9248,
+        "mcc": 0.8214,
+        "cohen_kappa": 0.8058,
+        "training_time_seconds": 0.0019,
+        "prediction_time_seconds": 0.0002,
+        "model_size_mb": 0.1533,
+        "confusion_matrix": [
+          [
+            451,
+            0
+          ],
+          [
+            19,
+            45
+          ]
+        ]
+      },
+      "cv_stats": {
+        "cv_mean_accuracy": 0.9728,
+        "cv_std_accuracy": 0.0037,
+        "cv_mean_f1": 0.8778,
+        "cv_std_f1": 0.0178
+      },
+      "feature_importance": {
+        "naive_bayes": {
+          "top_spam_features": [
+            {
+              "feature": "call phone",
+              "log_ratio": 3.8098
+            },
+            {
+              "feature": "claim",
+              "log_ratio": 3.2598
+            },
+            {
+              "feature": "prize",
+              "log_ratio": 3.1278
+            },
+            {
+              "feature": "tone",
+              "log_ratio": 2.9064
+            },
+            {
+              "feature": "150p",
+              "log_ratio": 2.8346
+            },
+            {
+              "feature": "rington",
+              "log_ratio": 2.7112
+            },
+            {
+              "feature": "number prize",
+              "log_ratio": 2.7077
+            },
+            {
+              "feature": "guarante",
+              "log_ratio": 2.7065
+            },
+            {
+              "feature": "number cash",
+              "log_ratio": 2.6996
+            },
+            {
+              "feature": "phone now",
+              "log_ratio": 2.6615
+            },
+            {
+              "feature": "servic",
+              "log_ratio": 2.6577
+            },
+            {
+              "feature": "url",
+              "log_ratio": 2.6093
+            },
+            {
+              "feature": "award",
+              "log_ratio": 2.5491
+            },
+            {
+              "feature": "won number",
+              "log_ratio": 2.4897
+            },
+            {
+              "feature": "cs",
+              "log_ratio": 2.4604
+            }
+          ],
+          "top_ham_features": [
+            {
+              "feature": "gt",
+              "log_ratio": -3.0652
+            },
+            {
+              "feature": "lt",
+              "log_ratio": -3.0564
+            },
+            {
+              "feature": "lt gt",
+              "log_ratio": -2.9619
+            },
+            {
+              "feature": "ok",
+              "log_ratio": -2.935
+            },
+            {
+              "feature": "da",
+              "log_ratio": -2.8335
+            },
+            {
+              "feature": "come",
+              "log_ratio": -2.7962
+            },
+            {
+              "feature": "lor",
+              "log_ratio": -2.7726
+            },
+            {
+              "feature": "got",
+              "log_ratio": -2.7375
+            },
+            {
+              "feature": "ll",
+              "log_ratio": -2.6707
+            },
+            {
+              "feature": "work",
+              "log_ratio": -2.6066
+            },
+            {
+              "feature": "home",
+              "log_ratio": -2.6003
+            },
+            {
+              "feature": "later",
+              "log_ratio": -2.4832
+            },
+            {
+              "feature": "say",
+              "log_ratio": -2.436
+            },
+            {
+              "feature": "wat",
+              "log_ratio": -2.4244
+            },
+            {
+              "feature": "way",
+              "log_ratio": -2.4205
+            }
+          ]
+        }
+      },
+      "artifact_dir": "data\\models\\baselines\\multinomial_nb_tfidf",
+      "accuracy": 0.9631,
+      "precision": 1.0,
+      "recall": 0.7031,
+      "f1_score": 0.8257,
+      "roc_auc": 0.9706,
+      "pr_auc": 0.9248,
+      "mcc": 0.8214,
+      "cohen_kappa": 0.8058,
+      "training_time_seconds": 0.0019,
+      "prediction_time_seconds": 0.0002,
+      "model_size_mb": 0.1533
+    },
+    {
+      "experiment_key": "logistic_regression_tfidf",
+      "model_name": "logistic_regression",
+      "vectorizer": "tfidf",
+      "metrics": {
+        "accuracy": 0.9592,
+        "precision": 0.9216,
+        "recall": 0.7344,
+        "f1_score": 0.8174,
+        "f1_macro": 0.8972,
+        "f1_weighted": 0.9572,
+        "roc_auc": 0.9908,
+        "pr_auc": 0.8866,
+        "mcc": 0.8013,
+        "cohen_kappa": 0.7948,
+        "training_time_seconds": 0.0271,
+        "prediction_time_seconds": 0.0003,
+        "model_size_mb": 0.039,
+        "confusion_matrix": [
+          [
+            447,
+            4
+          ],
+          [
+            17,
+            47
+          ]
+        ]
+      },
+      "cv_stats": {
+        "cv_mean_accuracy": 0.9726,
+        "cv_std_accuracy": 0.0067,
+        "cv_mean_f1": 0.8794,
+        "cv_std_f1": 0.0301
+      },
+      "feature_importance": {
+        "logistic_regression": {
+          "top_spam_indicators": [
+            {
+              "feature": "phone",
+              "coefficient": 6.4337
+            },
+            {
+              "feature": "number",
+              "coefficient": 5.2417
+            },
+            {
+              "feature": "call phone",
+              "coefficient": 3.9761
+            },
+            {
+              "feature": "url",
+              "coefficient": 3.9753
+            },
+            {
+              "feature": "txt",
+              "coefficient": 3.8669
+            },
+            {
+              "feature": "free",
+              "coefficient": 3.1446
+            },
+            {
+              "feature": "mobil",
+              "coefficient": 3.0267
+            },
+            {
+              "feature": "text",
+              "coefficient": 2.9406
+            },
+            {
+              "feature": "number number",
+              "coefficient": 2.6003
+            },
+            {
+              "feature": "servic",
+              "coefficient": 2.5674
+            },
+            {
+              "feature": "stop",
+              "coefficient": 2.5044
+            },
+            {
+              "feature": "call",
+              "coefficient": 2.4443
+            },
+            {
+              "feature": "repli",
+              "coefficient": 2.4139
+            },
+            {
+              "feature": "150p",
+              "coefficient": 2.3774
+            },
+            {
+              "feature": "tone",
+              "coefficient": 2.3367
+            }
+          ],
+          "top_ham_indicators": [
+            {
+              "feature": "ok",
+              "coefficient": -1.5452
+            },
+            {
+              "feature": "got",
+              "coefficient": -1.1612
+            },
+            {
+              "feature": "lt",
+              "coefficient": -1.1349
+            },
+            {
+              "feature": "gt",
+              "coefficient": -1.111
+            },
+            {
+              "feature": "work",
+              "coefficient": -1.0465
+            },
+            {
+              "feature": "da",
+              "coefficient": -1.034
+            },
+            {
+              "feature": "come",
+              "coefficient": -1.0133
+            },
+            {
+              "feature": "home",
+              "coefficient": -0.9923
+            },
+            {
+              "feature": "lt gt",
+              "coefficient": -0.9696
+            },
+            {
+              "feature": "ll",
+              "coefficient": -0.9656
+            },
+            {
+              "feature": "lor",
+              "coefficient": -0.9637
+            },
+            {
+              "feature": "still",
+              "coefficient": -0.9346
+            },
+            {
+              "feature": "sorri",
+              "coefficient": -0.9232
+            },
+            {
+              "feature": "right",
+              "coefficient": -0.9121
+            },
+            {
+              "feature": "go",
+              "coefficient": -0.8663
+            }
+          ]
+        }
+      },
+      "artifact_dir": "data\\models\\baselines\\logistic_regression_tfidf",
+      "accuracy": 0.9592,
+      "precision": 0.9216,
+      "recall": 0.7344,
+      "f1_score": 0.8174,
+      "roc_auc": 0.9908,
+      "pr_auc": 0.8866,
+      "mcc": 0.8013,
+      "cohen_kappa": 0.7948,
+      "training_time_seconds": 0.0271,
+      "prediction_time_seconds": 0.0003,
+      "model_size_mb": 0.039
+    },
+    {
+      "experiment_key": "linear_svm_tfidf",
+      "model_name": "linear_svm",
+      "vectorizer": "tfidf",
+      "metrics": {
+        "accuracy": 0.9767,
+        "precision": 0.9333,
+        "recall": 0.875,
+        "f1_score": 0.9032,
+        "f1_macro": 0.945,
+        "f1_weighted": 0.9764,
+        "roc_auc": 0.9918,
+        "pr_auc": 0.9271,
+        "mcc": 0.8906,
+        "cohen_kappa": 0.89,
+        "training_time_seconds": 0.0557,
+        "prediction_time_seconds": 0.0045,
+        "model_size_mb": 0.1936,
+        "confusion_matrix": [
+          [
+            447,
+            4
+          ],
+          [
+            8,
+            56
+          ]
+        ]
+      },
+      "cv_stats": {
+        "cv_mean_accuracy": 0.984,
+        "cv_std_accuracy": 0.0033,
+        "cv_mean_f1": 0.9349,
+        "cv_std_f1": 0.0132
+      },
+      "feature_importance": {},
+      "artifact_dir": "data\\models\\baselines\\linear_svm_tfidf",
+      "accuracy": 0.9767,
+      "precision": 0.9333,
+      "recall": 0.875,
+      "f1_score": 0.9032,
+      "roc_auc": 0.9918,
+      "pr_auc": 0.9271,
+      "mcc": 0.8906,
+      "cohen_kappa": 0.89,
+      "training_time_seconds": 0.0557,
+      "prediction_time_seconds": 0.0045,
+      "model_size_mb": 0.1936
+    },
+    {
+      "experiment_key": "random_forest_tfidf",
+      "model_name": "random_forest",
+      "vectorizer": "tfidf",
+      "metrics": {
+        "accuracy": 0.9689,
+        "precision": 0.98,
+        "recall": 0.7656,
+        "f1_score": 0.8596,
+        "f1_macro": 0.9211,
+        "f1_weighted": 0.9673,
+        "roc_auc": 0.9963,
+        "pr_auc": 0.9815,
+        "mcc": 0.8506,
+        "cohen_kappa": 0.8425,
+        "training_time_seconds": 0.3546,
+        "prediction_time_seconds": 0.0389,
+        "model_size_mb": 4.4348,
+        "confusion_matrix": [
+          [
+            450,
+            1
+          ],
+          [
+            15,
+            49
+          ]
+        ]
+      },
+      "cv_stats": {
+        "cv_mean_accuracy": 0.9784,
+        "cv_std_accuracy": 0.0031,
+        "cv_mean_f1": 0.9062,
+        "cv_std_f1": 0.0148
+      },
+      "feature_importance": {},
+      "artifact_dir": "data\\models\\baselines\\random_forest_tfidf",
+      "accuracy": 0.9689,
+      "precision": 0.98,
+      "recall": 0.7656,
+      "f1_score": 0.8596,
+      "roc_auc": 0.9963,
+      "pr_auc": 0.9815,
+      "mcc": 0.8506,
+      "cohen_kappa": 0.8425,
+      "training_time_seconds": 0.3546,
+      "prediction_time_seconds": 0.0389,
+      "model_size_mb": 4.4348
+    },
+    {
+      "experiment_key": "multinomial_nb_count",
+      "model_name": "multinomial_nb",
+      "vectorizer": "count",
+      "metrics": {
+        "accuracy": 0.9728,
+        "precision": 0.8906,
+        "recall": 0.8906,
+        "f1_score": 0.8906,
+        "f1_macro": 0.9376,
+        "f1_weighted": 0.9728,
+        "roc_auc": 0.961,
+        "pr_auc": 0.9193,
+        "mcc": 0.8751,
+        "cohen_kappa": 0.8751,
+        "training_time_seconds": 0.0019,
+        "prediction_time_seconds": 0.0002,
+        "model_size_mb": 0.1533,
+        "confusion_matrix": [
+          [
+            444,
+            7
+          ],
+          [
+            7,
+            57
+          ]
+        ]
+      },
+      "cv_stats": {
+        "cv_mean_accuracy": 0.983,
+        "cv_std_accuracy": 0.0061,
+        "cv_mean_f1": 0.9323,
+        "cv_std_f1": 0.0226
+      },
+      "feature_importance": {
+        "naive_bayes": {
+          "top_spam_features": [
+            {
+              "feature": "call phone",
+              "log_ratio": 5.7644
+            },
+            {
+              "feature": "claim",
+              "log_ratio": 5.0966
+            },
+            {
+              "feature": "prize",
+              "log_ratio": 4.9042
+            },
+            {
+              "feature": "tone",
+              "log_ratio": 4.7219
+            },
+            {
+              "feature": "150p",
+              "log_ratio": 4.5647
+            },
+            {
+              "feature": "number cash",
+              "log_ratio": 4.3521
+            },
+            {
+              "feature": "guarante",
+              "log_ratio": 4.3255
+            },
+            {
+              "feature": "number prize",
+              "log_ratio": 4.3255
+            },
+            {
+              "feature": "phone now",
+              "log_ratio": 4.2699
+            },
+            {
+              "feature": "rington",
+              "log_ratio": 4.1485
+            },
+            {
+              "feature": "cs",
+              "log_ratio": 4.1485
+            },
+            {
+              "feature": "won number",
+              "log_ratio": 4.0467
+            },
+            {
+              "feature": "poli",
+              "log_ratio": 3.9334
+            },
+            {
+              "feature": "150ppm",
+              "log_ratio": 3.9334
+            },
+            {
+              "feature": "stop number",
+              "log_ratio": 3.8926
+            }
+          ],
+          "top_ham_features": [
+            {
+              "feature": "lt",
+              "log_ratio": -4.7493
+            },
+            {
+              "feature": "gt",
+              "log_ratio": -4.7493
+            },
+            {
+              "feature": "lt gt",
+              "log_ratio": -4.6182
+            },
+            {
+              "feature": "lor",
+              "log_ratio": -4.1683
+            },
+            {
+              "feature": "da",
+              "log_ratio": -4.0646
+            },
+            {
+              "feature": "work",
+              "log_ratio": -3.8288
+            },
+            {
+              "feature": "later",
+              "log_ratio": -3.7628
+            },
+            {
+              "feature": "happi",
+              "log_ratio": -3.7398
+            },
+            {
+              "feature": "realli",
+              "log_ratio": -3.5895
+            },
+            {
+              "feature": "said",
+              "log_ratio": -3.4902
+            },
+            {
+              "feature": "sure",
+              "log_ratio": -3.4751
+            },
+            {
+              "feature": "anyth",
+              "log_ratio": -3.4443
+            },
+            {
+              "feature": "morn",
+              "log_ratio": -3.4126
+            },
+            {
+              "feature": "ll",
+              "log_ratio": -3.3909
+            },
+            {
+              "feature": "sleep",
+              "log_ratio": -3.3798
+            }
+          ]
+        }
+      },
+      "artifact_dir": "data\\models\\baselines\\multinomial_nb_count",
+      "accuracy": 0.9728,
+      "precision": 0.8906,
+      "recall": 0.8906,
+      "f1_score": 0.8906,
+      "roc_auc": 0.961,
+      "pr_auc": 0.9193,
+      "mcc": 0.8751,
+      "cohen_kappa": 0.8751,
+      "training_time_seconds": 0.0019,
+      "prediction_time_seconds": 0.0002,
+      "model_size_mb": 0.1533
+    },
+    {
+      "experiment_key": "logistic_regression_count",
+      "model_name": "logistic_regression",
+      "vectorizer": "count",
+      "metrics": {
+        "accuracy": 0.9786,
+        "precision": 0.9818,
+        "recall": 0.8438,
+        "f1_score": 0.9076,
+        "f1_macro": 0.9477,
+        "f1_weighted": 0.9779,
+        "roc_auc": 0.9968,
+        "pr_auc": 0.9831,
+        "mcc": 0.8989,
+        "cohen_kappa": 0.8956,
+        "training_time_seconds": 0.0226,
+        "prediction_time_seconds": 0.0003,
+        "model_size_mb": 0.039,
+        "confusion_matrix": [
+          [
+            450,
+            1
+          ],
+          [
+            10,
+            54
+          ]
+        ]
+      },
+      "cv_stats": {
+        "cv_mean_accuracy": 0.9806,
+        "cv_std_accuracy": 0.0054,
+        "cv_mean_f1": 0.9166,
+        "cv_std_f1": 0.0243
+      },
+      "feature_importance": {
+        "logistic_regression": {
+          "top_spam_indicators": [
+            {
+              "feature": "url",
+              "coefficient": 2.667
+            },
+            {
+              "feature": "phone",
+              "coefficient": 2.1057
+            },
+            {
+              "feature": "call phone",
+              "coefficient": 1.6329
+            },
+            {
+              "feature": "rington",
+              "coefficient": 1.599
+            },
+            {
+              "feature": "txt",
+              "coefficient": 1.4618
+            },
+            {
+              "feature": "servic",
+              "coefficient": 1.4301
+            },
+            {
+              "feature": "sm",
+              "coefficient": 1.4149
+            },
+            {
+              "feature": "text",
+              "coefficient": 1.4105
+            },
+            {
+              "feature": "mobil",
+              "coefficient": 1.3657
+            },
+            {
+              "feature": "uk",
+              "coefficient": 1.2847
+            },
+            {
+              "feature": "free",
+              "coefficient": 1.2663
+            },
+            {
+              "feature": "tone",
+              "coefficient": 1.2386
+            },
+            {
+              "feature": "video",
+              "coefficient": 1.1609
+            },
+            {
+              "feature": "email",
+              "coefficient": 1.0963
+            },
+            {
+              "feature": "condit",
+              "coefficient": 1.095
+            }
+          ],
+          "top_ham_indicators": [
+            {
+              "feature": "lt",
+              "coefficient": -1.1218
+            },
+            {
+              "feature": "gt",
+              "coefficient": -1.1073
+            },
+            {
+              "feature": "lt gt",
+              "coefficient": -0.9871
+            },
+            {
+              "feature": "got",
+              "coefficient": -0.7317
+            },
+            {
+              "feature": "home",
+              "coefficient": -0.7275
+            },
+            {
+              "feature": "still",
+              "coefficient": -0.639
+            },
+            {
+              "feature": "think",
+              "coefficient": -0.638
+            },
+            {
+              "feature": "face",
+              "coefficient": -0.609
+            },
+            {
+              "feature": "da",
+              "coefficient": -0.5986
+            },
+            {
+              "feature": "pl",
+              "coefficient": -0.5821
+            },
+            {
+              "feature": "sorri",
+              "coefficient": -0.5668
+            },
+            {
+              "feature": "don",
+              "coefficient": -0.5517
+            },
+            {
+              "feature": "work",
+              "coefficient": -0.5489
+            },
+            {
+              "feature": "lor",
+              "coefficient": -0.5458
+            },
+            {
+              "feature": "might",
+              "coefficient": -0.5455
+            }
+          ]
+        }
+      },
+      "artifact_dir": "data\\models\\baselines\\logistic_regression_count",
+      "accuracy": 0.9786,
+      "precision": 0.9818,
+      "recall": 0.8438,
+      "f1_score": 0.9076,
+      "roc_auc": 0.9968,
+      "pr_auc": 0.9831,
+      "mcc": 0.8989,
+      "cohen_kappa": 0.8956,
+      "training_time_seconds": 0.0226,
+      "prediction_time_seconds": 0.0003,
+      "model_size_mb": 0.039
+    },
+    {
+      "experiment_key": "linear_svm_count",
+      "model_name": "linear_svm",
+      "vectorizer": "count",
+      "metrics": {
+        "accuracy": 0.9825,
+        "precision": 0.9825,
+        "recall": 0.875,
+        "f1_score": 0.9256,
+        "f1_macro": 0.9579,
+        "f1_weighted": 0.9821,
+        "roc_auc": 0.9908,
+        "pr_auc": 0.9776,
+        "mcc": 0.9177,
+        "cohen_kappa": 0.9158,
+        "training_time_seconds": 0.1183,
+        "prediction_time_seconds": 0.005,
+        "model_size_mb": 0.1936,
+        "confusion_matrix": [
+          [
+            450,
+            1
+          ],
+          [
+            8,
+            56
+          ]
+        ]
+      },
+      "cv_stats": {
+        "cv_mean_accuracy": 0.9825,
+        "cv_std_accuracy": 0.0066,
+        "cv_mean_f1": 0.9264,
+        "cv_std_f1": 0.0287
+      },
+      "feature_importance": {},
+      "artifact_dir": "data\\models\\baselines\\linear_svm_count",
+      "accuracy": 0.9825,
+      "precision": 0.9825,
+      "recall": 0.875,
+      "f1_score": 0.9256,
+      "roc_auc": 0.9908,
+      "pr_auc": 0.9776,
+      "mcc": 0.9177,
+      "cohen_kappa": 0.9158,
+      "training_time_seconds": 0.1183,
+      "prediction_time_seconds": 0.005,
+      "model_size_mb": 0.1936
+    },
+    {
+      "experiment_key": "random_forest_count",
+      "model_name": "random_forest",
+      "vectorizer": "count",
+      "metrics": {
+        "accuracy": 0.9709,
+        "precision": 0.9804,
+        "recall": 0.7812,
+        "f1_score": 0.8696,
+        "f1_macro": 0.9266,
+        "f1_weighted": 0.9694,
+        "roc_auc": 0.9952,
+        "pr_auc": 0.9787,
+        "mcc": 0.8604,
+        "cohen_kappa": 0.8534,
+        "training_time_seconds": 0.6163,
+        "prediction_time_seconds": 0.0554,
+        "model_size_mb": 5.5391,
+        "confusion_matrix": [
+          [
+            450,
+            1
+          ],
+          [
+            14,
+            50
+          ]
+        ]
+      },
+      "cv_stats": {
+        "cv_mean_accuracy": 0.9801,
+        "cv_std_accuracy": 0.0038,
+        "cv_mean_f1": 0.916,
+        "cv_std_f1": 0.0134
+      },
+      "feature_importance": {},
+      "artifact_dir": "data\\models\\baselines\\random_forest_count",
+      "accuracy": 0.9709,
+      "precision": 0.9804,
+      "recall": 0.7812,
+      "f1_score": 0.8696,
+      "roc_auc": 0.9952,
+      "pr_auc": 0.9787,
+      "mcc": 0.8604,
+      "cohen_kappa": 0.8534,
+      "training_time_seconds": 0.6163,
+      "prediction_time_seconds": 0.0554,
+      "model_size_mb": 5.5391
+    }
+  ]
+}

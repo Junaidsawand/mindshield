@@ -1,0 +1,21 @@
+{
+  "config": {
+    "lowercase": true,
+    "url_policy": "replace",
+    "email_policy": "replace",
+    "number_policy": "replace",
+    "phone_policy": "replace",
+    "emoji_policy": "demojize",
+    "punctuation_policy": "remove",
+    "whitespace_cleanup": true,
+    "url_placeholder": "[URL]",
+    "email_placeholder": "[EMAIL]",
+    "number_placeholder": "[NUMBER]",
+    "phone_placeholder": "[PHONE]",
+    "remove_stopwords": true,
+    "custom_stopwords": [],
+    "stemmer": "porter",
+    "lemmatizer": "none"
+  },
+  "pipeline_version": "3.2.0"
+}

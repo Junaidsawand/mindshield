@@ -5,6 +5,32 @@ All notable changes to the MindShield backend are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] — 2026-08-04
+
+### Added — Phase 3.3: Classical Machine Learning Baselines & Evaluation Engine
+
+#### Classical ML Baseline Architecture (`app/baselines/`)
+- `BaselineConfig` (`app/baselines/config.py`) — declarative configuration model for classical baselines (`MultinomialNB`, `LogisticRegression`, `LinearSVC`, `RandomForestClassifier`), 5-fold CV parameters, and directory paths.
+- `BaselineTrainer` (`app/baselines/trainer.py`) — model training orchestrator executing 5-Fold Stratified Cross-Validation across 8 experiment combinations (4 classifiers $\times$ 2 vectorizers), joblib model artifact serialization, and automatic best model export.
+- `BaselineEvaluator` (`app/baselines/evaluator.py`) — evaluation engine computing 11 performance metrics (Accuracy, Precision, Recall, F1, Macro F1, Weighted F1, ROC-AUC, PR-AUC, MCC, Cohen's Kappa, Times, Size), extracting feature importances, and generating 4 publication-grade (300 DPI) figures (`07_baseline_model_comparison.png`, `08_baseline_confusion_matrices.png`, `09_baseline_roc_curves.png`).
+- `BaselineMLPipeline` (`app/baselines/pipeline.py`) — master orchestrator facade exporting `backend/data/metadata/baseline_models_comparison.json`.
+
+#### Model Artifact Exports & Best Model Selection
+- Selected **`linear_svm_count`** as top classical model (**Test Accuracy: 98.25%, F1-Score: 92.56%, ROC-AUC: 0.9908**).
+- Exported artifacts to `backend/data/models/best_classical_model/` (`model.joblib`, `vectorizer.joblib`, `pipeline.json`, `metadata.json`).
+- Exported 8 individual experiment folders under `backend/data/models/baselines/`.
+
+#### CLI Script & Research Notebook Artifacts
+- `scripts/train_baseline_models.py` — CLI execution runner (`python -m scripts.train_baseline_models`).
+- `scripts/generate_notebook_03.py` — generator script producing research notebook `backend/notebooks/03_Classical_ML_Baselines.ipynb`.
+
+#### Test Suite & Thesis Documentation
+- `tests/test_baseline_models.py` — unit & integration test suite.
+- `backend/docs/08_Classical_ML_Baselines.md` — thesis technical reference with 3 Mermaid diagrams.
+- `docs/thesis-preparation/Classical_ML_Viva.md` — 10 academic Q&A questions for BS Computer Science FYP viva defense.
+
+---
+
 ## [3.2.0] — 2026-08-04
 
 ### Added — Phase 3.2: Production-Quality NLP Preprocessing & Feature Extraction Engine
