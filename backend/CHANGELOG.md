@@ -5,6 +5,31 @@ All notable changes to the MindShield backend are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] — 2026-08-04
+
+### Added — Phase 3.4: DistilBERT Fine-Tuning Pipeline & Comparative Benchmarking Engine
+
+#### DistilBERT Transformer Architecture (`app/distilbert/`)
+- `DistilBERTConfig` (`app/distilbert/config.py`) — declarative configuration model for transformer fine-tuning (`distilbert-base-uncased`), batch size (16), learning rate ($2\times 10^{-5}$), warmup ratio (0.1), FP16 mixed precision, and hardware device auto-detection.
+- `SMSDataset` (`app/distilbert/dataset.py`) — PyTorch `Dataset` wrapper performing subword tokenization via `AutoTokenizer`.
+- `DistilBERTTrainer` (`app/distilbert/trainer.py`) — fine-tuning execution engine with AdamW optimizer, linear warmup scheduler, early stopping callback (`patience=2`), best checkpoint saving, and Hugging Face artifact serialization.
+- `DistilBERTEvaluator` (`app/distilbert/evaluator.py`) — evaluation engine computing 11 performance metrics, generating 4 publication-grade (300 DPI) figures (`11_distilbert_confusion_matrix.png`, `12_distilbert_roc_curve.png`, `13_distilbert_pr_curve.png`, `14_distilbert_learning_curves.png`), and running comparative benchmark against Phase 3.3 Best Model (`15_classical_vs_distilbert_comparison.png`).
+- `DistilBERTPipeline` (`app/distilbert/pipeline.py`) — master orchestrator facade exporting `backend/data/metadata/distilbert_metrics.json` and `classical_vs_distilbert_comparison.json`.
+
+#### Model Artifact Exports
+- Serialized trained DistilBERT model suite to `backend/data/models/distilbert/` (`model.safetensors`, `config.json`, `tokenizer.json`, `training_history.json`, `label_mapping.json`, `metrics.json`).
+
+#### CLI Script & Research Notebook Artifacts
+- `scripts/train_distilbert.py` — CLI execution runner (`python -m scripts.train_distilbert`).
+- `scripts/generate_notebook_04.py` — generator script producing research notebook `backend/notebooks/04_DistilBERT_Training.ipynb`.
+
+#### Test Suite & Thesis Documentation
+- `tests/test_distilbert_pipeline.py` — unit & integration test suite.
+- `backend/docs/09_DistilBERT_Fine_Tuning.md` — thesis technical reference with 3 Mermaid diagrams.
+- `docs/thesis-preparation/DistilBERT_Training_Viva.md` — 10 academic Q&A questions for BS Computer Science FYP viva defense.
+
+---
+
 ## [3.3.0] — 2026-08-04
 
 ### Added — Phase 3.3: Classical Machine Learning Baselines & Evaluation Engine
