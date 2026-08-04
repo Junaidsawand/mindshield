@@ -64,11 +64,11 @@ The key innovation of Phase 2.3 is the introduction of `InferenceService` and `M
 |-----------|----------------|--------|
 | `BaseModelLoader` Interface | Minimal lifecycle contract (`load`, `unload`, `predict`, `predict_batch`, `health`) | ✅ Complete |
 | `InferenceService` | Latency tracking, batching, and automatic fallback recovery | ✅ Complete |
-| `HuggingFaceModelLoader` | Production stub for HuggingFace Transformers / ONNX runtime | ✅ Complete |
-| `ModelLoaderFactory` | Declarative composition root for backend selection | ✅ Complete |
+| `HuggingFaceModelLoader` / `DistilBERTModelLoader` | Real production PyTorch Transformers & tokenizer inference loader (`data/models/distilbert/`) | ✅ Complete (Phase 3.4) |
+| `ModelLoaderFactory` | Declarative composition root for backend selection (`mock`, `distilbert`, `huggingface`, `placeholder`) | ✅ Complete |
 | Lifespan Management | Startup initialisation, warm-up passes, and graceful shutdown | ✅ Complete |
 | Fallback Recovery | Automatic failover to `MockModelLoader` on primary model crash or OOM | ✅ Complete |
-| Automated Test Suite | 155 tests (100% pass rate, 91% total coverage) | ✅ Complete |
+| Automated Test Suite | 202 tests (100% pass rate, 81% total coverage) | ✅ Complete |
 | Flake8 Code Quality | Zero linting or formatting violations | ✅ Complete |
 
 ---

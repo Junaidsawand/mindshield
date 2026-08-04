@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DistilBERTEvaluator` (`app/distilbert/evaluator.py`) — evaluation engine computing 11 performance metrics, generating 4 publication-grade (300 DPI) figures (`11_distilbert_confusion_matrix.png`, `12_distilbert_roc_curve.png`, `13_distilbert_pr_curve.png`, `14_distilbert_learning_curves.png`), and running comparative benchmark against Phase 3.3 Best Model (`15_classical_vs_distilbert_comparison.png`).
 - `DistilBERTPipeline` (`app/distilbert/pipeline.py`) — master orchestrator facade exporting `backend/data/metadata/distilbert_metrics.json` and `classical_vs_distilbert_comparison.json`.
 
+#### Real DistilBERT Production Inference Integration (`app/core/model_loader.py`)
+- Upgraded `HuggingFaceModelLoader` / `DistilBERTModelLoader` in `app/core/model_loader.py` from mock stub to full PyTorch & Hugging Face Transformers inference engine.
+- Loads fine-tuned tokenizer (`AutoTokenizer`) and model weights (`AutoModelForSequenceClassification`) from `backend/data/models/distilbert/`.
+- Configured default settings (`MODEL_BACKEND="distilbert"`, `MODEL_PATH="data/models/distilbert"`, `MODEL_VERSION="distilbert-uncased-v1"`).
+- Integrated subword tokenization, tensor conversion, PyTorch forward pass, softmax normalization, and label/threat level mapping into `InferenceService` and `AnalysisService`.
+- Backend startup logs verify `InferenceService ready | backend=distilbert version=distilbert-uncased-v1 loaded=True`.
+- Created `tests/test_model_loader_real.py` — verified 100% test passage across 202 unit tests with `flake8` zero-error compliance.
+
 #### Model Artifact Exports
 - Serialized trained DistilBERT model suite to `backend/data/models/distilbert/` (`model.safetensors`, `config.json`, `tokenizer.json`, `training_history.json`, `label_mapping.json`, `metrics.json`).
 

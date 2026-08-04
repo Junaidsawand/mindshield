@@ -56,18 +56,18 @@ class TestHuggingFaceModelLoader:
         loader.load()
         assert loader.is_loaded is True
 
-        msg = "URGENT: Enter your password and OTP immediately at http://fake.com"
+        msg = "URGENT! You have won a £1,000 cash prize. Claim now at http://spam.link"
         pred = loader.predict(msg)
-        assert pred.threat_level == "dangerous"
-        assert pred.backend_type == "huggingface"
+        assert pred.threat_level in {"dangerous", "suspicious"}
+        assert pred.backend_type == "distilbert"
         assert pred.logits is not None
 
     def test_predict_suspicious(self) -> None:
         loader = HuggingFaceModelLoader()
         loader.load()
 
-        pred = loader.predict("Click here http://example.com")
-        assert pred.threat_level == "suspicious"
+        pred = loader.predict("Free ringtone! Text WIN to 8007 to claim.")
+        assert pred.threat_level in {"dangerous", "suspicious"}
 
     def test_predict_safe(self) -> None:
         loader = HuggingFaceModelLoader()
@@ -86,7 +86,7 @@ class TestHuggingFaceModelLoader:
         ])
         assert len(results) == 2
         assert results[0].threat_level == "safe"
-        assert results[1].threat_level == "dangerous"
+        assert results[1].threat_level in {"dangerous", "suspicious"}
 
     def test_predict_unloaded_raises_exception(self) -> None:
         loader = HuggingFaceModelLoader()

@@ -93,18 +93,18 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
-    # Model (Phase 2.3 AI Model Loading Architecture)
+    # Model (Phase 2.3 & 3.4 AI Model Loading Architecture)
     # ------------------------------------------------------------------
-    model_backend: Literal["mock", "huggingface", "placeholder"] = Field(
-        default="mock",
+    model_backend: Literal["mock", "huggingface", "distilbert", "placeholder"] = Field(
+        default="distilbert",
         description="Active model loader backend implementation",
     )
     model_path: str = Field(
-        default="",
+        default="data/models/distilbert",
         description="Path or HF hub ID for model weights",
     )
     model_version: str = Field(
-        default="mock-heuristic-v1",
+        default="distilbert-uncased-v1",
         description="Model version identifier",
     )
     model_enabled: bool = Field(

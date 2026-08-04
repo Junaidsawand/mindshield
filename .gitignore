@@ -58,4 +58,6 @@ backend/data/processed/*
 # Flutter (Monorepo)
 **/build/
 **/.dart_tool/
-*.apkbackend/data/models/distilbert/model.safetensors 
+*.apk
+
+backend/data/models/distilbert/model.safetensors

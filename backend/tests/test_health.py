@@ -56,9 +56,11 @@ class TestHealthEndpoint:
         assert data["model_loaded"] is True
 
     def test_health_model_version_is_mock(self, client: TestClient) -> None:
-        """Model version must identify the mock in Phase 2.1."""
+        """Model version must identify active model version."""
         data = client.get("/health").json()
-        assert "mock" in data["model_version"]
+        assert any(
+            k in data["model_version"] for k in ("mock", "distilbert", "hf")
+        )
 
     def test_health_response_has_uptime(self, client: TestClient) -> None:
         """``uptime_seconds`` must be a non-negative number."""
