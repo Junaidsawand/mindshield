@@ -24,6 +24,7 @@ from sklearn.metrics import accuracy_score, f1_score
 from app.distilbert.config import DistilBERTConfig
 from app.distilbert.dataset import SMSDataset
 from app.distilbert.evaluator import DistilBERTEvaluator
+from app.nlp.config import NLPPreprocessingConfig
 from app.nlp.pipeline import NLPPreprocessingPipeline
 
 
@@ -32,11 +33,18 @@ class DistilBERTTrainer:
 
     def __init__(self, config: Optional[DistilBERTConfig] = None):
         self.config = config or DistilBERTConfig()
-        self.pipeline = NLPPreprocessingPipeline()
+        self.pipeline = NLPPreprocessingPipeline(
+            NLPPreprocessingConfig.create_transformer_config()
+        )
         self.evaluator = DistilBERTEvaluator(self.config.figures_output_dir)
 
-        # Set random seeds and CPU multithreading for speed
-        torch.set_num_threads(min(8, os.cpu_count() or 4))
+        # Set random seeds and CPU multithreading (configured to avoid hangs on CPU)
+        if self.config.device == "cpu":
+            torch.set_num_threads(4)
+            os.environ["OMP_NUM_THREADS"] = "4"
+            os.environ["MKL_NUM_THREADS"] = "4"
+        else:
+            torch.set_num_threads(min(8, os.cpu_count() or 4))
         torch.manual_seed(self.config.seed)
         np.random.seed(self.config.seed)
         if torch.cuda.is_available():
@@ -152,8 +160,9 @@ class DistilBERTTrainer:
         for epoch in range(1, self.config.epochs + 1):
             model.train()
             running_train_loss = 0.0
+            total_batches = len(train_loader)
 
-            for batch in train_loader:
+            for step, batch in enumerate(train_loader, 1):
                 optimizer.zero_grad()
 
                 input_ids = batch["input_ids"].to(self.config.device)
@@ -181,6 +190,14 @@ class DistilBERTTrainer:
 
                 scheduler.step()
                 running_train_loss += loss.item()
+
+                if step % 10 == 0 or step == total_batches:
+                    print(
+                        f"    Epoch {epoch}/{self.config.epochs} | "
+                        f"Batch {step}/{total_batches} | "
+                        f"Loss: {loss.item():.4f}",
+                        flush=True,
+                    )
 
             avg_train_loss = running_train_loss / len(train_loader)
 

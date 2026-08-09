@@ -289,6 +289,12 @@ class HuggingFaceModelLoader(BaseModelLoader):
         self._backend_name = (
             backend_name.strip().lower() if backend_name else "distilbert"
         )
+        from app.nlp.config import NLPPreprocessingConfig
+        from app.nlp.pipeline import NLPPreprocessingPipeline
+
+        self._preprocessor = NLPPreprocessingPipeline(
+            NLPPreprocessingConfig.create_transformer_config()
+        )
         self._is_loaded: bool = False
         self._load_time_ms: float | None = None
         self._tokenizer: Any | None = None
@@ -431,8 +437,11 @@ class HuggingFaceModelLoader(BaseModelLoader):
         try:
             import torch
 
+            clean_text = self._preprocessor.preprocess_text(text)[
+                "final_processed_text"
+            ]
             inputs = self._tokenizer(
-                text,
+                clean_text,
                 return_tensors="pt",
                 truncation=True,
                 padding=True,

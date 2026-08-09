@@ -5,6 +5,56 @@ All notable changes to the MindShield backend are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] — 2026-08-09
+
+### Added — Phase 3.6: Pakistani SMS Domain Generalization & Hard-Negative Fine-Tuning
+
+#### Localized Pakistani Labeled Dataset (v2)
+- Created `PakScamV2DatasetGenerator` (`app/data/pakscam_v2_generator.py`) to generate a larger corpus of 140 localized samples.
+- Integrated 15 real-world user-observed SMS (UBL credit receipts, ATM debits, ReadyCash loans, Zong promos, Gaming Royale) as seed data with explicit provenance metadata.
+- Implemented template-family grouping and normalized SHA-256 deduplication to prevent data leakage between train and test splits.
+
+#### Aligned Fine-Tuning (`distilbert-pakscam-v2`)
+- Created `scripts/train_pakscam_v2_distilbert.py` to fine-tune the model for 3 epochs with early stopping (patience=2).
+- Unified tokenization length to 128 (matching production inference) to avoid training/inference length mismatch.
+- Added step-wise batch progress logging and restricted CPU thread pool to 4 to prevent Windows environment hang.
+- Archived the resulting model weights, tokenizer, and config to `data/models/distilbert_pakscam_v2/`.
+
+#### Multi-Model Comparative Evaluation
+- Created `scripts/evaluate_v2_models.py` to evaluate `uci-v1`, `uci-v2`, `pak-v1`, and `pak-v2` across 8 distinct subsets (UCI in-domain, Pak Banking HAM, Pak Telecom HAM, Pak Financial HAM, Pak ALL HAM, Pak ALL SPAM, Roman Urdu HAM, Roman Urdu SPAM).
+- Documented a massive reduction in the Pakistani HAM false positive rate (FPR) for `pak-v2` (FPR dropped from 93.10% to 9.20%; banking FPR dropped from 100% to 2.44%), while maintaining a UCI Test F1 of 0.9421.
+
+#### Production Switch Gate Decision & Regression Testing
+- Expanded the regression test suite `tests/test_ml_regression.py` to run 14 critical benchmarks.
+- Documented the failure of 3 out of 10 legimate benchmarks (Zong 50% OFF, UBL customer service, Gaming Royale subscription) due to the strong association of shortened URLs (`bit.ly`) and prize-like terms in the pre-trained UCI weights.
+- Applied the strict decision gate: since not all 10 benchmarks passed, the active production model was restored to `distilbert-pakscam-v1` in `data/models/distilbert`, while `pakscam-v2` was preserved for future research.
+
+#### Documentation
+- Created `backend/docs/13_Pakistani_Domain_Generalization.md` (domain generalization analysis).
+- Created `docs/PAKISTANI_GENERALIZATION_FINAL_REPORT.md` (evaluation metrics and decision gate report).
+- Updated `docs/thesis-preparation/ML_Pipeline_Viva.md` (viva defense defense Q&A for domain generalization).
+
+## [3.5.0] — 2026-08-08
+
+### Added — Phase 3.5: Transformer Training/Inference Alignment & PakScam Fine-Tuning
+
+#### Shared Deterministic Preprocessing Pipeline
+- Aligned training and inference preprocessing using `NLPPreprocessingConfig.create_transformer_config()` across `DistilBERTTrainer`, `DistilBERTEvaluator`, and `HuggingFaceModelLoader`.
+- Preserved case, raw URLs, emails, numbers, and punctuation, removing classical Porter stemming and stopword filtering for transformer models.
+
+#### Model Checkpoint Versioning & Baselines
+- Archived legacy model (`distilbert-uci-v1`) in `data/models/distilbert_uci_v1/`.
+- Fine-tuned raw-text aligned model (`distilbert-uci-v2`) in `data/models/distilbert_uci_v2/` (+6.27% F1 gain on raw text).
+- Fine-tuned multi-domain model (`distilbert-pakscam-v1`) in `data/models/distilbert_pakscam_v1/`.
+
+#### Localized Pakistani Synthetic Dataset (`pakscam-v1`)
+- Created `PakScamDatasetGenerator` (`app/data/pakscam_generator.py`) exporting 57 synthetic samples (`data/processed/pakscam_dataset.csv`) covering legitimate Pakistani banking receipts, hard-negative HAM, threat phishing, prize scams, and Roman Urdu.
+
+#### Multi-Model Evaluation & Quality Assurance
+- Created `scripts/evaluate_all_models.py` generating `data/metadata/master_model_comparison.json`.
+- Created automated ML regression test suite `tests/test_ml_regression.py`.
+- Created thesis documentation: `backend/docs/11_ML_Pipeline_Audit.md`, `12_Transformer_Training_Inference_Alignment.md`, `docs/thesis-preparation/ML_Pipeline_Viva.md`.
+
 ## [3.4.0] — 2026-08-04
 
 ### Added — Phase 3.4: DistilBERT Fine-Tuning Pipeline & Comparative Benchmarking Engine
@@ -23,6 +73,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integrated subword tokenization, tensor conversion, PyTorch forward pass, softmax normalization, and label/threat level mapping into `InferenceService` and `AnalysisService`.
 - Backend startup logs verify `InferenceService ready | backend=distilbert version=distilbert-uncased-v1 loaded=True`.
 - Created `tests/test_model_loader_real.py` — verified 100% test passage across 202 unit tests with `flake8` zero-error compliance.
+
+#### Flutter Mobile Client Production Integration (`frontend/`)
+- Replaced mock keyword heuristic classifier in Flutter `AnalysisService` (`frontend/lib/core/services/analysis_service.dart`) with real HTTP `POST /api/v1/analyze` client using `DioClient.instance.dio`.
+- Created `ApiAnalysisRepository` (`frontend/lib/features/analysis/data/api_analysis_repository.dart`) and deleted obsolete `DummyAnalysisRepository`.
+- Updated `AnalysisProvider` to consume `ApiAnalysisRepository.instance`.
+- Integrated exponential backoff retry logic (up to 2 retries) and network error handling.
+- Resolved physical Android hardware (Google Pixel 6a) connection timeout issue by replacing unroutable emulator loopback IP (`10.0.2.2`) with runtime-configurable `AppConstants.apiBaseUrl` (`--dart-define=API_BASE_URL=...`), adding `INTERNET` and `ACCESS_NETWORK_STATE` permissions, and setting `android:usesCleartextTraffic="true"` in `main/AndroidManifest.xml`.
+- Configured automatic mapping of backend `threat_level`, `confidence`, `indicators`, and `explanation` to SQLite database columns (`ai_status`, `is_spam`, `confidence_score`, `detected_threats`, `spam_risk_level`, `spam_attack_type`, `spam_status`, `quarantined_at`).
+- Created Flutter unit test suite (`test/analysis_service_test.dart` and `test/api_analysis_repository_test.dart`) — verified 100% test passage with `flutter analyze` zero issues.
+- Created `backend/docs/10_Production_Inference.md` and `docs/thesis-preparation/Production_Inference_Viva.md`.
 
 #### Model Artifact Exports
 - Serialized trained DistilBERT model suite to `backend/data/models/distilbert/` (`model.safetensors`, `config.json`, `tokenizer.json`, `training_history.json`, `label_mapping.json`, `metrics.json`).
