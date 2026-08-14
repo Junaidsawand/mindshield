@@ -14,14 +14,16 @@ Based on the comparative evaluation of the 4 models across 8 subsets (515 UCI sa
 
 | Evaluation Subset | uci-v1 (Base) | uci-v2 (Base) | pak-v1 (Prod) | pak-v2 (Candidate) |
 |---|---|---|---|---|
-| **A. UCI Test (In-Domain)** | F1: 0.889 / FPR: 0.002 | F1: 0.952 / FPR: 0.002 | **F1: 0.960 / FPR: 0.002** | F1: 0.942 / FPR: 0.000 |
-| **B. Pak Banking HAM** | FPR: 0.951 (39/41 FP) | FPR: 1.000 (41/41 FP) | **FPR: 1.000 (41/41 FP)** | **FPR: 0.024 (1/41 FP)** |
-| **C. Pak Telecom HAM** | FPR: 0.700 (21/30 FP) | FPR: 0.833 (25/30 FP) | **FPR: 0.800 (24/30 FP)** | **FPR: 0.200 (6/30 FP)** |
-| **D. Pak Financial HAM** | FPR: 0.750 (12/16 FP) | FPR: 1.000 (16/16 FP) | **FPR: 1.000 (16/16 FP)** | **FPR: 0.062 (1/16 FP)** |
-| **E. Pak ALL HAM (FPR)** | FPR: 0.828 (72/87 FP) | FPR: 0.943 (82/87 FP) | **FPR: 0.931 (81/87 FP)** | **FPR: 0.092 (8/87 FP)** |
-| **F. Pak ALL SPAM** | F1: 0.884 / FN: 11 | F1: 0.991 / FN: 1 | **F1: 0.991 / FN: 1** | F1: 0.929 / FN: 7 |
-| **G. Roman Urdu HAM** | FPR: 0.409 (9/22 FP) | FPR: 0.773 (17/22 FP) | **FPR: 0.727 (16/22 FP)** | **FPR: 0.000 (0/22 FP)** |
-| **H. Roman Urdu SPAM** | F1: 0.571 / FN: 9 | F1: 0.966 / FN: 1 | **F1: 0.966 / FN: 1** | F1: 0.696 / FN: 7 |
+| **A. UCI Test (In-Domain)** | F1: 0.889 / FPR: 0.002 | F1: 0.952 / FPR: 0.002 | **F1: 0.9600 / FPR: 0.0022** | F1: 0.9421 / FPR: 0.0000 |
+| **B. Pak Banking HAM** | FPR: 95.1% (39/41 FP) | FPR: 100.0% (41/41) | **FPR: 100.0% (41/41 FP)** | **FPR: 2.44% (1/41 FP)** |
+| **C. Pak Telecom HAM** | FPR: 70.0% (21/30 FP) | FPR: 83.3% (25/30) | **FPR: 80.0% (24/30 FP)** | **FPR: 20.0% (6/30 FP)** |
+| **D. Pak Financial HAM** | FPR: 75.0% (12/16 FP) | FPR: 100.0% (16/16) | **FPR: 100.0% (16/16 FP)** | **FPR: 6.67% (1/15 FP)** |
+| **E. Pak ALL HAM (FPR)** | FPR: 82.8% (72/87 FP) | FPR: 94.3% (82/87) | **FPR: 93.10% (81/87 FP)** | **FPR: 9.20% (8/87 FP)** |
+| **F. Pak ALL SPAM** | F1: 0.884 (FN: 11) | F1: 0.991 (FN: 1) | **F1: 0.9811 (FN: 1)** | F1: 0.8679 (FN: 7) |
+| **G. Roman Urdu HAM** | FPR: 40.9% (9/22 FP) | FPR: 77.3% (17/22) | **FPR: 72.7% (16/22 FP)** | **FPR: 0.00% (0/22 FP)** |
+| **H. Roman Urdu SPAM** | F1: 0.571 (FN: 9) | F1: 0.966 (FN: 1) | **F1: 0.966 (FN: 1)** | F1: 0.696 (FN: 7) |
+
+*(Note: The statistics in this table are synchronized with the authoritative results file `backend/data/metadata/v3_evaluation_results.json`.)*
 
 ### 1.3 Analysis of v1 Failures
 The production model (`pak-v1`) exhibits a massive generalization failure on Pakistani HAM:
@@ -37,9 +39,9 @@ The production model (`pak-v1`) exhibits a massive generalization failure on Pak
 
 ### 1.4 Analysis of v2 Improvements
 The candidate model (`pak-v2`) dramatically reduces the False Positive Rate on Pakistani HAM:
-* **Pak ALL HAM FPR drops from 93.1% to 9.2%.**
-* **Pak Banking HAM FPR drops from 100.0% to 2.4%** (40 out of 41 banking HAM messages are now correctly classified as safe!).
-* **Roman Urdu HAM FPR drops from 72.7% to 0.0%** (all 22 Roman Urdu HAM messages are correctly classified as safe!).
+* **Pak ALL HAM FPR drops from 93.10% to 9.20%.**
+* **Pak Banking HAM FPR drops from 100.0% to 2.44%** (40 out of 41 banking HAM messages are now correctly classified as safe!).
+* **Roman Urdu HAM FPR drops from 72.7% to 0.00%** (all 22 Roman Urdu HAM messages are correctly classified as safe!).
 
 #### Why v2 improved:
 * **Domain-Specific Fine-tuning:** `v2` incorporated ~140 Pakistani samples, including multiple instances of bank receipts (UBL, HBL), Roman Urdu sentences, and mobile bundle notifications as HAM. This taught the model that financial receipts and Roman Urdu text can be benign, overriding the default UCI-trained bias.
@@ -48,13 +50,13 @@ The candidate model (`pak-v2`) dramatically reduces the False Positive Rate on P
 ### 1.5 Why v2 Still Fails on 3 Regression Cases
 Despite these major improvements, `v2` fails 3 critical regression benchmarks:
 
-1. **`test_zong_50_percent_off` (Fails - Classified as phishing with 97.6% confidence):**
+1. **`test_zong_50_percent_off` (Fails - Classified as phishing with 97.67% confidence):**
    * *Text:* `50% OFF Only 4 You! Make the most of Z Hour sale from 5PM-9PM & get 50% OFF on WhatsApp Plus Bundle in My Zong App. Tap now: bit.ly/3rY7XHq`
    * *Root Cause:* High-urgency promotional vocabulary (`50% OFF`, `Only 4 You`, `Tap now`) combined with a shortened URL (`bit.ly`). Shortened URLs are strongly associated with phishing in the base UCI dataset.
-2. **`test_ubl_customer_service_bitly` (Fails - Classified as phishing with 91.5% confidence):**
+2. **`test_ubl_customer_service_bitly` (Fails - Classified as phishing with 91.51% confidence):**
    * *Text:* `Dear UBL Customer,\nYou may log your complaints via our Contact Center, Email, Website, Mobile App, Social Media, Branches or visit: https://bit.ly/2WceaFA`
    * *Root Cause:* Bank identity markers (`Dear UBL Customer`) paired with a shortened `bit.ly` link. The model interprets this as a banking credential-harvesting attempt.
-3. **`test_gaming_royale_subscription` (Fails - Classified as phishing with 54.2% confidence):**
+3. **`test_gaming_royale_subscription` (Fails - Classified as phishing with 54.22% confidence):**
    * *Text:* `Thanks for subscribing to Gaming Royale at Rs 11.95/Day (Auto Renewal). Play live Games on http://z.gamingroyale.club. To Unsub click http://z.gamingroyale.club/u`
    * *Root Cause:* Overlap with subscription spam patterns. Terms like `subscribing`, `Rs 11.95/Day`, `Auto Renewal`, and unsubscribing links (`http://.../u`) are borderline features that confuse the model.
 
@@ -94,8 +96,8 @@ The remaining **2,000+ milliseconds** is caused by a client-side network resolut
 To address the regression failures and false positives, we propose a refined training and calibration strategy:
 
 ### 3.1 Data Enhancement (Anti-Shortcut Augmentation)
-* **Shortened Link Augmentation:** Add 50-70 legitimate, benign banking and carrier SMS templates that contain `bit.ly` or `tinyurl.com` links pointing to official helplines, feedback surveys, or app store links. This teaches the model that URLs are not a binary shortcut for spam.
-* **Telecom Promo Augmentation:** Introduce 30-40 benign telecom service promos (e.g. bundle renewal, 50% discount offers) categorized as HAM.
+* **Shortened Link Augmentation:** AddLegitimate, benign banking and carrier SMS templates that contain `bit.ly` or `tinyurl.com` links pointing to official helplines, feedback surveys, or app store links. This teaches the model that URLs are not a binary shortcut for spam.
+* **Telecom Promo Augmentation:** Introduce benign telecom service promos (e.g. bundle renewal, 50% discount offers) categorized as HAM.
 * **Roman Urdu Phishing Augmentation:** Add Roman Urdu phishing templates (like fake lottery wins or account blockage warnings) to ensure that the model does not classify *all* Roman Urdu messages as safe (which would lead to false negatives on Roman Urdu scams).
 
 ### 3.2 Preprocessing Refinement

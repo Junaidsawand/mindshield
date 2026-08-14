@@ -48,8 +48,8 @@ sequenceDiagram
 ## 2. Audit Findings & Detailed Answers
 
 ### 1. Exact Flutter Entry Point for SMS Analysis
-* **User-Initiated Flow:** `frontend/lib/features/inbox/presentation/conversation_detail_screen.dart` via `_navigateToAnalysis(context, msg)` which pushes the route `AppRoutes.analysis` (navigating to `AnalysisScreen`). `AnalysisScreen` then instantiates `AnalysisProvider` which triggers `loadAnalysis(message)`.
-* **Background Automated Flow:** `frontend/lib/core/services/sms_background_service.dart` via the method-channel handler `_handleMethodCall` catching `onSmsReceived` events and calling `AnalysisService.instance.analyzeMessage(id: id, sender: sender, body: body)`.
+* **User-Initiated Flow**: `frontend/lib/features/inbox/presentation/conversation_detail_screen.dart` via `_navigateToAnalysis(context, msg)` which pushes the route `AppRoutes.analysis` (navigating to `AnalysisScreen`). `AnalysisScreen` then instantiates `AnalysisProvider` which triggers `loadAnalysis(message)`.
+* **Background Automated Flow**: `frontend/lib/core/services/sms_background_service.dart` via the method-channel handler `_handleMethodCall` catching `onSmsReceived` events and calling `AnalysisService.instance.analyzeMessage(id: id, sender: sender, body: body)`.
 
 ### 2. Exact API Endpoint Called
 * `POST /api/v1/analyze` (resolving to URL configured in `AppConstants.apiBaseUrl` + `/analyze`).
@@ -68,20 +68,20 @@ sequenceDiagram
 ```
 
 ### 4. Exact FastAPI Route
-* Location: `backend/app/routers/v1/analysis.py`
+* Location: [`backend/app/routers/v1/analysis.py`](file:///c:/Users/n%20tech/OneDrive/Desktop/mindshield/backend/app/routers/v1/analysis.py)
 * Definition: `@router.post("", response_model=APIResponse[AnalysisResult], ...)` registered under prefix `/analyze` within the versioned router `/api/v1`.
 
 ### 5. Exact Backend Service Chain
-1. **Endpoint Controller:** `analyse_message` (extracts `request_id` and forwards request data to `AnalysisService`).
-2. **AnalysisService:** `analyse()` orchestrates:
+1. **Endpoint Controller**: `analyse_message` (extracts `request_id` and forwards request data to `AnalysisService`).
+2. **AnalysisService**: `analyse()` orchestrates:
    * Validation (`is_valid_message`)
    * Sanitization (`sanitise_message`)
    * Feature extraction (`compute_message_features`)
    * Delegation of classification to `InferenceService.predict()`
    * Constructing `ThreatIndicator` list based on extracted features
    * Mapping raw output to `AnalysisResult`.
-3. **InferenceService:** `predict()` tracks latencies and coordinates primary/fallback loaders.
-4. **HuggingFaceModelLoader:** `predict()` performs tokenization, PyTorch tensor loading, and raw logit scoring.
+3. **InferenceService**: `predict()` tracks latencies and coordinates primary/fallback loaders.
+4. **HuggingFaceModelLoader**: `predict()` performs tokenization, PyTorch tensor loading, and raw logit scoring.
 
 ### 6. Exact Model Path Used at Runtime
 * `backend/data/models/distilbert/` (configured as `MODEL_PATH="data/models/distilbert"` in `.env`).
@@ -125,26 +125,26 @@ sequenceDiagram
   * Instantiates `AnalysisResult` and `SenderInfo` models to feed screen state.
 
 ### 10. Exact LIME Execution Path
-* **Backend-Side:** Instead of computing slow model perturbation-based explanations dynamically per request, the backend performs highly efficient static keyword / feature checks (extracted during preprocessing) returning them in the `indicators` array with corresponding severity weights (e.g., `critical`, `high`, `medium`, `low`).
-* **Frontend-Side:** The `ApiAnalysisRepository` maps indicators to `SuspiciousKeyword` objects with weights `[0.40–0.95]`. These are supplied to the `LimeHighlightCard` widget (`frontend/lib/features/analysis/presentation/widgets/lime_highlight_card.dart`), which dynamically scales background highlights and opacity proportions corresponding to weights.
+* **Backend-Side**: Instead of computing slow model perturbation-based explanations dynamically per request, the backend performs highly efficient static keyword / feature checks (extracted during preprocessing) returning them in the `indicators` array with corresponding severity weights (e.g., `critical`, `high`, `medium`, `low`).
+* **Frontend-Side**: The `ApiAnalysisRepository` maps indicators to `SuspiciousKeyword` objects with weights `[0.40–0.95]`. These are supplied to the `LimeHighlightCard` widget (`frontend/lib/features/analysis/presentation/widgets/lime_highlight_card.dart`), which dynamically scales background highlights and opacity proportions corresponding to weights.
 
 ### 11. Whether any Mock/Dummy Repository is still Reachable by Production Code
-* **No.** The `DummyAnalysisRepository` has been deleted from the filesystem and is not imported or referenced anywhere in `frontend/lib`. `ApiAnalysisRepository` is directly hardcoded as the production repository.
+* **No**. The `DummyAnalysisRepository` has been deleted from the filesystem and is not imported or referenced anywhere in `frontend/lib`. `ApiAnalysisRepository` is directly hardcoded as the production repository.
 
 ### 12. Whether Offline Fallback can Accidentally Hide API Failures
-* **No.** There is no mock/fake database or offline fallback within `ApiAnalysisRepository` or `AnalysisService`. Any request timeout or response failure throws an explicit exception, which propagates to `AnalysisProvider._errorMessage` and displays a user-facing retry screen with error detail.
+* **No**. There is no mock/fake database or offline fallback within `ApiAnalysisRepository` or `AnalysisService`. Any request timeout or response failure throws an explicit exception, which propagates to `AnalysisProvider._errorMessage` and displays a user-facing retry screen with error detail.
 
 ### 13. Whether any Configuration can Accidentally Point to v2
-* **No.** The settings `MODEL_PATH` in `backend/app/core/config.py` defaults strictly to `data/models/distilbert` (v1 production weights). The research/candidate `distilbert-pakscam-v2` is archived in `backend/data/models/distilbert_pakscam_v2` and is not loaded by the application factory lifecycle.
+* **No**. The settings `MODEL_PATH` in `backend/app/core/config.py` defaults strictly to `data/models/distilbert` (v1 production weights). The research/candidate `distilbert-pakscam-v2` is archived in `backend/data/models/distilbert_pakscam_v2` and is not loaded by the application factory lifecycle.
 
 ### 14. Whether Android Release Configuration Points to the Correct Backend URL
-* **Yes.** In `frontend/lib/core/constants/app_constants.dart`, `AppConstants.apiBaseUrl` defaults to the development IP but is configured to allow direct override at compilation/launch time using `--dart-define=API_BASE_URL=http://<PRODUCTION_URL>`. Furthermore, `frontend/android/app/src/main/AndroidManifest.xml` explicitly defines `android:usesCleartextTraffic="true"` to prevent Android OS from blocking local HTTP calls during on-premise testing.
+* **Yes**. In `frontend/lib/core/constants/app_constants.dart`, `AppConstants.apiBaseUrl` defaults to the development IP but is configured to allow direct override at compilation/launch time using `--dart-define=API_BASE_URL=http://<PRODUCTION_URL>`. Furthermore, `frontend/android/app/src/main/AndroidManifest.xml` explicitly defines `android:usesCleartextTraffic="true"` to prevent Android OS from blocking local HTTP calls during on-premise testing.
 
 ---
 
 ## 3. Configuration & Integrity Status
 
-* **Production Model Path:** `backend/data/models/distilbert/`
-* **Weights Active:** Aligned to `distilbert-pakscam-v1`
-* **Environment Alignment:** `.env` updated to `MODEL_VERSION="distilbert-pakscam-v1"`
-* **Safety Gate Status:** Model `distilbert-pakscam-v2` remains quarantined due to failures in 3 Pakistani HAM regression benchmarks.
+* **Production Model Path**: `backend/data/models/distilbert/`
+* **Weights Active**: Aligned to `distilbert-pakscam-v1`
+* **Environment Alignment**: `.env` updated to `MODEL_VERSION="distilbert-pakscam-v1"`
+* **Safety Gate Status**: Model `distilbert-pakscam-v2` and `v3` remain quarantined due to failures in Pakistani HAM regression benchmarks.
