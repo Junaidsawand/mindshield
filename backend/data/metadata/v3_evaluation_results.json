@@ -1,0 +1,368 @@
+{
+  "distilbert-pakscam-v1": {
+    "uci": {
+      "samples": 515,
+      "tp": 60,
+      "fp": 1,
+      "tn": 450,
+      "fn": 4,
+      "precision": 0.9836,
+      "recall": 0.9375,
+      "f1": 0.96,
+      "fpr": 0.0022,
+      "conf_mean": 0.9742,
+      "conf_min": 0.5346,
+      "conf_max": 0.9933,
+      "conf_p25": 0.9864,
+      "conf_p75": 0.9923
+    },
+    "pak_ham_summary": {
+      "fp_count": 81,
+      "fpr": 0.931,
+      "conf_mean": 0.8833
+    },
+    "pak_ham_categories": {
+      "banking_ham": {
+        "n": 41,
+        "fp": 41,
+        "fpr": 1.0
+      },
+      "telecom_ham": {
+        "n": 30,
+        "fp": 24,
+        "fpr": 0.8
+      },
+      "roman_urdu_ham": {
+        "n": 22,
+        "fp": 16,
+        "fpr": 0.7273
+      },
+      "financial_ham": {
+        "n": 15,
+        "fp": 15,
+        "fpr": 1.0
+      }
+    },
+    "pak_spam": {
+      "n": 53,
+      "tp": 52,
+      "fn": 1,
+      "recall": 0.9811,
+      "f1": 0.9811,
+      "conf_mean": 0.8813
+    },
+    "regression": {
+      "total": 14,
+      "passed": 5,
+      "failed": 9,
+      "pass_rate": 0.35714285714285715,
+      "failures": [
+        {
+          "id": "ubl_ibft_receipt",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9256
+        },
+        {
+          "id": "ubl_atm_debit",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9007
+        },
+        {
+          "id": "ubl_customer_service_bitly",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9142
+        },
+        {
+          "id": "zong_50_percent_off",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9347
+        },
+        {
+          "id": "gaming_royale_subscription",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9216
+        },
+        {
+          "id": "gaming_royale_free_trial",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9231
+        },
+        {
+          "id": "readycash_overdue",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.916
+        },
+        {
+          "id": "readycash_1_day_left",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.8994
+        },
+        {
+          "id": "zong_engage_prize_lang",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.8599
+        }
+      ]
+    },
+    "latency": {
+      "n": 30,
+      "mean_ms": 41.95,
+      "p50_ms": 41.34,
+      "p95_ms": 49.43,
+      "max_ms": 50.74
+    },
+    "gates": {
+      "fpr_gate": {
+        "value": 0.9310344827586207,
+        "threshold": 0.02,
+        "pass": false
+      },
+      "spam_f1_gate": {
+        "value": 0.9811,
+        "threshold": 0.95,
+        "pass": true
+      },
+      "uci_f1_gate": {
+        "value": 0.96,
+        "threshold": 0.95,
+        "pass": "True"
+      },
+      "reg_gate": {
+        "passed": 5,
+        "total": 14,
+        "pass": false
+      },
+      "lat_gate": {
+        "value": 41.95,
+        "threshold": 60.0,
+        "pass": true
+      }
+    },
+    "promote": false
+  },
+  "distilbert-pakscam-v2": {
+    "uci": {
+      "samples": 515,
+      "tp": 57,
+      "fp": 0,
+      "tn": 451,
+      "fn": 7,
+      "precision": 1.0,
+      "recall": 0.8906,
+      "f1": 0.9421,
+      "fpr": 0.0,
+      "conf_mean": 0.9897,
+      "conf_min": 0.5115,
+      "conf_max": 0.9982,
+      "conf_p25": 0.9964,
+      "conf_p75": 0.998
+    },
+    "pak_ham_summary": {
+      "fp_count": 8,
+      "fpr": 0.092,
+      "conf_mean": 0.8731
+    },
+    "pak_ham_categories": {
+      "banking_ham": {
+        "n": 41,
+        "fp": 1,
+        "fpr": 0.0244
+      },
+      "telecom_ham": {
+        "n": 30,
+        "fp": 6,
+        "fpr": 0.2
+      },
+      "roman_urdu_ham": {
+        "n": 22,
+        "fp": 0,
+        "fpr": 0.0
+      },
+      "financial_ham": {
+        "n": 15,
+        "fp": 1,
+        "fpr": 0.0667
+      }
+    },
+    "pak_spam": {
+      "n": 53,
+      "tp": 46,
+      "fn": 7,
+      "recall": 0.8679,
+      "f1": 0.8679,
+      "conf_mean": 0.8297
+    },
+    "regression": {
+      "total": 14,
+      "passed": 11,
+      "failed": 3,
+      "pass_rate": 0.7857142857142857,
+      "failures": [
+        {
+          "id": "ubl_customer_service_bitly",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9151
+        },
+        {
+          "id": "zong_50_percent_off",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9767
+        },
+        {
+          "id": "gaming_royale_subscription",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.5422
+        }
+      ]
+    },
+    "latency": {
+      "n": 30,
+      "mean_ms": 60.8,
+      "p50_ms": 62.65,
+      "p95_ms": 67.8,
+      "max_ms": 72.39
+    },
+    "gates": {
+      "fpr_gate": {
+        "value": 0.09195402298850575,
+        "threshold": 0.02,
+        "pass": false
+      },
+      "spam_f1_gate": {
+        "value": 0.8679,
+        "threshold": 0.95,
+        "pass": false
+      },
+      "uci_f1_gate": {
+        "value": 0.9421,
+        "threshold": 0.95,
+        "pass": "False"
+      },
+      "reg_gate": {
+        "passed": 11,
+        "total": 14,
+        "pass": false
+      },
+      "lat_gate": {
+        "value": 60.8,
+        "threshold": 60.0,
+        "pass": false
+      }
+    },
+    "promote": false
+  },
+  "distilbert-pakscam-v3": {
+    "uci": {
+      "samples": 515,
+      "tp": 58,
+      "fp": 0,
+      "tn": 451,
+      "fn": 6,
+      "precision": 1.0,
+      "recall": 0.9062,
+      "f1": 0.9508,
+      "fpr": 0.0,
+      "conf_mean": 0.9942,
+      "conf_min": 0.6296,
+      "conf_max": 0.9992,
+      "conf_p25": 0.9979,
+      "conf_p75": 0.999
+    },
+    "pak_ham_summary": {
+      "fp_count": 3,
+      "fpr": 0.0345,
+      "conf_mean": 0.9852
+    },
+    "pak_ham_categories": {
+      "banking_ham": {
+        "n": 41,
+        "fp": 1,
+        "fpr": 0.0244
+      },
+      "telecom_ham": {
+        "n": 30,
+        "fp": 1,
+        "fpr": 0.0333
+      },
+      "roman_urdu_ham": {
+        "n": 22,
+        "fp": 3,
+        "fpr": 0.1364
+      },
+      "financial_ham": {
+        "n": 15,
+        "fp": 1,
+        "fpr": 0.0667
+      }
+    },
+    "pak_spam": {
+      "n": 53,
+      "tp": 53,
+      "fn": 0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "conf_mean": 0.9942
+    },
+    "regression": {
+      "total": 14,
+      "passed": 13,
+      "failed": 1,
+      "pass_rate": 0.9285714285714286,
+      "failures": [
+        {
+          "id": "zong_engage_prize_lang",
+          "expected": "safe",
+          "got": "phishing",
+          "conf": 0.9929
+        }
+      ]
+    },
+    "latency": {
+      "n": 30,
+      "mean_ms": 57.62,
+      "p50_ms": 59.98,
+      "p95_ms": 72.34,
+      "max_ms": 77.51
+    },
+    "gates": {
+      "fpr_gate": {
+        "value": 0.034482758620689655,
+        "threshold": 0.02,
+        "pass": false
+      },
+      "spam_f1_gate": {
+        "value": 1.0,
+        "threshold": 0.95,
+        "pass": true
+      },
+      "uci_f1_gate": {
+        "value": 0.9508,
+        "threshold": 0.95,
+        "pass": "True"
+      },
+      "reg_gate": {
+        "passed": 13,
+        "total": 14,
+        "pass": false
+      },
+      "lat_gate": {
+        "value": 57.62,
+        "threshold": 60.0,
+        "pass": true
+      }
+    },
+    "promote": false
+  }
+}

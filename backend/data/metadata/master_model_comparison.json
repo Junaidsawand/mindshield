@@ -1,0 +1,272 @@
+{
+  "distilbert-uci-v1": {
+    "UCI In-Domain Test": {
+      "samples": 515,
+      "acc": 0.9748,
+      "prec": 0.9811,
+      "rec": 0.8125,
+      "f1": 0.8889,
+      "tp": 52,
+      "fp": 1,
+      "tn": 450,
+      "fn": 12
+    },
+    "PakScam All Synthetic": {
+      "samples": 57,
+      "acc": 0.4737,
+      "prec": 0.4524,
+      "rec": 0.7308,
+      "f1": 0.5588,
+      "tp": 19,
+      "fp": 23,
+      "tn": 8,
+      "fn": 7
+    },
+    "PakScam \u2014 banking_ham": {
+      "samples": 15,
+      "acc": 0.0667,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 14,
+      "tn": 1,
+      "fn": 0
+    },
+    "PakScam \u2014 hard_negative_ham": {
+      "samples": 8,
+      "acc": 0.0,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 8,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 phishing_spam": {
+      "samples": 10,
+      "acc": 1.0,
+      "prec": 1.0,
+      "rec": 1.0,
+      "f1": 1.0,
+      "tp": 10,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 prize_spam": {
+      "samples": 8,
+      "acc": 0.875,
+      "prec": 1.0,
+      "rec": 0.875,
+      "f1": 0.9333,
+      "tp": 7,
+      "fp": 0,
+      "tn": 0,
+      "fn": 1
+    },
+    "PakScam \u2014 roman_urdu_ham": {
+      "samples": 8,
+      "acc": 0.875,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 7,
+      "fn": 0
+    },
+    "PakScam \u2014 roman_urdu_spam": {
+      "samples": 8,
+      "acc": 0.25,
+      "prec": 1.0,
+      "rec": 0.25,
+      "f1": 0.4,
+      "tp": 2,
+      "fp": 0,
+      "tn": 0,
+      "fn": 6
+    }
+  },
+  "distilbert-uci-v2": {
+    "UCI In-Domain Test": {
+      "samples": 515,
+      "acc": 0.9883,
+      "prec": 0.9833,
+      "rec": 0.9219,
+      "f1": 0.9516,
+      "tp": 59,
+      "fp": 1,
+      "tn": 450,
+      "fn": 5
+    },
+    "PakScam All Synthetic": {
+      "samples": 57,
+      "acc": 0.5263,
+      "prec": 0.4902,
+      "rec": 0.9615,
+      "f1": 0.6494,
+      "tp": 25,
+      "fp": 26,
+      "tn": 5,
+      "fn": 1
+    },
+    "PakScam \u2014 banking_ham": {
+      "samples": 15,
+      "acc": 0.0,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 15,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 hard_negative_ham": {
+      "samples": 8,
+      "acc": 0.0,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 8,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 phishing_spam": {
+      "samples": 10,
+      "acc": 1.0,
+      "prec": 1.0,
+      "rec": 1.0,
+      "f1": 1.0,
+      "tp": 10,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 prize_spam": {
+      "samples": 8,
+      "acc": 1.0,
+      "prec": 1.0,
+      "rec": 1.0,
+      "f1": 1.0,
+      "tp": 8,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 roman_urdu_ham": {
+      "samples": 8,
+      "acc": 0.625,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 3,
+      "tn": 5,
+      "fn": 0
+    },
+    "PakScam \u2014 roman_urdu_spam": {
+      "samples": 8,
+      "acc": 0.875,
+      "prec": 1.0,
+      "rec": 0.875,
+      "f1": 0.9333,
+      "tp": 7,
+      "fp": 0,
+      "tn": 0,
+      "fn": 1
+    }
+  },
+  "distilbert-pakscam-v1": {
+    "UCI In-Domain Test": {
+      "samples": 515,
+      "acc": 0.9903,
+      "prec": 0.9836,
+      "rec": 0.9375,
+      "f1": 0.96,
+      "tp": 60,
+      "fp": 1,
+      "tn": 450,
+      "fn": 4
+    },
+    "PakScam All Synthetic": {
+      "samples": 57,
+      "acc": 0.5439,
+      "prec": 0.5,
+      "rec": 0.9615,
+      "f1": 0.6579,
+      "tp": 25,
+      "fp": 25,
+      "tn": 6,
+      "fn": 1
+    },
+    "PakScam \u2014 banking_ham": {
+      "samples": 15,
+      "acc": 0.0,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 15,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 hard_negative_ham": {
+      "samples": 8,
+      "acc": 0.0,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 8,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 phishing_spam": {
+      "samples": 10,
+      "acc": 1.0,
+      "prec": 1.0,
+      "rec": 1.0,
+      "f1": 1.0,
+      "tp": 10,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 prize_spam": {
+      "samples": 8,
+      "acc": 1.0,
+      "prec": 1.0,
+      "rec": 1.0,
+      "f1": 1.0,
+      "tp": 8,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0
+    },
+    "PakScam \u2014 roman_urdu_ham": {
+      "samples": 8,
+      "acc": 0.75,
+      "prec": 0.0,
+      "rec": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 2,
+      "tn": 6,
+      "fn": 0
+    },
+    "PakScam \u2014 roman_urdu_spam": {
+      "samples": 8,
+      "acc": 0.875,
+      "prec": 1.0,
+      "rec": 0.875,
+      "f1": 0.9333,
+      "tp": 7,
+      "fp": 0,
+      "tn": 0,
+      "fn": 1
+    }
+  }
+}

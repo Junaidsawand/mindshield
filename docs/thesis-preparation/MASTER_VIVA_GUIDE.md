@@ -141,6 +141,8 @@ On the Dart side, `SmsBackgroundService` receives the call and delegates to `Ana
 - 🔒 **Security, Permissions & GDPR**: [`Security_Viva.md`](file:///c:/Users/n%20tech/OneDrive/Desktop/mindshield/docs/thesis-preparation/Security_Viva.md)
 - 🧪 **Testing Strategy & Verification**: [`Testing_Viva.md`](file:///c:/Users/n%20tech/OneDrive/Desktop/mindshield/docs/thesis-preparation/Testing_Viva.md)
 - 🚀 **Deployment & Cloud Infrastructure**: [`Deployment_Viva.md`](file:///c:/Users/n%20tech/OneDrive/Desktop/mindshield/docs/thesis-preparation/Deployment_Viva.md)
+- ⚡ **Production AI Inference & Mobile Integration**: [`Production_Inference_Viva.md`](file:///c:/Users/n%20tech/OneDrive/Desktop/mindshield/docs/thesis-preparation/Production_Inference_Viva.md)
+- 🔬 **ML Pipeline Alignment & Defense**: [`ML_Pipeline_Viva.md`](file:///c:/Users/n%20tech/OneDrive/Desktop/mindshield/docs/thesis-preparation/ML_Pipeline_Viva.md)
 - 📋 **Final Defense Checklist**: [`Thesis_Defense_Checklist.md`](file:///c:/Users/n%20tech/OneDrive/Desktop/mindshield/docs/thesis-preparation/Thesis_Defense_Checklist.md)
 
 ---

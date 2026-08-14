@@ -1,0 +1,98 @@
+{
+  "UCI_In_Domain_Test": {
+    "subset": "UCI In-Domain Test",
+    "total_samples": 515,
+    "accuracy": 0.9903,
+    "precision": 0.9836,
+    "recall": 0.9375,
+    "f1_score": 0.96,
+    "tp": 60,
+    "fp": 1,
+    "tn": 450,
+    "fn": 4
+  },
+  "PakScam_All_Synthetic": {
+    "subset": "PakScam All Synthetic",
+    "total_samples": 57,
+    "accuracy": 0.5439,
+    "precision": 0.5,
+    "recall": 0.9615,
+    "f1_score": 0.6579,
+    "tp": 25,
+    "fp": 25,
+    "tn": 6,
+    "fn": 1
+  },
+  "banking_ham": {
+    "subset": "PakScam \u2014 banking_ham",
+    "total_samples": 15,
+    "accuracy": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "tp": 0,
+    "fp": 15,
+    "tn": 0,
+    "fn": 0
+  },
+  "hard_negative_ham": {
+    "subset": "PakScam \u2014 hard_negative_ham",
+    "total_samples": 8,
+    "accuracy": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "tp": 0,
+    "fp": 8,
+    "tn": 0,
+    "fn": 0
+  },
+  "phishing_spam": {
+    "subset": "PakScam \u2014 phishing_spam",
+    "total_samples": 10,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "tp": 10,
+    "fp": 0,
+    "tn": 0,
+    "fn": 0
+  },
+  "prize_spam": {
+    "subset": "PakScam \u2014 prize_spam",
+    "total_samples": 8,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "tp": 8,
+    "fp": 0,
+    "tn": 0,
+    "fn": 0
+  },
+  "roman_urdu_ham": {
+    "subset": "PakScam \u2014 roman_urdu_ham",
+    "total_samples": 8,
+    "accuracy": 0.75,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "tp": 0,
+    "fp": 2,
+    "tn": 6,
+    "fn": 0
+  },
+  "roman_urdu_spam": {
+    "subset": "PakScam \u2014 roman_urdu_spam",
+    "total_samples": 8,
+    "accuracy": 0.875,
+    "precision": 1.0,
+    "recall": 0.875,
+    "f1_score": 0.9333,
+    "tp": 7,
+    "fp": 0,
+    "tn": 0,
+    "fn": 1
+  }
+}
