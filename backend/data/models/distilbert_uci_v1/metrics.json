@@ -1,0 +1,68 @@
+{
+  "metrics": {
+    "accuracy": 0.9786,
+    "precision": 0.9649,
+    "recall": 0.8594,
+    "f1_score": 0.9091,
+    "f1_macro": 0.9485,
+    "f1_weighted": 0.9781,
+    "roc_auc": 0.9951,
+    "pr_auc": 0.974,
+    "mcc": 0.899,
+    "cohen_kappa": 0.897,
+    "training_time_seconds": 1101.6093,
+    "prediction_time_seconds": 34.2911,
+    "model_size_mb": 255.425,
+    "confusion_matrix": [
+      [
+        449,
+        2
+      ],
+      [
+        9,
+        55
+      ]
+    ],
+    "classification_report": {
+      "ham": {
+        "precision": 0.980349344978166,
+        "recall": 0.9955654101995566,
+        "f1-score": 0.9878987898789879,
+        "support": 451.0
+      },
+      "spam": {
+        "precision": 0.9649122807017544,
+        "recall": 0.859375,
+        "f1-score": 0.9090909090909091,
+        "support": 64.0
+      },
+      "accuracy": 0.9786407766990292,
+      "macro avg": {
+        "precision": 0.9726308128399601,
+        "recall": 0.9274702050997783,
+        "f1-score": 0.9484948494849486,
+        "support": 515.0
+      },
+      "weighted avg": {
+        "precision": 0.9784309525243983,
+        "recall": 0.9786407766990292,
+        "f1-score": 0.9781051891596927,
+        "support": 515.0
+      }
+    }
+  },
+  "history": {
+    "train_loss": [
+      0.186
+    ],
+    "val_loss": [
+      0.0445
+    ],
+    "val_accuracy": [
+      0.9883
+    ],
+    "val_f1": [
+      0.9545
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "model_version": "distilbert-pakscam-v2",
+  "base_model": "distilbert-base-uncased",
+  "epochs": 3,
+  "max_length": 128,
+  "learning_rate": 2e-05,
+  "batch_size": 32,
+  "seed": 42,
+  "patience": 2,
+  "uci_train_samples": 4118,
+  "pakscam_train_samples": 98,
+  "combined_train_samples": 4216,
+  "combined_val_samples": 557,
+  "uci_test_samples": 515,
+  "pakscam_test_samples": 42,
+  "dataset_version": "pakscam_localized_v2",
+  "preprocessing": "create_transformer_config()"
+}

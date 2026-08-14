@@ -19,8 +19,15 @@ class AppConstants {
   static const int dbVersion = 1;
 
   // ── Network ─────────────────────────────────────────────────────────────────
-  /// Base URL for the MindShield AI backend (placeholder – update before use).
-  static const String apiBaseUrl = 'https://api.mindshield.local/v1';
+  /// Base URL for the MindShield AI backend.
+  ///
+  /// Can be overridden at launch using `--dart-define=API_BASE_URL=http://<YOUR_IP>:8000/api/v1`.
+  /// Defaults to host LAN IP for physical device development (`http://192.168.100.14:8000/api/v1`).
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://192.168.100.33:8000/api/v1',
+  );
+  static const String analyzeEndpoint = '/analyze';
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 30);
 

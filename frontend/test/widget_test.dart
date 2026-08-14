@@ -16,5 +16,7 @@ void main() {
 
     // The splash screen should render without errors.
     expect(find.text('MindShield'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
   });
 }

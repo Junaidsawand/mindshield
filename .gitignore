@@ -60,4 +60,5 @@ backend/data/processed/*
 **/.dart_tool/
 *.apk
 
-backend/data/models/distilbert/model.safetensors
+
+backend/data/models/**/model.safetensors

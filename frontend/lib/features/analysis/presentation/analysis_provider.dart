@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../data/dummy_analysis_repository.dart';
+import '../data/api_analysis_repository.dart';
 import '../domain/analysis_result.dart';
 import '../../inbox/domain/sms_message.dart';
 import '../../spam/data/sqflite_spam_repository.dart';
@@ -24,11 +24,12 @@ enum AnalysisActionState {
 
 /// Manages all state for the AI Threat Analysis screen.
 class AnalysisProvider extends ChangeNotifier {
-  AnalysisProvider();
+  AnalysisProvider([ApiAnalysisRepository? repository])
+      : _repo = repository ?? ApiAnalysisRepository.instance;
 
   // ── Dependencies ──────────────────────────────────────────────────────────
 
-  final _repo = DummyAnalysisRepository.instance;
+  final ApiAnalysisRepository _repo;
 
   // ── Internal state ────────────────────────────────────────────────────────
 
