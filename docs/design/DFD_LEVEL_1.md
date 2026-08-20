@@ -22,7 +22,7 @@ graph TD
     D3[("D3: Model Weights Folder")]
 
     %% Mobile Client Processes
-    subgraph Client Application (Flutter Host)
+    subgraph "Client Application (Flutter Host)"
         P1["1.0 Permission Handler"]
         P2["2.0 SMS Interceptor"]
         P3["3.0 Cache Manager"]
@@ -32,13 +32,13 @@ graph TD
     end
 
     %% Backend Server Processes
-    subgraph FastAPI API Server
+    subgraph "FastAPI API Server"
         P4["4.0 Router Controller"]
         P5["5.0 Validator"]
     end
 
     %% ML Engine Processes
-    subgraph PyTorch Inference Engine
+    subgraph "PyTorch Inference Engine"
         P6["6.0 Model Loader"]
         P7["7.0 Feature Extractor"]
     end
@@ -54,13 +54,13 @@ graph TD
 
     User -->|Open thread / details| P8
     P8 -->|Query conversations| P3
-    P3 <-->|Read data| D1
+    P3 ---|Read data| D1
 
     P8 -->|Trigger API check| P4
     P4 -->|Extract URL/financial metrics| P5
     P5 -->|Preprocessed DTO| P6
     
-    P6 <-->|Weights lookup| D3
+    P6 ---|Weights lookup| D3
     P6 -->|Class probabilities| P4
     
     P4 -->|Indicators list| P7

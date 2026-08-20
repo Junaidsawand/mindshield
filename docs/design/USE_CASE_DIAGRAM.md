@@ -12,36 +12,35 @@
 The following diagram defines the interactions between human/system actors and the MindShield application boundary.
 
 ```mermaid
-leftToRightDirection
+graph LR
+    User[Mobile User]
+    OS[Android Operating System]
 
-actor "Mobile User" as User
-actor "Android Operating System" as OS
+    subgraph "MindShield System Boundary"
+        UC01([UC-01: Grant System Permissions])
+        UC02([UC-02: Intercept Incoming SMS])
+        UC03([UC-03: View Inbox Conversations])
+        UC04([UC-04: Analyze Message Threat])
+        UC05([UC-05: Inspect Visual Explainability Highlights])
+        UC06([UC-06: Manage Quarantined Spam Messages])
+        UC07([UC-07: Inspect Historical Logs])
+        UC08([UC-08: View Dashboard Analytics])
+        UC09([UC-09: Modify System Settings])
+        UC10([UC-10: Query API Operational Health])
+    end
 
-subgraph MindShield System Boundary
-    usecase "UC-01: Grant System Permissions" as UC01
-    usecase "UC-02: Intercept Incoming SMS" as UC02
-    usecase "UC-03: View Inbox Conversations" as UC03
-    usecase "UC-04: Analyze Message Threat" as UC04
-    usecase "UC-05: Inspect Visual Explainability Highlights" as UC05
-    usecase "UC-06: Manage Quarantined Spam Messages" as UC06
-    usecase "UC-07: Inspect Historical Logs" as UC07
-    usecase "UC-08: View Dashboard Analytics" as UC08
-    usecase "UC-09: Modify System Settings" as UC09
-    usecase "UC-10: Query API Operational Health" as UC10
-end
+    User --> UC01
+    User --> UC03
+    User --> UC04
+    User --> UC06
+    User --> UC07
+    User --> UC08
+    User --> UC09
 
-User --> UC01
-User --> UC03
-User --> UC04
-User --> UC06
-User --> UC07
-User --> UC08
-User --> UC09
+    OS --> UC02
 
-OS --> UC02
-
-UC04 <.. UC05 : <<extend>>
-UC03 ..> UC10 : <<include>>
+    UC05 -.->|extend| UC04
+    UC03 -.->|include| UC10
 ```
 
 ---

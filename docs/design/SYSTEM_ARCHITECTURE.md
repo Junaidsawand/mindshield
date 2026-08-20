@@ -13,14 +13,14 @@ The system architecture of MindShield implements a clean, decoupled layout divid
 
 ```mermaid
 graph TD
-    subgraph Mobile Device (Android API 21+)
+    subgraph "Mobile Device (Android API 21+)"
         A[Android Telephony Subsystem] -->|SMS Received Intent| B[Kotlin SMSBroadcastReceiver]
         B -->|Platform Method Channels| C[Flutter SMS Background Service]
         
-        subgraph Flutter Client App (Clean Architecture)
+        subgraph "Flutter Client App (Clean Architecture)"
             C -->|Write Message| D[(SQLite db: sms_messages)]
             
-            subgraph Presentation Layer (UI & Providers)
+            subgraph "Presentation Layer (UI & Providers)"
                 E1[Inbox Screen] --- EP[InboxProvider]
                 E2[Spam Folder] --- SP[SpamProvider]
                 E3[Analysis Details] --- AP[AnalysisProvider]
@@ -28,8 +28,10 @@ graph TD
                 E5[Settings Screen] --- STP[SettingsProvider]
             end
             
-            subgraph Data & Domain Layer
-                EP & SP & DP --- R1[SQLite Repositories]
+            subgraph "Data & Domain Layer"
+                EP --- R1[SQLite Repositories]
+                SP --- R1
+                DP --- R1
                 R1 --- D
                 
                 AP --- R2[ApiAnalysisRepository]
@@ -40,19 +42,20 @@ graph TD
         end
     end
 
-    subgraph Backend Server (FastAPI Host)
+    subgraph "Backend Server (FastAPI Host)"
         F -->|POST /api/v1/analyze| G[FastAPI Router]
         G -->|Validation check| H[Validators Module]
         H -->|Cleaned message DTO| I[InferenceService]
         
-        subgraph ML Pipeline (PyTorch Sandbox)
+        subgraph "ML Pipeline (PyTorch Sandbox)"
             I -->|Run predict| J[HuggingFaceModelLoader]
             J -->|Subword Tokenizer| K[WordPiece Vocab]
             J -->|Forward inference| L[Active Model: distilbert-pakscam-v1]
         end
         
         I -->|Heuristic highlight lookup| M[AnalysisService / Keyword checkers]
-        J & M -->|Formulate envelope payload| G
+        J -->|Formulate envelope payload| G
+        M -->|Formulate envelope payload| G
     end
 
     classDef implemented fill:#2a7f5c,stroke:#fff,stroke-width:1px,color:#fff;
