@@ -72,3 +72,4 @@ scratch_*.txt
 # Large ONNX binary weights
 backend/data/models/**/*.onnx.data
 *.onnx.data
+*.onnx
