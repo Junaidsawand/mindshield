@@ -115,16 +115,20 @@ class ApiAnalysisRepository {
       ];
     }
 
+    final countryMap = _CountryParser.parse(message.sender);
+    final String? countryCode = countryMap?['code'];
+    final String? countryName = countryMap?['name'];
+
     final senderInfo = SenderInfo(
       displayName: message.sender,
       phoneNumber: message.sender,
-      countryCode: 'ZA',
-      countryName: 'South Africa',
-      firstSeenDate: DateTime.now().subtract(const Duration(days: 60)),
-      reportCount: threatLevel == 'safe' ? 0 : 15,
+      countryCode: countryCode,
+      countryName: countryName,
+      firstSeenDate: null,
+      reportCount: null,
       isKnownScammer: threatLevel == 'dangerous',
-      carrierName: 'Vodacom / MTN',
-      lineType: 'Mobile',
+      carrierName: null,
+      lineType: null,
     );
 
     return AnalysisResult(
@@ -185,5 +189,75 @@ class ApiAnalysisRepository {
     if (keywordNames.any((k) => k.contains('financial'))) return AttackType.investmentFraud;
     if (keywordNames.any((k) => k.contains('credential'))) return AttackType.piiHarvesting;
     return AttackType.smishing;
+  }
+}
+
+class _CountryParser {
+  static const Map<String, String> _names = {
+    '27': 'South Africa',
+    '1': 'United States',
+    '44': 'United Kingdom',
+    '92': 'Pakistan',
+    '91': 'India',
+    '49': 'Germany',
+    '33': 'France',
+    '61': 'Australia',
+    '81': 'Japan',
+    '55': 'Brazil',
+    '86': 'China',
+    '7': 'Russia',
+    '34': 'Spain',
+    '39': 'Italy',
+    '966': 'Saudi Arabia',
+    '971': 'United Arab Emirates',
+  };
+
+  static const Map<String, String> _codes = {
+    '27': 'ZA',
+    '1': 'US',
+    '44': 'GB',
+    '92': 'PK',
+    '91': 'IN',
+    '49': 'DE',
+    '33': 'FR',
+    '61': 'AU',
+    '81': 'JP',
+    '55': 'BR',
+    '86': 'CN',
+    '7': 'RU',
+    '34': 'ES',
+    '39': 'IT',
+    '966': 'SA',
+    '971': 'AE',
+  };
+
+  static Map<String, String>? parse(String phoneNumber) {
+    // Clean spaces, hyphens, and parens
+    var clean = phoneNumber.replaceAll(RegExp(r'[\s\-()]+'), '');
+    
+    // Normalize 00 to +
+    if (clean.startsWith('00')) {
+      clean = '+${clean.substring(2)}';
+    }
+    
+    if (!clean.startsWith('+')) {
+      return null;
+    }
+    
+    final digits = clean.substring(1);
+    
+    // Try matching prefixes of length 3, 2, then 1 digit
+    for (int len = 3; len >= 1; len--) {
+      if (digits.length >= len) {
+        final prefix = digits.substring(0, len);
+        if (_names.containsKey(prefix)) {
+          return {
+            'code': _codes[prefix]!,
+            'name': _names[prefix]!,
+          };
+        }
+      }
+    }
+    return null;
   }
 }

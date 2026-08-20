@@ -24,7 +24,7 @@ import 'widgets/spam_action_sheet.dart';
 /// Architecture
 /// ────────────
 /// * [SpamProvider] is scoped locally via [ChangeNotifierProvider].
-/// * Data flows through [DummySpamRepository] (real DB integration later).
+/// * Data flows through [SqfliteSpamRepository].
 /// * Navigation to [AnalysisScreen] passes a compatible [SmsMessage] via
 ///   [GoRouter.extra].
 ///

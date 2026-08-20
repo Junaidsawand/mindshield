@@ -154,10 +154,10 @@ class SenderInfo {
   const SenderInfo({
     required this.displayName,
     required this.phoneNumber,
-    required this.countryCode,
-    required this.countryName,
-    required this.firstSeenDate,
-    required this.reportCount,
+    this.countryCode,
+    this.countryName,
+    this.firstSeenDate,
+    this.reportCount,
     required this.isKnownScammer,
     this.carrierName,
     this.lineType,
@@ -170,16 +170,16 @@ class SenderInfo {
   final String phoneNumber;
 
   /// ISO 3166-1 alpha-2 country code (e.g. "ZA", "US").
-  final String countryCode;
+  final String? countryCode;
 
   /// Full country name.
-  final String countryName;
+  final String? countryName;
 
   /// Date this number was first seen reporting threats in the MindShield network.
-  final DateTime firstSeenDate;
+  final DateTime? firstSeenDate;
 
   /// Number of times this sender has been reported in the crowd-sourced database.
-  final int reportCount;
+  final int? reportCount;
 
   /// Whether the number appears in known scammer databases.
   final bool isKnownScammer;

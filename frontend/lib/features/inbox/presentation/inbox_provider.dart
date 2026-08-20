@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../data/sqflite_inbox_repository.dart';
 import '../../spam/data/sqflite_spam_repository.dart';
 import '../domain/sms_message.dart';
@@ -99,11 +100,18 @@ class InboxProvider extends ChangeNotifier {
 
   // ── Public API ────────────────────────────────────────────────────────────
 
-  /// Fetches messages from the repository, groups them into conversations, and notifies listeners.
   Future<void> loadMessages() async {
     _setLoading(true);
     _errorMessage = null;
     try {
+      final isPermissionGranted = await Permission.sms.isGranted;
+      if (!isPermissionGranted) {
+        _errorMessage = 'SMS permission is required to read your messages.';
+        _conversations = [];
+        notifyListeners();
+        return;
+      }
+
       final fetched = await _repo.fetchMessages();
       _conversations = groupIntoConversations<SmsMessage>(
         messages: fetched,

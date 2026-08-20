@@ -1,0 +1,1806 @@
+{
+  "summary": {
+    "total_samples": 64,
+    "mismatch_count": 0,
+    "equivalence_pass": true,
+    "mean_logit_diff": 1.0882504284381866e-06,
+    "max_logit_diff": 2.86102294921875e-06,
+    "mean_prob_diff": 2.9840521165169775e-08,
+    "max_prob_diff": 5.364418029785156e-07,
+    "tolerance": 0.0001
+  },
+  "records": [
+    {
+      "index": 0,
+      "source": "regression:ubl_ibft_receipt",
+      "text": "PKR 5,030 received from ILAM UL DIN* in your UBL A/C *5034 o...",
+      "pt_logits": [
+        2.301058769226074,
+        -2.5098838806152344
+      ],
+      "ort_logits": [
+        2.301058292388916,
+        -2.5098838806152344
+      ],
+      "pt_probs": [
+        0.9919255375862122,
+        0.00807445589452982
+      ],
+      "ort_probs": [
+        0.9919255375862122,
+        0.008074458688497543
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9919255375862122,
+      "ort_conf": 0.9919255375862122,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 2.7939677238464355e-09,
+      "equivalent": true
+    },
+    {
+      "index": 1,
+      "source": "regression:ubl_atm_debit",
+      "text": "JUNAID AHMED A/C *5034 is debited with PKR 5,000 on 04/08/26...",
+      "pt_logits": [
+        2.041002035140991,
+        -2.229559898376465
+      ],
+      "ort_logits": [
+        2.041001558303833,
+        -2.2295596599578857
+      ],
+      "pt_probs": [
+        0.9862186312675476,
+        0.013781345449388027
+      ],
+      "ort_probs": [
+        0.9862186312675476,
+        0.013781358487904072
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9862186312675476,
+      "ort_conf": 0.9862186312675476,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 1.30385160446167e-08,
+      "equivalent": true
+    },
+    {
+      "index": 2,
+      "source": "regression:ubl_customer_service_bitly",
+      "text": "Dear UBL Customer,\nYou may log your complaints via our Conta...",
+      "pt_logits": [
+        -0.5078933238983154,
+        0.47239550948143005
+      ],
+      "ort_logits": [
+        -0.5078922510147095,
+        0.4723941683769226
+      ],
+      "pt_probs": [
+        0.27283450961112976,
+        0.7271655797958374
+      ],
+      "ort_probs": [
+        0.2728349566459656,
+        0.7271650433540344
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.7271655797958374,
+      "ort_conf": 0.7271650433540344,
+      "logit_diff": 1.341104507446289e-06,
+      "prob_diff": 5.364418029785156e-07,
+      "equivalent": true
+    },
+    {
+      "index": 3,
+      "source": "regression:zong_50_percent_off",
+      "text": "50% OFF Only 4 You! Make the most of Z Hour sale from 5PM-9P...",
+      "pt_logits": [
+        -1.587105393409729,
+        1.6369432210922241
+      ],
+      "ort_logits": [
+        -1.587104320526123,
+        1.6369421482086182
+      ],
+      "pt_probs": [
+        0.03827069327235222,
+        0.9617293477058411
+      ],
+      "ort_probs": [
+        0.038270771503448486,
+        0.9617292284965515
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9617293477058411,
+      "ort_conf": 0.9617292284965515,
+      "logit_diff": 1.0728836059570312e-06,
+      "prob_diff": 1.1920928955078125e-07,
+      "equivalent": true
+    },
+    {
+      "index": 4,
+      "source": "regression:gaming_royale_subscription",
+      "text": "Thanks for subscribing to Gaming Royale at Rs 11.95/Day (Aut...",
+      "pt_logits": [
+        2.099102735519409,
+        -1.8982148170471191
+      ],
+      "ort_logits": [
+        2.0991013050079346,
+        -1.8982131481170654
+      ],
+      "pt_probs": [
+        0.9819663763046265,
+        0.018033651635050774
+      ],
+      "ort_probs": [
+        0.9819662570953369,
+        0.018033703789114952
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9819663763046265,
+      "ort_conf": 0.9819662570953369,
+      "logit_diff": 1.6689300537109375e-06,
+      "prob_diff": 1.1920928955078125e-07,
+      "equivalent": true
+    },
+    {
+      "index": 5,
+      "source": "regression:gaming_royale_free_trial",
+      "text": "You have unlocked ONE Day FREE Trial of Gaming Royale and wi...",
+      "pt_logits": [
+        1.5749043226242065,
+        -1.4793606996536255
+      ],
+      "ort_logits": [
+        1.574905514717102,
+        -1.4793617725372314
+      ],
+      "pt_probs": [
+        0.9549662470817566,
+        0.04503369703888893
+      ],
+      "ort_probs": [
+        0.9549663662910461,
+        0.04503359645605087
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9549662470817566,
+      "ort_conf": 0.9549663662910461,
+      "logit_diff": 1.1920928955078125e-06,
+      "prob_diff": 1.1920928955078125e-07,
+      "equivalent": true
+    },
+    {
+      "index": 6,
+      "source": "regression:readycash_overdue",
+      "text": "Your ReadCash is Overdue! Save on the next weekly fee of Rs ...",
+      "pt_logits": [
+        1.2455558776855469,
+        -1.1541138887405396
+      ],
+      "ort_logits": [
+        1.2455575466156006,
+        -1.1541149616241455
+      ],
+      "pt_probs": [
+        0.9168021082878113,
+        0.08319788426160812
+      ],
+      "ort_probs": [
+        0.9168022871017456,
+        0.08319766819477081
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9168021082878113,
+      "ort_conf": 0.9168022871017456,
+      "logit_diff": 1.6689300537109375e-06,
+      "prob_diff": 2.1606683731079102e-07,
+      "equivalent": true
+    },
+    {
+      "index": 7,
+      "source": "regression:readycash_1_day_left",
+      "text": "1 DAY LEFT! Your ReadyCash loan is due tomorrow! Make sure t...",
+      "pt_logits": [
+        2.168431520462036,
+        -2.044865608215332
+      ],
+      "ort_logits": [
+        2.1684298515319824,
+        -2.0448639392852783
+      ],
+      "pt_probs": [
+        0.9854183197021484,
+        0.014581729657948017
+      ],
+      "ort_probs": [
+        0.9854182004928589,
+        0.0145817706361413
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9854183197021484,
+      "ort_conf": 0.9854182004928589,
+      "logit_diff": 1.6689300537109375e-06,
+      "prob_diff": 1.1920928955078125e-07,
+      "equivalent": true
+    },
+    {
+      "index": 8,
+      "source": "regression:zong_engage_prize_lang",
+      "text": "Jeetne ke liye tayyar ho jao! aur jeeto bade inaam, Zong Eng...",
+      "pt_logits": [
+        -1.915490984916687,
+        1.87906014919281
+      ],
+      "ort_logits": [
+        -1.9154919385910034,
+        1.8790607452392578
+      ],
+      "pt_probs": [
+        0.021998194977641106,
+        0.9780017733573914
+      ],
+      "ort_probs": [
+        0.02199815772473812,
+        0.9780017733573914
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9780017733573914,
+      "ort_conf": 0.9780017733573914,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 3.725290298461914e-08,
+      "equivalent": true
+    },
+    {
+      "index": 9,
+      "source": "regression:prize_phishing",
+      "text": "Congratulations! You have won PKR 100,000. Click http://exam...",
+      "pt_logits": [
+        -2.3254754543304443,
+        2.247908592224121
+      ],
+      "ort_logits": [
+        -2.325474500656128,
+        2.2479071617126465
+      ],
+      "pt_probs": [
+        0.01021749060600996,
+        0.9897825717926025
+      ],
+      "ort_probs": [
+        0.010217517614364624,
+        0.989782452583313
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9897825717926025,
+      "ort_conf": 0.989782452583313,
+      "logit_diff": 1.430511474609375e-06,
+      "prob_diff": 1.1920928955078125e-07,
+      "equivalent": true
+    },
+    {
+      "index": 10,
+      "source": "regression:fake_bank_verification",
+      "text": "HBL Alert: Your account will be blocked in 24 hours due to p...",
+      "pt_logits": [
+        -2.5284948348999023,
+        2.3748955726623535
+      ],
+      "ort_logits": [
+        -2.5284931659698486,
+        2.3748936653137207
+      ],
+      "pt_probs": [
+        0.007366707548499107,
+        0.9926332831382751
+      ],
+      "ort_probs": [
+        0.007366731762886047,
+        0.9926332831382751
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9926332831382751,
+      "ort_conf": 0.9926332831382751,
+      "logit_diff": 1.9073486328125e-06,
+      "prob_diff": 2.421438694000244e-08,
+      "equivalent": true
+    },
+    {
+      "index": 11,
+      "source": "regression:fake_account_suspension",
+      "text": "Your UBL account has been suspended. Verify your account imm...",
+      "pt_logits": [
+        -1.933521032333374,
+        1.8697021007537842
+      ],
+      "ort_logits": [
+        -1.9335196018218994,
+        1.8697007894515991
+      ],
+      "pt_probs": [
+        0.02181239239871502,
+        0.9781875610351562
+      ],
+      "ort_probs": [
+        0.021812455728650093,
+        0.9781875610351562
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9781875610351562,
+      "ort_conf": 0.9781875610351562,
+      "logit_diff": 1.430511474609375e-06,
+      "prob_diff": 6.332993507385254e-08,
+      "equivalent": true
+    },
+    {
+      "index": 12,
+      "source": "regression:otp_phishing",
+      "text": "Dear Customer, share your 6-digit OTP code with our support ...",
+      "pt_logits": [
+        -1.9482375383377075,
+        1.8820405006408691
+      ],
+      "ort_logits": [
+        -1.948238730430603,
+        1.8820416927337646
+      ],
+      "pt_probs": [
+        0.021242542192339897,
+        0.9787574410438538
+      ],
+      "ort_probs": [
+        0.021242495626211166,
+        0.9787575602531433
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9787574410438538,
+      "ort_conf": 0.9787575602531433,
+      "logit_diff": 1.1920928955078125e-06,
+      "prob_diff": 1.1920928955078125e-07,
+      "equivalent": true
+    },
+    {
+      "index": 13,
+      "source": "regression:bisp_roman_urdu_scam",
+      "text": "BISP ki taraf se 25,000 rupay approved hain. Abhi claim kare...",
+      "pt_logits": [
+        -2.9584436416625977,
+        2.755763530731201
+      ],
+      "ort_logits": [
+        -2.958444118499756,
+        2.755763292312622
+      ],
+      "pt_probs": [
+        0.0032879188656806946,
+        0.9967120885848999
+      ],
+      "ort_probs": [
+        0.0032879174686968327,
+        0.9967120885848999
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9967120885848999,
+      "ort_conf": 0.9967120885848999,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 1.3969838619232178e-09,
+      "equivalent": true
+    },
+    {
+      "index": 14,
+      "source": "uci_test_set",
+      "text": "Ugh I don't wanna get out of bed. It's so warm.",
+      "pt_logits": [
+        3.317805290222168,
+        -3.43331241607666
+      ],
+      "ort_logits": [
+        3.3178062438964844,
+        -3.4333128929138184
+      ],
+      "pt_probs": [
+        0.9988318085670471,
+        0.0011682054027915
+      ],
+      "ort_probs": [
+        0.9988318085670471,
+        0.0011682037729769945
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9988318085670471,
+      "ort_conf": 0.9988318085670471,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 1.6298145055770874e-09,
+      "equivalent": true
+    },
+    {
+      "index": 15,
+      "source": "uci_test_set",
+      "text": "Lol! Oops sorry! Have fun.",
+      "pt_logits": [
+        3.2865755558013916,
+        -3.4495277404785156
+      ],
+      "ort_logits": [
+        3.2865757942199707,
+        -3.449526786804199
+      ],
+      "pt_probs": [
+        0.9988141059875488,
+        0.001185856992378831
+      ],
+      "ort_probs": [
+        0.9988141059875488,
+        0.0011858574580401182
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9988141059875488,
+      "ort_conf": 0.9988141059875488,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 4.656612873077393e-10,
+      "equivalent": true
+    },
+    {
+      "index": 16,
+      "source": "uci_test_set",
+      "text": "Call me. I m unable to cal. Lets meet bhaskar, and deep",
+      "pt_logits": [
+        3.347855567932129,
+        -3.5328798294067383
+      ],
+      "ort_logits": [
+        3.3478546142578125,
+        -3.532878875732422
+      ],
+      "pt_probs": [
+        0.9989737272262573,
+        0.001026333891786635
+      ],
+      "ort_probs": [
+        0.9989737272262573,
+        0.001026335870847106
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9989737272262573,
+      "ort_conf": 0.9989737272262573,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 1.979060471057892e-09,
+      "equivalent": true
+    },
+    {
+      "index": 17,
+      "source": "uci_test_set",
+      "text": "How long has it been since you screamed, princess?",
+      "pt_logits": [
+        2.908489465713501,
+        -2.958899974822998
+      ],
+      "ort_logits": [
+        2.9084887504577637,
+        -2.9588990211486816
+      ],
+      "pt_probs": [
+        0.9971777200698853,
+        0.002822263864800334
+      ],
+      "ort_probs": [
+        0.9971777200698853,
+        0.0028222689870744944
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9971777200698853,
+      "ort_conf": 0.9971777200698853,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 5.122274160385132e-09,
+      "equivalent": true
+    },
+    {
+      "index": 18,
+      "source": "uci_test_set",
+      "text": "They will pick up and drop in car.so no problem..",
+      "pt_logits": [
+        3.132659435272217,
+        -3.149947166442871
+      ],
+      "ort_logits": [
+        3.132659912109375,
+        -3.149947166442871
+      ],
+      "pt_probs": [
+        0.998134970664978,
+        0.0018650388810783625
+      ],
+      "ort_probs": [
+        0.998134970664978,
+        0.0018650381825864315
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.998134970664978,
+      "ort_conf": 0.998134970664978,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 6.984919309616089e-10,
+      "equivalent": true
+    },
+    {
+      "index": 19,
+      "source": "uci_test_set",
+      "text": "Are you still playing with gautham?",
+      "pt_logits": [
+        3.0127010345458984,
+        -3.0276334285736084
+      ],
+      "ort_logits": [
+        3.0127010345458984,
+        -3.027632474899292
+      ],
+      "pt_probs": [
+        0.997624933719635,
+        0.002375107491388917
+      ],
+      "ort_probs": [
+        0.997624933719635,
+        0.00237510958686471
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.997624933719635,
+      "ort_conf": 0.997624933719635,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 2.0954757928848267e-09,
+      "equivalent": true
+    },
+    {
+      "index": 20,
+      "source": "uci_test_set",
+      "text": "No break time one... How... I come out n get my stuff fr \u00fc?",
+      "pt_logits": [
+        3.439894437789917,
+        -3.48641037940979
+      ],
+      "ort_logits": [
+        3.4398953914642334,
+        -3.4864115715026855
+      ],
+      "pt_probs": [
+        0.9990193843841553,
+        0.0009806588059291244
+      ],
+      "ort_probs": [
+        0.9990193843841553,
+        0.0009806569432839751
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9990193843841553,
+      "ort_conf": 0.9990193843841553,
+      "logit_diff": 1.1920928955078125e-06,
+      "prob_diff": 1.862645149230957e-09,
+      "equivalent": true
+    },
+    {
+      "index": 21,
+      "source": "uci_test_set",
+      "text": "Now, whats your house # again ? And do you have any beer the...",
+      "pt_logits": [
+        3.1871585845947266,
+        -3.2992687225341797
+      ],
+      "ort_logits": [
+        3.1871588230133057,
+        -3.299269199371338
+      ],
+      "pt_probs": [
+        0.998478353023529,
+        0.0015216650208458304
+      ],
+      "ort_probs": [
+        0.998478353023529,
+        0.0015216635074466467
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.998478353023529,
+      "ort_conf": 0.998478353023529,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 1.5133991837501526e-09,
+      "equivalent": true
+    },
+    {
+      "index": 22,
+      "source": "uci_test_set",
+      "text": "I came hostel. I m going to sleep. Plz call me up before cla...",
+      "pt_logits": [
+        3.357133626937866,
+        -3.468515634536743
+      ],
+      "ort_logits": [
+        3.357131004333496,
+        -3.468513011932373
+      ],
+      "pt_probs": [
+        0.9989156723022461,
+        0.001084393821656704
+      ],
+      "ort_probs": [
+        0.9989156723022461,
+        0.0010843995260074735
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9989156723022461,
+      "ort_conf": 0.9989156723022461,
+      "logit_diff": 2.6226043701171875e-06,
+      "prob_diff": 5.704350769519806e-09,
+      "equivalent": true
+    },
+    {
+      "index": 23,
+      "source": "uci_test_set",
+      "text": "Was playng 9 doors game and gt racing on phone lol",
+      "pt_logits": [
+        2.9124298095703125,
+        -3.0805039405822754
+      ],
+      "ort_logits": [
+        2.912428855895996,
+        -3.080503463745117
+      ],
+      "pt_probs": [
+        0.9975098371505737,
+        0.0024901132564991713
+      ],
+      "ort_probs": [
+        0.9975098371505737,
+        0.0024901169817894697
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9975098371505737,
+      "ort_conf": 0.9975098371505737,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 3.725290298461914e-09,
+      "equivalent": true
+    },
+    {
+      "index": 24,
+      "source": "uci_test_set",
+      "text": "No it will reach by 9 only. She telling she will be there. I...",
+      "pt_logits": [
+        3.3170595169067383,
+        -3.49564266204834
+      ],
+      "ort_logits": [
+        3.317058563232422,
+        -3.4956421852111816
+      ],
+      "pt_probs": [
+        0.9989014863967896,
+        0.0010985091794282198
+      ],
+      "ort_probs": [
+        0.9989014863967896,
+        0.0010985108092427254
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9989014863967896,
+      "ort_conf": 0.9989014863967896,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 1.6298145055770874e-09,
+      "equivalent": true
+    },
+    {
+      "index": 25,
+      "source": "uci_test_set",
+      "text": "Hi baby ive just got back from work and i was wanting to see...",
+      "pt_logits": [
+        3.2149176597595215,
+        -3.2276086807250977
+      ],
+      "ort_logits": [
+        3.2149174213409424,
+        -3.2276086807250977
+      ],
+      "pt_probs": [
+        0.9984101057052612,
+        0.0015898470301181078
+      ],
+      "ort_probs": [
+        0.9984101057052612,
+        0.0015898477286100388
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9984101057052612,
+      "ort_conf": 0.9984101057052612,
+      "logit_diff": 2.384185791015625e-07,
+      "prob_diff": 6.984919309616089e-10,
+      "equivalent": true
+    },
+    {
+      "index": 26,
+      "source": "uci_test_set",
+      "text": "What do you do, my dog ? Must I always wait till the end of ...",
+      "pt_logits": [
+        2.5703072547912598,
+        -2.5633575916290283
+      ],
+      "ort_logits": [
+        2.5703060626983643,
+        -2.563356637954712
+      ],
+      "pt_probs": [
+        0.9941396713256836,
+        0.005860369652509689
+      ],
+      "ort_probs": [
+        0.9941396713256836,
+        0.005860383156687021
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9941396713256836,
+      "ort_conf": 0.9941396713256836,
+      "logit_diff": 1.1920928955078125e-06,
+      "prob_diff": 1.3504177331924438e-08,
+      "equivalent": true
+    },
+    {
+      "index": 27,
+      "source": "uci_test_set",
+      "text": "Beautiful Truth against Gravity.. Read carefully: \"Our heart...",
+      "pt_logits": [
+        2.2484893798828125,
+        -2.3928475379943848
+      ],
+      "ort_logits": [
+        2.248487949371338,
+        -2.392845869064331
+      ],
+      "pt_probs": [
+        0.9904474020004272,
+        0.009552661329507828
+      ],
+      "ort_probs": [
+        0.9904472827911377,
+        0.00955269206315279
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9904474020004272,
+      "ort_conf": 0.9904472827911377,
+      "logit_diff": 1.6689300537109375e-06,
+      "prob_diff": 1.1920928955078125e-07,
+      "equivalent": true
+    },
+    {
+      "index": 28,
+      "source": "uci_test_set",
+      "text": "U wan 2 haf lunch i'm in da canteen now.",
+      "pt_logits": [
+        3.4610555171966553,
+        -3.520735025405884
+      ],
+      "ort_logits": [
+        3.461055278778076,
+        -3.5207347869873047
+      ],
+      "pt_probs": [
+        0.9990721940994263,
+        0.0009277773788198829
+      ],
+      "ort_probs": [
+        0.9990721940994263,
+        0.0009277777862735093
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9990721940994263,
+      "ort_conf": 0.9990721940994263,
+      "logit_diff": 2.384185791015625e-07,
+      "prob_diff": 4.0745362639427185e-10,
+      "equivalent": true
+    },
+    {
+      "index": 29,
+      "source": "uci_test_set",
+      "text": "Have you always been saying welp?",
+      "pt_logits": [
+        3.2261152267456055,
+        -3.361448287963867
+      ],
+      "ort_logits": [
+        3.226113796234131,
+        -3.361447334289551
+      ],
+      "pt_probs": [
+        0.9986245632171631,
+        0.001375497318804264
+      ],
+      "ort_probs": [
+        0.9986245632171631,
+        0.001375500694848597
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9986245632171631,
+      "ort_conf": 0.9986245632171631,
+      "logit_diff": 1.430511474609375e-06,
+      "prob_diff": 3.3760443329811096e-09,
+      "equivalent": true
+    },
+    {
+      "index": 30,
+      "source": "uci_test_set",
+      "text": "Take some small dose tablet for fever",
+      "pt_logits": [
+        2.7127904891967773,
+        -2.8965444564819336
+      ],
+      "ort_logits": [
+        2.712789297103882,
+        -2.896542549133301
+      ],
+      "pt_probs": [
+        0.9963498115539551,
+        0.003650132566690445
+      ],
+      "ort_probs": [
+        0.9963498115539551,
+        0.0036501430440694094
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9963498115539551,
+      "ort_conf": 0.9963498115539551,
+      "logit_diff": 1.9073486328125e-06,
+      "prob_diff": 1.0477378964424133e-08,
+      "equivalent": true
+    },
+    {
+      "index": 31,
+      "source": "uci_test_set",
+      "text": "I'm always looking for an excuse to be in the city.",
+      "pt_logits": [
+        3.1444129943847656,
+        -3.1847100257873535
+      ],
+      "ort_logits": [
+        3.1444103717803955,
+        -3.1847071647644043
+      ],
+      "pt_probs": [
+        0.9982195496559143,
+        0.001780421705916524
+      ],
+      "ort_probs": [
+        0.9982195496559143,
+        0.001780431135557592
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9982195496559143,
+      "ort_conf": 0.9982195496559143,
+      "logit_diff": 2.86102294921875e-06,
+      "prob_diff": 9.42964106798172e-09,
+      "equivalent": true
+    },
+    {
+      "index": 32,
+      "source": "uci_test_set",
+      "text": "I dont have any of your file in my bag..i was in work when y...",
+      "pt_logits": [
+        3.3137614727020264,
+        -3.3830742835998535
+      ],
+      "ort_logits": [
+        3.3137614727020264,
+        -3.3830742835998535
+      ],
+      "pt_probs": [
+        0.9987667798995972,
+        0.0012332904152572155
+      ],
+      "ort_probs": [
+        0.9987667798995972,
+        0.0012332904152572155
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9987667798995972,
+      "ort_conf": 0.9987667798995972,
+      "logit_diff": 0.0,
+      "prob_diff": 0.0,
+      "equivalent": true
+    },
+    {
+      "index": 33,
+      "source": "uci_test_set",
+      "text": "Wat time r \u00fc going to xin's hostel?",
+      "pt_logits": [
+        3.4109206199645996,
+        -3.4687728881835938
+      ],
+      "ort_logits": [
+        3.410921096801758,
+        -3.4687724113464355
+      ],
+      "pt_probs": [
+        0.9989726543426514,
+        0.0010274025844410062
+      ],
+      "ort_probs": [
+        0.9989726543426514,
+        0.0010274025844410062
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9989726543426514,
+      "ort_conf": 0.9989726543426514,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 0.0,
+      "equivalent": true
+    },
+    {
+      "index": 34,
+      "source": "uci_test_set",
+      "text": "We walked from my moms. Right on stagwood pass right on wint...",
+      "pt_logits": [
+        2.5057387351989746,
+        -2.592451572418213
+      ],
+      "ort_logits": [
+        2.5057387351989746,
+        -2.592451572418213
+      ],
+      "pt_probs": [
+        0.9939292669296265,
+        0.006070711184293032
+      ],
+      "ort_probs": [
+        0.9939292669296265,
+        0.006070711184293032
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9939292669296265,
+      "ort_conf": 0.9939292669296265,
+      "logit_diff": 0.0,
+      "prob_diff": 0.0,
+      "equivalent": true
+    },
+    {
+      "index": 35,
+      "source": "uci_test_set",
+      "text": "Please give it 2 or i will pick it up on Tuesday evening abo...",
+      "pt_logits": [
+        2.9135122299194336,
+        -2.9877965450286865
+      ],
+      "ort_logits": [
+        2.913511276245117,
+        -2.987794876098633
+      ],
+      "pt_probs": [
+        0.9972715973854065,
+        0.002728396560996771
+      ],
+      "ort_probs": [
+        0.9972715973854065,
+        0.0027284047100692987
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9972715973854065,
+      "ort_conf": 0.9972715973854065,
+      "logit_diff": 1.6689300537109375e-06,
+      "prob_diff": 8.149072527885437e-09,
+      "equivalent": true
+    },
+    {
+      "index": 36,
+      "source": "uci_test_set",
+      "text": "Wat r u doing now?",
+      "pt_logits": [
+        3.4192075729370117,
+        -3.4817214012145996
+      ],
+      "ort_logits": [
+        3.4192070960998535,
+        -3.481722354888916
+      ],
+      "pt_probs": [
+        0.9989941716194153,
+        0.001005836995318532
+      ],
+      "ort_probs": [
+        0.9989941716194153,
+        0.0010058365296572447
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9989941716194153,
+      "ort_conf": 0.9989941716194153,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 4.656612873077393e-10,
+      "equivalent": true
+    },
+    {
+      "index": 37,
+      "source": "uci_test_set",
+      "text": "K.k:)advance happy pongal.",
+      "pt_logits": [
+        2.839366912841797,
+        -2.941727638244629
+      ],
+      "ort_logits": [
+        2.8393688201904297,
+        -2.941728353500366
+      ],
+      "pt_probs": [
+        0.996924102306366,
+        0.0030758462380617857
+      ],
+      "ort_probs": [
+        0.996924102306366,
+        0.003075837390497327
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.996924102306366,
+      "ort_conf": 0.996924102306366,
+      "logit_diff": 1.9073486328125e-06,
+      "prob_diff": 8.847564458847046e-09,
+      "equivalent": true
+    },
+    {
+      "index": 38,
+      "source": "uci_test_set",
+      "text": "Think + da. You wil do.",
+      "pt_logits": [
+        3.4155430793762207,
+        -3.5117712020874023
+      ],
+      "ort_logits": [
+        3.415543556213379,
+        -3.511770725250244
+      ],
+      "pt_probs": [
+        0.9990203380584717,
+        0.0009796703234314919
+      ],
+      "ort_probs": [
+        0.9990203380584717,
+        0.0009796704398468137
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9990203380584717,
+      "ort_conf": 0.9990203380584717,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 1.1641532182693481e-10,
+      "equivalent": true
+    },
+    {
+      "index": 39,
+      "source": "uci_test_set",
+      "text": "Please leave this topic..sorry for telling that..",
+      "pt_logits": [
+        3.149029016494751,
+        -3.2120609283447266
+      ],
+      "ort_logits": [
+        3.1490302085876465,
+        -3.2120609283447266
+      ],
+      "pt_probs": [
+        0.9982755184173584,
+        0.001724504167214036
+      ],
+      "ort_probs": [
+        0.9982755184173584,
+        0.0017245017224922776
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9982755184173584,
+      "ort_conf": 0.9982755184173584,
+      "logit_diff": 1.1920928955078125e-06,
+      "prob_diff": 2.444721758365631e-09,
+      "equivalent": true
+    },
+    {
+      "index": 40,
+      "source": "uci_test_set",
+      "text": "Kay... Since we are out already",
+      "pt_logits": [
+        3.3677988052368164,
+        -3.4646496772766113
+      ],
+      "ort_logits": [
+        3.3677992820739746,
+        -3.4646496772766113
+      ],
+      "pt_probs": [
+        0.9989228844642639,
+        0.0010770534863695502
+      ],
+      "ort_probs": [
+        0.9989228844642639,
+        0.001077053020708263
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9989228844642639,
+      "ort_conf": 0.9989228844642639,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 4.656612873077393e-10,
+      "equivalent": true
+    },
+    {
+      "index": 41,
+      "source": "uci_test_set",
+      "text": "Oh ok..",
+      "pt_logits": [
+        3.2916903495788574,
+        -3.3619775772094727
+      ],
+      "ort_logits": [
+        3.2916903495788574,
+        -3.3619771003723145
+      ],
+      "pt_probs": [
+        0.998712420463562,
+        0.0012876243563368917
+      ],
+      "ort_probs": [
+        0.998712420463562,
+        0.0012876249384135008
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.998712420463562,
+      "ort_conf": 0.998712420463562,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 5.820766091346741e-10,
+      "equivalent": true
+    },
+    {
+      "index": 42,
+      "source": "uci_test_set",
+      "text": "K.k:)i'm going to tirunelvali this week to see my uncle ..i ...",
+      "pt_logits": [
+        3.1373848915100098,
+        -3.2704362869262695
+      ],
+      "ort_logits": [
+        3.1373839378356934,
+        -3.2704355716705322
+      ],
+      "pt_probs": [
+        0.9983540773391724,
+        0.0016458991449326277
+      ],
+      "ort_probs": [
+        0.9983540773391724,
+        0.0016459014732390642
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9983540773391724,
+      "ort_conf": 0.9983540773391724,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 2.3283064365386963e-09,
+      "equivalent": true
+    },
+    {
+      "index": 43,
+      "source": "uci_test_set",
+      "text": "Hey I am really horny want to chat or see me naked text hot ...",
+      "pt_logits": [
+        -2.9314661026000977,
+        2.6961681842803955
+      ],
+      "ort_logits": [
+        -2.9314656257629395,
+        2.6961679458618164
+      ],
+      "pt_probs": [
+        0.0035841832868754864,
+        0.9964158535003662
+      ],
+      "ort_probs": [
+        0.003584184916689992,
+        0.9964158535003662
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9964158535003662,
+      "ort_conf": 0.9964158535003662,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 1.6298145055770874e-09,
+      "equivalent": true
+    },
+    {
+      "index": 44,
+      "source": "uci_test_set",
+      "text": "What's nannys address?",
+      "pt_logits": [
+        3.078218936920166,
+        -3.1735658645629883
+      ],
+      "ort_logits": [
+        3.0782179832458496,
+        -3.17356538772583
+      ],
+      "pt_probs": [
+        0.9980766773223877,
+        0.0019233054481446743
+      ],
+      "ort_probs": [
+        0.9980766773223877,
+        0.0019233082421123981
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9980766773223877,
+      "ort_conf": 0.9980766773223877,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 2.7939677238464355e-09,
+      "equivalent": true
+    },
+    {
+      "index": 45,
+      "source": "uci_test_set",
+      "text": "Hello hun how ru? Its here by the way. Im good. Been on 2 da...",
+      "pt_logits": [
+        3.2730934619903564,
+        -3.3529818058013916
+      ],
+      "ort_logits": [
+        3.273092031478882,
+        -3.3529810905456543
+      ],
+      "pt_probs": [
+        0.9986763596534729,
+        0.0013236002996563911
+      ],
+      "ort_probs": [
+        0.9986763596534729,
+        0.0013236035592854023
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9986763596534729,
+      "ort_conf": 0.9986763596534729,
+      "logit_diff": 1.430511474609375e-06,
+      "prob_diff": 3.259629011154175e-09,
+      "equivalent": true
+    },
+    {
+      "index": 46,
+      "source": "uci_test_set",
+      "text": "Great. Never been better. Each day gives even more reasons t...",
+      "pt_logits": [
+        2.9158897399902344,
+        -3.016477346420288
+      ],
+      "ort_logits": [
+        2.9158883094787598,
+        -3.0164759159088135
+      ],
+      "pt_probs": [
+        0.9973548650741577,
+        0.0026451805606484413
+      ],
+      "ort_probs": [
+        0.9973548650741577,
+        0.002645188244059682
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9973548650741577,
+      "ort_conf": 0.9973548650741577,
+      "logit_diff": 1.430511474609375e-06,
+      "prob_diff": 7.683411240577698e-09,
+      "equivalent": true
+    },
+    {
+      "index": 47,
+      "source": "uci_test_set",
+      "text": "Oh... Okie lor...We go on sat...",
+      "pt_logits": [
+        3.342541217803955,
+        -3.445518970489502
+      ],
+      "ort_logits": [
+        3.3425424098968506,
+        -3.4455199241638184
+      ],
+      "pt_probs": [
+        0.9988741278648376,
+        0.0011258841259405017
+      ],
+      "ort_probs": [
+        0.9988741278648376,
+        0.001125881914049387
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9988741278648376,
+      "ort_conf": 0.9988741278648376,
+      "logit_diff": 1.1920928955078125e-06,
+      "prob_diff": 2.2118911147117615e-09,
+      "equivalent": true
+    },
+    {
+      "index": 48,
+      "source": "uci_test_set",
+      "text": "So when you gonna get rimac access",
+      "pt_logits": [
+        3.223921298980713,
+        -3.185267210006714
+      ],
+      "ort_logits": [
+        3.2239201068878174,
+        -3.1852657794952393
+      ],
+      "pt_probs": [
+        0.998356282711029,
+        0.001643654191866517
+      ],
+      "ort_probs": [
+        0.998356282711029,
+        0.001643658266402781
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.998356282711029,
+      "ort_conf": 0.998356282711029,
+      "logit_diff": 1.430511474609375e-06,
+      "prob_diff": 4.0745362639427185e-09,
+      "equivalent": true
+    },
+    {
+      "index": 49,
+      "source": "uci_test_set",
+      "text": "Oh ok wait 4 me there... My lect havent finish",
+      "pt_logits": [
+        3.4382317066192627,
+        -3.5178675651550293
+      ],
+      "ort_logits": [
+        3.4382314682006836,
+        -3.517866611480713
+      ],
+      "pt_probs": [
+        0.9990480542182922,
+        0.0009518987499177456
+      ],
+      "ort_probs": [
+        0.9990480542182922,
+        0.0009519000886939466
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9990480542182922,
+      "ort_conf": 0.9990480542182922,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 1.3387762010097504e-09,
+      "equivalent": true
+    },
+    {
+      "index": 50,
+      "source": "uci_test_set",
+      "text": "Beautiful truth : Expression of the face could Be seen by ev...",
+      "pt_logits": [
+        2.4580907821655273,
+        -2.6927618980407715
+      ],
+      "ort_logits": [
+        2.4580905437469482,
+        -2.6927614212036133
+      ],
+      "pt_probs": [
+        0.9942389726638794,
+        0.005761079955846071
+      ],
+      "ort_probs": [
+        0.9942389726638794,
+        0.005761082749813795
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9942389726638794,
+      "ort_conf": 0.9942389726638794,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 2.7939677238464355e-09,
+      "equivalent": true
+    },
+    {
+      "index": 51,
+      "source": "uci_test_set",
+      "text": "How would my ip address test that considering my computer is...",
+      "pt_logits": [
+        2.8768491744995117,
+        -2.934703826904297
+      ],
+      "ort_logits": [
+        2.8768491744995117,
+        -2.934703826904297
+      ],
+      "pt_probs": [
+        0.997016191482544,
+        0.002983848564326763
+      ],
+      "ort_probs": [
+        0.997016191482544,
+        0.002983848564326763
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.997016191482544,
+      "ort_conf": 0.997016191482544,
+      "logit_diff": 0.0,
+      "prob_diff": 0.0,
+      "equivalent": true
+    },
+    {
+      "index": 52,
+      "source": "uci_test_set",
+      "text": "I don,t think so. You don't need to be going out that late o...",
+      "pt_logits": [
+        2.804292678833008,
+        -2.919360876083374
+      ],
+      "ort_logits": [
+        2.804290771484375,
+        -2.9193601608276367
+      ],
+      "pt_probs": [
+        0.9967429041862488,
+        0.0032571060582995415
+      ],
+      "ort_probs": [
+        0.9967429041862488,
+        0.0032571156043559313
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9967429041862488,
+      "ort_conf": 0.9967429041862488,
+      "logit_diff": 1.9073486328125e-06,
+      "prob_diff": 9.546056389808655e-09,
+      "equivalent": true
+    },
+    {
+      "index": 53,
+      "source": "uci_test_set",
+      "text": "I love you !!! You know? Can you feel it? Does it make your ...",
+      "pt_logits": [
+        2.862868309020996,
+        -2.9642176628112793
+      ],
+      "ort_logits": [
+        2.8628666400909424,
+        -2.9642152786254883
+      ],
+      "pt_probs": [
+        0.9970620274543762,
+        0.0029379939660429955
+      ],
+      "ort_probs": [
+        0.9970620274543762,
+        0.0029380067717283964
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9970620274543762,
+      "ort_conf": 0.9970620274543762,
+      "logit_diff": 2.384185791015625e-06,
+      "prob_diff": 1.280568540096283e-08,
+      "equivalent": true
+    },
+    {
+      "index": 54,
+      "source": "uci_test_set",
+      "text": "Good evening! this is roger. How are you?",
+      "pt_logits": [
+        3.1947710514068604,
+        -3.30053448677063
+      ],
+      "ort_logits": [
+        3.194770097732544,
+        -3.3005335330963135
+      ],
+      "pt_probs": [
+        0.9984917640686035,
+        0.0015082353493198752
+      ],
+      "ort_probs": [
+        0.9984917640686035,
+        0.001508238259702921
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9984917640686035,
+      "ort_conf": 0.9984917640686035,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 2.9103830456733704e-09,
+      "equivalent": true
+    },
+    {
+      "index": 55,
+      "source": "uci_test_set",
+      "text": "Can you do online transaction?",
+      "pt_logits": [
+        2.6948392391204834,
+        -2.765197277069092
+      ],
+      "ort_logits": [
+        2.694838047027588,
+        -2.7651963233947754
+      ],
+      "pt_probs": [
+        0.9957646131515503,
+        0.004235386848449707
+      ],
+      "ort_probs": [
+        0.9957646131515503,
+        0.004235394764691591
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9957646131515503,
+      "ort_conf": 0.9957646131515503,
+      "logit_diff": 1.1920928955078125e-06,
+      "prob_diff": 7.916241884231567e-09,
+      "equivalent": true
+    },
+    {
+      "index": 56,
+      "source": "uci_test_set",
+      "text": "I will take care of financial problem.i will help:)",
+      "pt_logits": [
+        2.9578921794891357,
+        -3.132816791534424
+      ],
+      "ort_logits": [
+        2.9578909873962402,
+        -3.1328163146972656
+      ],
+      "pt_probs": [
+        0.9977413415908813,
+        0.0022586907725781202
+      ],
+      "ort_probs": [
+        0.9977413415908813,
+        0.0022586940322071314
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9977413415908813,
+      "ort_conf": 0.9977413415908813,
+      "logit_diff": 1.1920928955078125e-06,
+      "prob_diff": 3.259629011154175e-09,
+      "equivalent": true
+    },
+    {
+      "index": 57,
+      "source": "uci_test_set",
+      "text": "Hello, my love ! How went your day ? Are you alright ? I thi...",
+      "pt_logits": [
+        2.3778462409973145,
+        -2.4220356941223145
+      ],
+      "ort_logits": [
+        2.3778457641601562,
+        -2.4220356941223145
+      ],
+      "pt_probs": [
+        0.9918364882469177,
+        0.008163527585566044
+      ],
+      "ort_probs": [
+        0.9918364882469177,
+        0.008163531310856342
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9918364882469177,
+      "ort_conf": 0.9918364882469177,
+      "logit_diff": 4.76837158203125e-07,
+      "prob_diff": 3.725290298461914e-09,
+      "equivalent": true
+    },
+    {
+      "index": 58,
+      "source": "uci_test_set",
+      "text": "(Bank of Granite issues Strong-Buy) EXPLOSIVE PICK FOR OUR M...",
+      "pt_logits": [
+        -2.219883441925049,
+        2.0822834968566895
+      ],
+      "ort_logits": [
+        -2.2198827266693115,
+        2.0822832584381104
+      ],
+      "pt_probs": [
+        0.013358327560126781,
+        0.9866416454315186
+      ],
+      "ort_probs": [
+        0.0133583415299654,
+        0.9866416454315186
+      ],
+      "pt_label": "spam",
+      "ort_label": "spam",
+      "pt_conf": 0.9866416454315186,
+      "ort_conf": 0.9866416454315186,
+      "logit_diff": 7.152557373046875e-07,
+      "prob_diff": 1.3969838619232178e-08,
+      "equivalent": true
+    },
+    {
+      "index": 59,
+      "source": "uci_test_set",
+      "text": "I.ll always be there, even if its just in spirit. I.ll get a...",
+      "pt_logits": [
+        3.356091022491455,
+        -3.4796302318573
+      ],
+      "ort_logits": [
+        3.3560900688171387,
+        -3.479628086090088
+      ],
+      "pt_probs": [
+        0.9989264607429504,
+        0.0010735384421423078
+      ],
+      "ort_probs": [
+        0.9989264607429504,
+        0.001073541585355997
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9989264607429504,
+      "ort_conf": 0.9989264607429504,
+      "logit_diff": 2.1457672119140625e-06,
+      "prob_diff": 3.14321368932724e-09,
+      "equivalent": true
+    },
+    {
+      "index": 60,
+      "source": "uci_test_set",
+      "text": "Friendship is not a game to play, It is not a word to say, I...",
+      "pt_logits": [
+        3.282677173614502,
+        -3.3923141956329346
+      ],
+      "ort_logits": [
+        3.282677173614502,
+        -3.3923134803771973
+      ],
+      "pt_probs": [
+        0.9987395405769348,
+        0.0012604923686012626
+      ],
+      "ort_probs": [
+        0.9987395405769348,
+        0.0012604935327544808
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9987395405769348,
+      "ort_conf": 0.9987395405769348,
+      "logit_diff": 7.152557373046875e-07,
+      "prob_diff": 1.1641532182693481e-09,
+      "equivalent": true
+    },
+    {
+      "index": 61,
+      "source": "uci_test_set",
+      "text": "Check mail.i have mailed varma and kept copy to you regardin...",
+      "pt_logits": [
+        3.129760265350342,
+        -3.2714405059814453
+      ],
+      "ort_logits": [
+        3.129758834838867,
+        -3.2714390754699707
+      ],
+      "pt_probs": [
+        0.9983432292938232,
+        0.0016568137798458338
+      ],
+      "ort_probs": [
+        0.9983432292938232,
+        0.0016568186692893505
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9983432292938232,
+      "ort_conf": 0.9983432292938232,
+      "logit_diff": 1.430511474609375e-06,
+      "prob_diff": 4.889443516731262e-09,
+      "equivalent": true
+    },
+    {
+      "index": 62,
+      "source": "uci_test_set",
+      "text": "Dear relieved of westonzoyland, all going to plan this end t...",
+      "pt_logits": [
+        3.050765037536621,
+        -3.196500062942505
+      ],
+      "ort_logits": [
+        3.0507659912109375,
+        -3.196500778198242
+      ],
+      "pt_probs": [
+        0.9980680346488953,
+        0.0019320015562698245
+      ],
+      "ort_probs": [
+        0.9980680346488953,
+        0.0019319980638101697
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9980680346488953,
+      "ort_conf": 0.9980680346488953,
+      "logit_diff": 9.5367431640625e-07,
+      "prob_diff": 3.4924596548080444e-09,
+      "equivalent": true
+    },
+    {
+      "index": 63,
+      "source": "uci_test_set",
+      "text": "Its a part of checking IQ",
+      "pt_logits": [
+        3.374821424484253,
+        -3.5257863998413086
+      ],
+      "ort_logits": [
+        3.3748221397399902,
+        -3.5257863998413086
+      ],
+      "pt_probs": [
+        0.9989938139915466,
+        0.0010061594657599926
+      ],
+      "ort_probs": [
+        0.9989938139915466,
+        0.0010061590000987053
+      ],
+      "pt_label": "ham",
+      "ort_label": "ham",
+      "pt_conf": 0.9989938139915466,
+      "ort_conf": 0.9989938139915466,
+      "logit_diff": 7.152557373046875e-07,
+      "prob_diff": 4.656612873077393e-10,
+      "equivalent": true
+    }
+  ]
+}

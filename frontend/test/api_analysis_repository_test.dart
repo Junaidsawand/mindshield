@@ -132,5 +132,50 @@ void main() {
       expect(result.attackType, equals(AttackType.benign));
       expect(result.suspiciousKeywords, isEmpty);
     });
+
+    test('getAnalysis extracts country from international prefix and nullifies others', () async {
+      const jsonResponse = '''
+      {
+        "success": true,
+        "data": {
+          "label": "phishing",
+          "threat_level": "dangerous",
+          "confidence": 0.95
+        }
+      }
+      ''';
+
+      final dio = Dio(BaseOptions(baseUrl: 'http://127.0.0.1:8000/api/v1'));
+      dio.httpClientAdapter = MockAdapter(jsonResponse);
+      final repo = ApiAnalysisRepository.withDio(dio);
+
+      // S. Africa prefix
+      final smsZa = SmsMessage(
+        id: 'msg_za',
+        sender: '+27721234567',
+        body: 'Check link',
+        timestamp: DateTime.now(),
+        aiStatus: AiStatus.pending,
+      );
+      final resultZa = await repo.getAnalysis(smsZa);
+      expect(resultZa.senderInfo.countryCode, equals('ZA'));
+      expect(resultZa.senderInfo.countryName, equals('South Africa'));
+      expect(resultZa.senderInfo.carrierName, isNull);
+      expect(resultZa.senderInfo.lineType, isNull);
+      expect(resultZa.senderInfo.firstSeenDate, isNull);
+      expect(resultZa.senderInfo.reportCount, isNull);
+
+      // Unknown prefix/alphanumeric sender
+      final smsAlpha = SmsMessage(
+        id: 'msg_alpha',
+        sender: 'EASYPAISA',
+        body: 'OTP code',
+        timestamp: DateTime.now(),
+        aiStatus: AiStatus.pending,
+      );
+      final resultAlpha = await repo.getAnalysis(smsAlpha);
+      expect(resultAlpha.senderInfo.countryCode, isNull);
+      expect(resultAlpha.senderInfo.countryName, isNull);
+    });
   });
 }

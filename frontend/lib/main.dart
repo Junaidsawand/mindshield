@@ -8,6 +8,7 @@ import 'features/settings/presentation/settings_provider.dart';
 import 'core/services/sms_background_service.dart';
 
 import 'core/services/contacts_service.dart';
+import 'features/dashboard/presentation/dashboard_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,9 +45,10 @@ class MindShieldApp extends StatelessWidget {
         ChangeNotifierProvider<SettingsProvider>(
           create: (_) => SettingsProvider(prefs),
         ),
-        // Future feature providers will be registered here.
-        // Example:
-        // ChangeNotifierProvider(create: (_) => DashboardProvider()),
+        // ── Dashboard module ─────────────────────────────────────────────
+        ChangeNotifierProvider<DashboardProvider>(
+          create: (_) => DashboardProvider(),
+        ),
       ],
       child: const _AppView(),
     );

@@ -497,7 +497,7 @@ class _EmptyState extends StatelessWidget {
         return (
           Icons.inbox_rounded,
           'No messages yet',
-          'Your SMS inbox is empty.',
+          'No SMS messages found on this device.',
         );
       case InboxFilter.safe:
         return (

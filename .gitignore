@@ -62,3 +62,13 @@ backend/data/processed/*
 
 
 backend/data/models/**/model.safetensors
+# Temporary & coverage artifacts
+backend/.coverage
+.coverage
+docs/~$*.docx
+~$*.docx
+scratch_*.txt
+
+# Large ONNX binary weights
+backend/data/models/**/*.onnx.data
+*.onnx.data

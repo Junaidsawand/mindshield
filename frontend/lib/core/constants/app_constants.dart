@@ -16,7 +16,7 @@ class AppConstants {
 
   // ── Database ────────────────────────────────────────────────────────────────
   static const String dbName = 'mindshield.db';
-  static const int dbVersion = 1;
+  static const int dbVersion = 2;
 
   // ── Network ─────────────────────────────────────────────────────────────────
   /// Base URL for the MindShield AI backend.
@@ -25,7 +25,7 @@ class AppConstants {
   /// Defaults to host LAN IP for physical device development (`http://192.168.100.14:8000/api/v1`).
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.100.33:8000/api/v1',
+    defaultValue: 'http://10.250.110.244:8000/api/v1',
   );
   static const String analyzeEndpoint = '/analyze';
   static const Duration connectTimeout = Duration(seconds: 15);

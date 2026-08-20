@@ -49,10 +49,7 @@ class SenderInfoCard extends StatelessWidget {
                 ),
               ),
               child: Center(
-                child: Text(
-                  _countryFlag(senderInfo.countryCode),
-                  style: const TextStyle(fontSize: 24),
-                ),
+                child: _buildAvatarChild(displayName, accentColor),
               ),
             ),
             const SizedBox(width: 14),
@@ -89,12 +86,63 @@ class SenderInfoCard extends StatelessWidget {
         _InfoGrid(senderInfo: senderInfo, formatDate: _formatDate),
 
         // ── Report count bar ──────────────────────────────────────────────
-        if (senderInfo.reportCount > 0) ...[
+        if (senderInfo.reportCount != null && senderInfo.reportCount! > 0) ...[
           const SizedBox(height: 14),
-          _ReportCountRow(reportCount: senderInfo.reportCount),
+          _ReportCountRow(reportCount: senderInfo.reportCount!),
         ],
       ],
     );
+  }
+
+  Widget _buildAvatarChild(String displayName, Color statusColor) {
+    final code = senderInfo.countryCode;
+    if (code != null && code.isNotEmpty) {
+      return Text(
+        _countryFlag(code),
+        style: const TextStyle(fontSize: 24),
+      );
+    }
+
+    final initials = _initials(displayName);
+    final hue = (displayName.codeUnits.fold(0, (a, b) => a + b) % 30) * 12.0;
+    final avatarColor = HSLColor.fromAHSL(1.0, hue, 0.55, 0.48).toColor();
+
+    if (initials == '?') {
+      return Icon(
+        Icons.person_rounded,
+        color: avatarColor,
+        size: 24,
+      );
+    }
+
+    return Text(
+      initials,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        color: avatarColor,
+      ),
+    );
+  }
+
+  String _initials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length >= 2) {
+      final a = _firstChar(parts[0]);
+      final b = _firstChar(parts[1]);
+      if (a.isNotEmpty && b.isNotEmpty) return '$a$b'.toUpperCase();
+    }
+    final single = _firstChar(parts[0]);
+    return single.isNotEmpty ? single.toUpperCase() : '?';
+  }
+
+  String _firstChar(String s) {
+    if (s.isEmpty) return '';
+    for (final c in s.split('')) {
+      if (RegExp(r'[A-Za-z0-9]').hasMatch(c)) return c;
+    }
+    return '';
   }
 
   String _countryFlag(String code) {
@@ -159,28 +207,39 @@ class _InfoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showCountry = senderInfo.countryName != null && senderInfo.countryCode != null;
+    final showCarrier = senderInfo.carrierName != null;
+    final showLineType = senderInfo.lineType != null;
+    final showFirstSeen = senderInfo.firstSeenDate != null;
+
+    if (!showCountry && !showCarrier && !showLineType && !showFirstSeen) {
+      return const SizedBox.shrink();
+    }
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
-        _InfoChip(
-          icon: Icons.public_rounded,
-          label: '${senderInfo.countryName} (${senderInfo.countryCode})',
-        ),
-        if (senderInfo.carrierName != null)
+        if (showCountry)
+          _InfoChip(
+            icon: Icons.public_rounded,
+            label: 'Country (from number): ${senderInfo.countryName} (${senderInfo.countryCode})',
+          ),
+        if (showCarrier)
           _InfoChip(
             icon: Icons.signal_cellular_alt_rounded,
             label: senderInfo.carrierName!,
           ),
-        if (senderInfo.lineType != null)
+        if (showLineType)
           _InfoChip(
             icon: Icons.phone_rounded,
             label: senderInfo.lineType!,
           ),
-        _InfoChip(
-          icon: Icons.history_rounded,
-          label: 'First seen: ${formatDate(senderInfo.firstSeenDate)}',
-        ),
+        if (showFirstSeen)
+          _InfoChip(
+            icon: Icons.history_rounded,
+            label: 'First seen: ${formatDate(senderInfo.firstSeenDate!)}',
+          ),
       ],
     );
   }
